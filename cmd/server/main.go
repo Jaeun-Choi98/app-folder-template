@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"pjt/internal/app"
@@ -22,7 +24,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := app.Start(); err != nil {
+		if err := app.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("Failed to start application: %v", err)
 			return
 		}

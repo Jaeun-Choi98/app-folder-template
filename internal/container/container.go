@@ -1,6 +1,6 @@
 package container
 
-import "pjt/root/internal/config"
+import "pjt/internal/config"
 
 type Container struct {
 	Config *config.Configuration
