@@ -28,7 +28,7 @@ root/ <br>
 │ │ │ ├── protocol/   # TCP 프로토콜 정의
 │ │ │ └── mapper/     # 프로토콜-모델 매핑
 │ │ └── eventbus/     # 내부 이벤트 버스
-│ └── infrastructure/ # 메모리 관련 코드
+│ └── infra/          # 메모리 관련 코드
 │ ├── ram/            # 메모리
 │ └── shm/            # 공유 메모리
 └── pkg/              # 외부 라이브러리 코드

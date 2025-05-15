@@ -5,18 +5,19 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"root/internal/app"
-	"root/internal/container"
+	"pjt/root/internal/app"
+	"pjt/root/internal/container"
 	"sync"
 	"syscall"
 	"time"
 )
 
 func main() {
-	container := container.NewContainer()
-
+	container, err := container.NewContainer()
+	if err != nil {
+		return
+	}
 	app := app.NewApplication(container)
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {

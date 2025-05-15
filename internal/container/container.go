@@ -1,9 +1,19 @@
 package container
 
+import "pjt/root/internal/config"
+
 type Container struct {
+	Config *config.Configuration
 }
 
-func NewContainer() *Container {
-	container := &Container{}
-	return container
+func NewContainer() (*Container, error) {
+
+	config, err := config.NewConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Container{
+		Config: config,
+	}, nil
 }
