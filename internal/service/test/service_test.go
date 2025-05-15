@@ -1,9 +1,9 @@
 package test
 
 import (
-	"pjt/root/internal/config"
-	repository "pjt/root/internal/repository/dao"
-	"pjt/root/internal/service"
+	"pjt/internal/config"
+	repository "pjt/internal/repository/dao"
+	"pjt/internal/service"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

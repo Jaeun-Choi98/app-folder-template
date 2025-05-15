@@ -3,8 +3,8 @@ package rest
 import (
 	"context"
 	"net/http"
-	"pjt/root/internal/config"
-	"pjt/root/internal/transport/http-rest/controller"
+	"pjt/internal/config"
+	"pjt/internal/transport/http-rest/controller"
 	"time"
 )
 

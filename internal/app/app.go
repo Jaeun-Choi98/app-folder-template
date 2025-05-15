@@ -2,11 +2,11 @@ package app
 
 import (
 	"context"
-	"pjt/root/internal/container"
-	repository "pjt/root/internal/repository/dao"
-	"pjt/root/internal/service"
-	rest "pjt/root/internal/transport/http-rest"
-	"pjt/root/internal/transport/http-rest/controller"
+	"pjt/internal/container"
+	repository "pjt/internal/repository/dao"
+	"pjt/internal/service"
+	rest "pjt/internal/transport/http-rest"
+	"pjt/internal/transport/http-rest/controller"
 	"sync"
 )
 

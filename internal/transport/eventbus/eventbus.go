@@ -3,7 +3,7 @@ package eventbus
 import (
 	"sync"
 
-	model "root/internal/model/event"
+	model "pjt/internal/model/event"
 )
 
 /**

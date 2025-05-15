@@ -2,9 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"pjt/root/internal/config"
-	"pjt/root/internal/service"
-	"pjt/root/internal/transport/http-rest/middleware"
+	"pjt/internal/config"
+	"pjt/internal/service"
+	"pjt/internal/transport/http-rest/middleware"
 
 	"github.com/gorilla/mux"
 )

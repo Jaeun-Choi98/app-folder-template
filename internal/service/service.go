@@ -1,8 +1,8 @@
 package service
 
 import (
-	"pjt/root/internal/config"
-	repository "pjt/root/internal/repository/dao"
+	"pjt/internal/config"
+	repository "pjt/internal/repository/dao"
 )
 
 type ServcieInterface interface {

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"pjt/root/internal/config"
+	"pjt/internal/config"
 )
 
 type DaoInterface interface {
