@@ -11,7 +11,9 @@ import (
 
 func TestService(t *testing.T) {
 	config := &config.Configuration{}
-	service := service.NewMyServcie(repository.NewMyDB(config), config)
+	dao, err := repository.NewMyDB(config)
+	assert.NoError(t, err)
+	service := service.NewMyServcie(dao, config)
 	str := service.Test()
 	assert.Equal(t, "hello world", str)
 }

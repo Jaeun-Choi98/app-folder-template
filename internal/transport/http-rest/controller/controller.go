@@ -15,10 +15,10 @@ type Controller struct {
 	Config  *config.Configuration
 }
 
-func NewController(service service.ServcieInterface, config *config.Configuration) *Controller {
-	r := mux.NewRouter()
+func NewController(router *mux.Router, service service.ServcieInterface, config *config.Configuration) *Controller {
+
 	controller := &Controller{
-		Router:  r,
+		Router:  router,
 		Service: service,
 		Config:  config,
 	}

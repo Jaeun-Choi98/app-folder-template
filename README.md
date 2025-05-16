@@ -7,7 +7,9 @@ pjt/ <br>
 ├── cmd/              # 애플리케이션 엔트리 포인트
 │ └── server/
 │ └── main.go
+│ └── log/            # 로그 파일
 ├── internal/         # 애플리케이션 내부 코드
+│ ├── logger/         # 커스텀 로거
 │ ├── config/         # 설정
 │ ├── container/      # 의존성 컨테이너
 │ ├── app/            # 애플리케이션 시작/종료 로직

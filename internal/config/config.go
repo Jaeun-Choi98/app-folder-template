@@ -7,8 +7,14 @@ import (
 )
 
 type Configuration struct {
+	// http-rest
 	RestIp   string
 	RestPort string
+
+	// repository
+	User   string
+	Passwd string
+	Conn   string
 }
 
 func NewConfiguration() (*Configuration, error) {
@@ -24,5 +30,8 @@ func initConfig(cfgFile *ini.File) *Configuration {
 	config := &Configuration{}
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
+	config.User = cfgFile.Section("ORACLE").Key("USER").MustString("")
+	config.Passwd = cfgFile.Section("ORACLE").Key("PASSWD").MustString("")
+	config.Conn = cfgFile.Section("ORACLE").Key("CONN").MustString("")
 	return config
 }
