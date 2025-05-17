@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"pjt/internal/app"
 	"pjt/internal/container"
+	"pjt/internal/logger"
 	"sync"
 	"syscall"
 	"time"
@@ -20,12 +20,28 @@ func main() {
 		return
 	}
 	app := app.NewApplication(container)
+
+	// 30일이 지난 로그 파일 정리
+	logger.StartCleaning()
+
+	// 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
+	container.Dao.StartDBHeartbeat()
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer func() {
+			container.Service.Close()
+			if err != nil {
+				logger.Printf("Failed to Close Service Instance:\n\t%v", err)
+			}
+			container.Dao.StopDBHeartbeat()
+			logger.StopCleaning()
+			wg.Done()
+		}()
+
 		if err := app.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("Failed to start application: %v", err)
+			logger.Printf("Failed to start application:\n\t%v", err)
 			return
 		}
 	}()
@@ -34,15 +50,16 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	<-signalChan
-	log.Println("Shutting down...")
+	logger.Println("Shutting down...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := app.Shutdown(ctx); err != nil {
-		log.Fatalf("Error during shutdown: %v", err)
+		logger.Printf("Error during shutdown: %v", err)
+		return
 	}
 
 	wg.Wait()
-	log.Println("Application stopped")
+	logger.Println("Application terminated")
 }

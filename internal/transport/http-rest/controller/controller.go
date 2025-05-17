@@ -33,3 +33,7 @@ func (c *Controller) RoutePath() {
 	})
 	c.Router.Use(middleware.NewCORSMiddleware([]string{"*"}))
 }
+
+func (c *Controller) Close() error {
+	return c.Service.Close()
+}

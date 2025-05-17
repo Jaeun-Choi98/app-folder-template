@@ -7,6 +7,7 @@ import (
 
 type ServcieInterface interface {
 	Test() string
+	Close() error
 }
 
 type MyService struct {
@@ -23,4 +24,8 @@ func NewMyServcie(dao repository.DaoInterface, config *config.Configuration) Ser
 
 func (s *MyService) Test() string {
 	return s.Dao.Test()
+}
+
+func (s *MyService) Close() error {
+	return s.Dao.Close()
 }

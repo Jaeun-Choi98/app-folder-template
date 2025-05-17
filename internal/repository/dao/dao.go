@@ -6,6 +6,9 @@ import (
 
 type DaoInterface interface {
 	Test() string
+	Close() error
+	StartDBHeartbeat()
+	StopDBHeartbeat()
 }
 
 func NewMyDB(config *config.Configuration) (DaoInterface, error) {
