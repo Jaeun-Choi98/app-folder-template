@@ -40,9 +40,6 @@ func NewContainer() (*Container, error) {
 	service := service.NewMyServcie(dao, config)
 	controller := controller.NewController(mux.NewRouter(), service, config)
 	rest := rest.NewRESTServer(*controller, config)
-	if err != nil {
-		return nil, err
-	}
 
 	return &Container{
 		Config:     config,
