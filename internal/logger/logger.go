@@ -16,11 +16,12 @@ var customLogger *CustomLogger
 var maxAgeDays = -1
 
 type CustomLogger struct {
-	wg     *sync.WaitGroup
-	ctx    context.Context
-	cancel context.CancelFunc
-	ticker *time.Ticker
-	Logger *log.Logger
+	wg      *sync.WaitGroup
+	ctx     context.Context
+	cancel  context.CancelFunc
+	ticker  *time.Ticker
+	logger  *log.Logger
+	logFile *os.File
 }
 
 func NewCustomLogger(prefix string) (*CustomLogger, error) {
@@ -38,11 +39,12 @@ func NewCustomLogger(prefix string) (*CustomLogger, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &CustomLogger{
-		wg:     wg,
-		ctx:    ctx,
-		cancel: cancel,
-		ticker: time.NewTicker(24 * time.Hour),
-		Logger: logger,
+		wg:      wg,
+		ctx:     ctx,
+		cancel:  cancel,
+		ticker:  time.NewTicker(24 * time.Hour),
+		logger:  logger,
+		logFile: file,
 	}, nil
 }
 
@@ -65,11 +67,15 @@ func SetLogger(l *CustomLogger) {
 // }
 
 func Println(v ...any) {
-	customLogger.Logger.Println(v...)
+	customLogger.logger.Println(v...)
 }
 
 func Printf(format string, v ...any) {
-	customLogger.Logger.Printf(format, v...)
+	customLogger.logger.Printf(format, v...)
+}
+
+func Close() error {
+	return customLogger.logFile.Close()
 }
 
 /**

@@ -11,14 +11,16 @@ type ServcieInterface interface {
 }
 
 type MyService struct {
-	Dao    repository.DaoInterface
-	Config *config.Configuration
+	Dao        repository.DaoInterface
+	SSEManager *SSESessionManager
+	Config     *config.Configuration
 }
 
 func NewMyServcie(dao repository.DaoInterface, config *config.Configuration) ServcieInterface {
 	return &MyService{
-		Dao:    dao,
-		Config: config,
+		Dao:        dao,
+		Config:     config,
+		SSEManager: NewSessionManager(),
 	}
 }
 
@@ -27,5 +29,6 @@ func (s *MyService) Test() string {
 }
 
 func (s *MyService) Close() error {
+	s.SSEManager.Shutdown()
 	return s.Dao.Close()
 }
