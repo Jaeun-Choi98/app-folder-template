@@ -2,6 +2,7 @@ package container
 
 import (
 	"pjt/internal/config"
+	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
 	repository "pjt/internal/repository/dao"
 	"pjt/internal/service"
@@ -10,6 +11,8 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+var container *Container
 
 type Container struct {
 	Config     *config.Configuration
@@ -20,6 +23,10 @@ type Container struct {
 }
 
 func NewContainer() (*Container, error) {
+
+	if container != nil {
+		return container, nil
+	}
 	customLogger, err := logger.NewCustomLogger("")
 	if err != nil {
 		return nil, err
@@ -37,7 +44,12 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	service := service.NewMyServcie(dao, config)
+	ram, err := ram.NewRam(dao)
+	if err != nil {
+		return nil, err
+	}
+
+	service := service.NewMyServcie(dao, ram, config)
 	controller := controller.NewController(mux.NewRouter(), service, config)
 	rest := rest.NewRESTServer(*controller, config)
 
@@ -48,4 +60,10 @@ func NewContainer() (*Container, error) {
 		Controller: controller,
 		RESTServer: rest,
 	}, nil
+}
+
+// 컨테이너 객체(싱글톤 객체)를 nil로 초기화.
+// nil이 아닐 경우 NewContainer()를 호출할 시 이전의 컨테이너 객체를 반환.
+func (c *Container) Close() {
+	container = nil
 }

@@ -33,17 +33,17 @@ func NewApplication(container *container.Container, cancel context.CancelFunc) *
 
 func (a *Application) Init() error {
 
-	// 30일이 지난 로그 파일 정리
-	logger.StartCleaning()
-
-	// 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
-	a.container.Dao.StartDBHeartbeat()
-
 	return nil
 }
 
 func (a *Application) Start() error {
 	a.wg.Add(1)
+
+	// 30일이 지난 로그 파일 정리
+	logger.StartCleaning()
+
+	// 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
+	a.container.Dao.StartDBHeartbeat()
 
 	startRestServer := func() error {
 		defer a.wg.Done()
@@ -89,6 +89,8 @@ func (a *Application) Shutdown() error {
 	logger.StopCleaning()
 	// 로그 파일 닫음
 	logger.Close()
+	// 컨테이너 객체 nil로 초기화
+	a.container.Close()
 
 	a.wg.Wait()
 	logger.Println("Application terminated")

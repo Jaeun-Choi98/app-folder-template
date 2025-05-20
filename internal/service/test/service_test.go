@@ -1,19 +1,16 @@
 package test
 
 import (
-	"pjt/internal/config"
-	repository "pjt/internal/repository/dao"
-	"pjt/internal/service"
+	"pjt/internal/container"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestService(t *testing.T) {
-	config := &config.Configuration{}
-	dao, err := repository.NewMyDB(config)
+	container, err := container.NewContainer()
 	assert.NoError(t, err)
-	service := service.NewMyServcie(dao, config)
-	str := service.Test()
+
+	str := container.Service.Test()
 	assert.Equal(t, "hello world", str)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"pjt/internal/config"
+	"pjt/internal/infra/ram"
 	repository "pjt/internal/repository/dao"
 )
 
@@ -12,13 +13,15 @@ type ServcieInterface interface {
 
 type MyService struct {
 	Dao        repository.DaoInterface
+	Ram        *ram.Ram
 	SSEManager *SSESessionManager
 	Config     *config.Configuration
 }
 
-func NewMyServcie(dao repository.DaoInterface, config *config.Configuration) ServcieInterface {
+func NewMyServcie(dao repository.DaoInterface, ram *ram.Ram, config *config.Configuration) ServcieInterface {
 	return &MyService{
 		Dao:        dao,
+		Ram:        ram,
 		Config:     config,
 		SSEManager: NewSessionManager(),
 	}

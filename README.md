@@ -18,17 +18,17 @@ pjt/ <br>
 │ ├── repository/     # 데이터 접근 계층
 │ │ ├── entity/       # 데이터베이스 엔티티
 │ │ ├── dao/          # 데이터 액세스 객체
-│ │ └── mapper/       # 엔티티-모델 매핑
+│ │ └── mapper/       # 엔티티-모델 매핑 -> entity 폴더로 병합
 │ ├── transport/      # 전송 프로토콜 관련 코드
 │ │ ├── http/         # HTTP 서버 관련
 │ │ │ ├── controller/ # HTTP 컨트롤러
 │ │ │ ├── dto/        # HTTP 요청/응답 모델
-│ │ │ ├── mapper/     # 모델-DTO 매핑
+│ │ │ ├── mapper/     # 모델-DTO 매핑 -> dto 폴더로 병합 예정정
 │ │ │ └── middleware/ # HTTP 미들웨어
 │ │ ├── tcp/          # TCP 서버 관련
 │ │ │ ├── handler/    # TCP 핸들러
 │ │ │ ├── protocol/   # TCP 프로토콜 정의
-│ │ │ └── mapper/     # 프로토콜-모델 매핑
+│ │ │ └── mapper/     # 프로토콜-모델 매핑 -> protocol 폴더로 병합 예정
 │ │ └── eventbus/     # 내부 이벤트 버스
 │ └── infra/          # 메모리 관련 코드
 │ ├── ram/            # 메모리

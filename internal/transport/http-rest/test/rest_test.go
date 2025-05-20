@@ -4,23 +4,17 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"pjt/internal/config"
-	repository "pjt/internal/repository/dao"
-	"pjt/internal/service"
-	"pjt/internal/transport/http-rest/controller"
+	"pjt/internal/container"
 	"testing"
 
-	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestREST(t *testing.T) {
-	config := &config.Configuration{}
-	dao, err := repository.NewMyDB(config)
+	container, err := container.NewContainer()
 	assert.NoError(t, err)
 
-	controller := controller.NewController(mux.NewRouter(), service.NewMyServcie(dao, config), config)
-	ms := httptest.NewServer(controller.Router)
+	ms := httptest.NewServer(container.Controller.Router)
 	defer ms.Close()
 
 	req, err := http.NewRequest("", ms.URL+"/test", nil)
