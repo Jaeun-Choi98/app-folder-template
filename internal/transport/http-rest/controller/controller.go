@@ -32,6 +32,7 @@ func (c *Controller) RoutePath() {
 		w.Write([]byte(str))
 	})
 	c.Router.Use(middleware.NewCORSMiddleware([]string{"*"}))
+	c.Router.Use(middleware.LogMiddleware)
 }
 
 func (c *Controller) Close() error {
