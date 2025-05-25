@@ -1,0 +1,45 @@
+2025/05/25 17:53:22 [Log Cleanup] Old log files deleted: log\logfile_here.txt (Deleted date: 2025-05-18)
+2025/05/25 17:53:22 [Log Cleanup] Log cleanup completed: 1 files deleted in total
+2025/05/25 17:54:04 [::1]:51248 - [Sun, 25 May 2025 17:54:04 KST] "GET /test HTTP/1.1 200 0.000000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" "
+
+2025/05/25 17:58:23 Shutting down...
+2025/05/25 17:58:23 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 17:58:23 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 17:58:27 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 17:58:35 [Sun, 25 May 2025 17:58:35 KST] ::1 "GET /test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:40:10 [Sun, 25 May 2025 18:40:10 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:40:41 [Sun, 25 May 2025 18:40:41 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:40:42 [Sun, 25 May 2025 18:40:42 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:40:43 [Sun, 25 May 2025 18:40:43 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:40:43 [Sun, 25 May 2025 18:40:43 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:15 [Sun, 25 May 2025 18:42:15 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:16 [Sun, 25 May 2025 18:42:16 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:16 [Sun, 25 May 2025 18:42:16 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:16 [Sun, 25 May 2025 18:42:16 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:17 [Sun, 25 May 2025 18:42:17 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:42:18 [Sun, 25 May 2025 18:42:18 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:44:00 [Sun, 25 May 2025 18:44:00 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:44:01 [Sun, 25 May 2025 18:44:01 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:44:01 [Sun, 25 May 2025 18:44:01 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:44:02 [Sun, 25 May 2025 18:44:02 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:44:02 [Sun, 25 May 2025 18:44:02 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:06 [Sun, 25 May 2025 18:45:06 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:06 [Sun, 25 May 2025 18:45:06 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:08 [Sun, 25 May 2025 18:45:08 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:09 [Sun, 25 May 2025 18:45:09 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:09 [Sun, 25 May 2025 18:45:09 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:09 [Sun, 25 May 2025 18:45:09 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:45:10 [Sun, 25 May 2025 18:45:10 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:32 [Sun, 25 May 2025 18:46:32 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:32 [Sun, 25 May 2025 18:46:32 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:33 [Sun, 25 May 2025 18:46:33 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:33 [Sun, 25 May 2025 18:46:33 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:33 [Sun, 25 May 2025 18:46:33 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:46:48 [Sun, 25 May 2025 18:46:48 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:47:00 [Sun, 25 May 2025 18:47:00 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:47:01 [Sun, 25 May 2025 18:47:01 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:47:01 [Sun, 25 May 2025 18:47:01 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:47:10 [Sun, 25 May 2025 18:47:10 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/25 18:49:40 Shutting down...
+2025/05/25 18:49:40 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 18:49:40 [Log Cleanup] Log cleanup goroutine terminated

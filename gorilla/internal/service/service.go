@@ -1,14 +1,19 @@
 package service
 
 import (
+	"fmt"
 	"pjt/internal/config"
 	"pjt/internal/infra/ram"
+	"pjt/internal/logger"
 	repository "pjt/internal/repository/dao"
 )
 
 type ServcieInterface interface {
 	Test() string
 	Close() error
+
+	// sse service
+	GetSSEManager() (*SSESessionManager, error)
 }
 
 type MyService struct {
@@ -34,4 +39,12 @@ func (s *MyService) Test() string {
 func (s *MyService) Close() error {
 	s.SSEManager.Shutdown()
 	return s.Dao.Close()
+}
+
+func (s *MyService) GetSSEManager() (*SSESessionManager, error) {
+	if s.SSEManager == nil {
+		logger.Println("SSEManager is empty")
+		return nil, fmt.Errorf("sse manager is empty")
+	}
+	return s.SSEManager, nil
 }

@@ -1,0 +1,59 @@
+2025/05/25 21:10:36 [Log Cleanup] Old log files deleted: log\2025_05_24 (Deleted date: 2025-05-24)
+2025/05/25 21:10:36 [Log Cleanup] Log cleanup completed: 1 files deleted in total
+2025/05/25 21:11:44 Shutting down...
+2025/05/25 21:11:47 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:14:54 Shutting down...
+2025/05/25 21:14:59 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:15:03 Shutting down...
+2025/05/25 21:15:03 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:15:03 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 21:15:07 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:15:42 User[1]'s client[82e58fe9-939b-49c6-b340-3b15649759b4] is closed
+2025/05/25 21:25:51 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:26:05 User[1]'s client[4e941880-1e91-4fc9-bed2-5bd47d58e125] is closed
+2025/05/25 21:27:09 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:27:44 User[1]'s client[d9662872-9333-4804-9620-adbeb292501b] is closed
+2025/05/25 21:28:26 Shutting down...
+2025/05/25 21:28:26 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:28:26 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 21:28:30 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:28:45 User[1]'s client[5404ead3-6997-4c34-aab1-b799d3a47631] is closed
+2025/05/25 21:30:18 Shutting down...
+2025/05/25 21:30:18 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:30:18 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 21:30:21 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:30:31 User[1]'s client[43da7878-edff-4370-9495-c455650367e5] is closed
+2025/05/25 21:30:44 User[1]'s client[2fb5891a-8fbe-4d0b-9833-999cc7101cd4] is closed
+2025/05/25 21:30:53 User[1]'s client[142dcf16-698a-4bcb-8cbf-55dc5075af0c] is closed
+2025/05/25 21:31:04 User[1]'s client[74ad1a06-ec9d-405b-bfae-84ef405e987d] is closed
+2025/05/25 21:31:32 Shutting down...
+2025/05/25 21:31:32 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:31:32 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 21:31:35 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:31:47 User[1]'s client[832fcaa3-a786-4ae5-8af8-ffaeee6e839b] is closed
+2025/05/25 21:34:23 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:34:32 User[1]'s client[f553d803-01fa-4a78-bd45-28da6d84440a] is closed
+2025/05/25 21:35:52 Shutting down...
+2025/05/25 21:35:52 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:35:52 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/25 21:35:55 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/25 21:36:06 User[1]'s client[088f06f9-3a15-4c7b-bd56-f344e5cba419] is closed
+2025/05/25 21:36:06 User[1]'s session[sess_1_1748176560784534000] is closed
+2025/05/25 21:38:51 User[2]'s client[48250a32-301d-4808-b114-0428b108e0c0] is closed
+2025/05/25 21:38:51 User[2]'s session[sess_2_1748176725780902600] is closed
+2025/05/25 21:38:54 User[1]'s client[40e7a040-0b51-40d8-bd97-f67954f962fb] is closed
+2025/05/25 21:38:54 User[1]'s session[sess_1_1748176728124775500] is closed
+2025/05/25 21:39:33 User[2]'s client[9242c699-0f97-4c10-bb41-d914fb39c5a0] is closed
+2025/05/25 21:39:33 User[2]'s session[sess_2_1748176767021820800] is closed
+2025/05/25 21:39:33 User[1]'s client[8a74d824-d3c0-405f-b2be-79048c5b0e96] is closed
+2025/05/25 21:39:33 User[1]'s session[sess_1_1748176767864126500] is closed
+2025/05/25 21:40:01 User[1]'s client[612591c1-2a05-4601-8ce1-c0e933cd4dd1] is closed
+2025/05/25 21:40:01 User[1]'s session[sess_1_1748176795507704300] is closed
+2025/05/25 21:40:02 User[2]'s client[5619d928-8bd5-4b01-abe5-341d80d8941b] is closed
+2025/05/25 21:40:02 User[2]'s session[sess_2_1748176796454883600] is closed
+2025/05/25 21:40:17 User[1]'s client[c95d8e1c-4a39-41a5-85cf-4faec8336050] is closed
+2025/05/25 21:40:18 User[1]'s client[8cc730a8-8647-43a0-be8e-32cb91472ef9] is closed
+2025/05/25 21:40:18 User[1]'s session[sess_1_1748176811042126200] is closed
+2025/05/25 21:40:53 Shutting down...
+2025/05/25 21:40:53 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/25 21:40:53 [Log Cleanup] Log cleanup goroutine terminated
