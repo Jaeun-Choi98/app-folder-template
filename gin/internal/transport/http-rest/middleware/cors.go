@@ -9,12 +9,12 @@ import (
 
 func NewCORSMiddleware(origins []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", strings.Join(origins, ","))
-		c.Writer.Header().Add("Access-Control-Allow-Headers",
+		c.Header("Access-Control-Allow-Origin", strings.Join(origins, ","))
+		c.Header("Access-Control-Allow-Headers",
 			"Content-Type,AccessToken,X-CSRF-Token,Authorization,Token,Set-Cookie,X-Requested-With")
-		c.Writer.Header().Add("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		//w.Header().Set("content-type", "application/json;charset=UTF-8")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
 		if c.Request.Method == "OPTIONS" {
 			c.Status(http.StatusOK)
 			return

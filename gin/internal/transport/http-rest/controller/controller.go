@@ -3,8 +3,12 @@ package controller
 import (
 	"net/http"
 	"pjt/internal/config"
+	model "pjt/internal/model/sample"
 	"pjt/internal/service"
+	"pjt/internal/transport/http-rest/http-utils/httperr"
+	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,12 +30,33 @@ func NewController(router *gin.Engine, service service.ServcieInterface, config 
 	return controller
 }
 
-func (ctr *Controller) RoutePath() {
-	ctr.Router.Use(middleware.LogMiddleware())
-	ctr.Router.Use(middleware.NewCORSMiddleware([]string{"*"}))
-	ctr.Router.GET("/test", func(c *gin.Context) {
-		str := ctr.Service.Test()
-		c.String(http.StatusOK, "%s", str)
+func (c *Controller) RoutePath() {
+	c.Router.Use(middleware.ErrorMiddleware())
+	c.Router.Use(middleware.LogMiddleware())
+	c.Router.Use(middleware.NewCORSMiddleware([]string{"*"}))
+
+	// 쿠키를 사용해서 jwt 토큰을 전달
+	c.Router.GET("/test", func(ctx *gin.Context) {
+		str := c.Service.Test()
+		jwt, err := jwt.NewJwtHS256(&model.SampleModel{Id: 1, Name: "cju"})
+		if err != nil {
+			ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+			return
+		}
+		http.SetCookie(ctx.Writer, &http.Cookie{
+			Name:    "jwt",
+			Value:   jwt,
+			MaxAge:  60 * 60,
+			Expires: time.Now().Add(time.Minute * 60),
+			Path:    "/",
+		})
+		ctx.String(http.StatusOK, "%s", str)
+	})
+
+	needJwt := c.Router.Group("/jwt")
+	needJwt.Use(middleware.JWTMiddleware())
+	needJwt.GET("/test", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "%s", "success jwt test")
 	})
 
 	// JWT 인증이 필요한 SSE 엔드포인트
@@ -41,7 +66,8 @@ func (ctr *Controller) RoutePath() {
 	// 이 엔드포인트는 내부 서비스만 접근할 수 있어야 합니다
 	//adminRouter := router.PathPrefix("/admin").Subrouter()
 	//adminRouter.HandleFunc("/send-event/{userID}", middleware.AdminAuth(c.SendEventToUser)).Methods("POST")
-
+	c.Router.GET("/sse-connect/:id", c.HandleSSEConnect)
+	c.Router.POST("/sse-send", c.SendSSEMessageAll)
 }
 
 func (ctr *Controller) Close() error {

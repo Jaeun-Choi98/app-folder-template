@@ -2,6 +2,8 @@
 
 I want to manage and handle the project more efficiently by standardizing the app folder structure. By doing so, I aim to help others easily understand and work with the system.
 
+++ examples using gorilla no longer be writed. reference the gin folder
+
 ```
 pjt/ <br>
 ├── cmd/              # 애플리케이션 엔트리 포인트

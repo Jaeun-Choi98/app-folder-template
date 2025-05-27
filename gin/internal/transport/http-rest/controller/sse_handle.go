@@ -1,83 +1,160 @@
 package controller
 
-/*
+import (
+	"context"
+	"fmt"
+	"net/http"
+	model "pjt/internal/model/sse"
+	"pjt/internal/service"
+	"pjt/internal/transport/http-rest/http-utils/httperr"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
 // HandleSSE는 클라이언트의 SSE 연결 요청을 처리합니다.
-func (ctr *Controller) HandleSSE(w http.ResponseWriter, r *http.Request) {
+func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
+	userId := ctx.Param("id")
 
 	// SSE 헤더 설정
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	ctx.Header("Content-Type", "text/event-stream")
+	ctx.Header("Cache-Control", "no-cache")
+	ctx.Header("Connection", "keep-alive")
+	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	// HTTP Flusher 확인
-	flusher, ok := w.(http.Flusher)
+	flusher, ok := ctx.Writer.(http.Flusher)
 	if !ok {
-		http.Error(w, "Streaming not supported", http.StatusInternalServerError)
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(fmt.Errorf("streaming not supported")))
 		return
 	}
 
 	// 클라이언트 ID 생성
-	clientID := uuid.New().String()
+	clientId := uuid.New().String()
 
 	// 클라이언트 컨텍스트 생성
-	ctx, cancel := context.WithCancel(r.Context())
+	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
 
 	// 새 SSE 클라이언트 생성
 	client := &service.SSEClient{
-		ClientId: clientID,
-		Writer:   w,
+		ClientId: clientId,
+		UserId:   userId,
+		Writer:   ctx.Writer,
 		Flusher:  flusher,
-		Ctx:      ctx,
+		Ctx:      clientCtx,
 		Cancel:   cancel,
 	}
 
 	// 사용자 세션 가져오기 또는 생성
-	session := c.Service.GetSessionByUserID(userID)
+	sseManager, err := ctl.Service.GetSSEManager()
+	if err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	session := sseManager.GetSessionByUserId(userId)
 	if session == nil {
-		session = c.sessionManager.NewSession(userID)
+		session = sseManager.NewSession(userId)
 	}
 
 	// 세션에 클라이언트 추가
-	session.AddClient(clientID, client)
+	session.AddClient(clientId, client)
 
 	// 연결 성공 이벤트 전송
-	connectEvent := model.Event{
-		EventType: "connect",
-		Data:      map[string]string{"message": "Connected successfully", "client_id": clientID},
+	connectMsg := model.SSEMessage{
+		Type:    "connect",
+		Payload: map[string]string{"message": "Connected successfully", "client_id": clientId},
 	}
-	client.SendEvent(connectEvent)
+	client.SendMessage(connectMsg)
 
 	// 클라이언트 요청이 종료되면 정리
-	// 주: r.Context()는 클라이언트가 연결을 끊으면 취소됩니다
+	// ctx.Request.Context()는 클라이언트가 연결을 끊으면 취소됩니다
 	go func() {
-		<-r.Context().Done()
-		session.RemoveClient(clientID)
+		<-clientCtx.Done()
+		session.RemoveClient(clientId)
+		if session.Count() == 0 {
+			sseManager.RemoveSession(userId)
+		}
 	}()
 
 	// 클라이언트가 연결을 끊을 때까지 연결 유지
 	// 심박(heartbeat)을 30초마다 전송
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-clientCtx.Done():
 			// 클라이언트 또는 서버에서 연결을 닫았음
 			return
 		case <-ticker.C:
 			// 심박 전송 - 연결이 활성 상태인지 확인
-			heartbeat := model.Event{
-				EventType: "heartbeat",
-				Data:      time.Now().Unix(),
+			heartbeat := model.SSEMessage{
+				Type:    "heartbeat",
+				Payload: time.Now().Unix(),
 			}
-			err := client.SendEvent(heartbeat)
+			err := client.SendMessage(heartbeat)
 			if err != nil {
 				// 오류 발생 시 연결 종료
-				session.RemoveClient(clientID)
+				session.RemoveClient(clientId)
 				return
 			}
 		}
 	}
 }
-*/
+
+// SendEventToUser는 모든 사용자에게 이벤트를 전송합니다.
+func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
+
+	// POST 요청 본문에서 이벤트 데이터 파싱
+	var msg model.SSEMessage
+	if err := ctx.ShouldBindJSON(&msg); err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	sseManager, err := ctl.Service.GetSSEManager()
+	if err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	// 이벤트 브로드캐스트
+	sseManager.Broadcast(msg)
+
+	// 성공 응답
+	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": "Msg sent to all user"})
+}
+
+// SendEventToUser는 특정 사용자에게 이벤트를 전송합니다.
+func (c *Controller) SendSSEMessageToUser(ctx *gin.Context) {
+	userId := ctx.Param("id")
+
+	// POST 요청 본문에서 이벤트 데이터 파싱
+	var msg model.SSEMessage
+	err := ctx.ShouldBindJSON(&msg)
+	if err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	sseManager, err := c.Service.GetSSEManager()
+	if err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	// 사용자 세션 조회
+	session := sseManager.GetSessionByUserId(userId)
+	if session == nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
+	}
+
+	// 이벤트 브로드캐스트
+	session.Broadcast(msg)
+
+	// 성공 응답
+	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": fmt.Sprintf("Event sent to user %s", userId)})
+}

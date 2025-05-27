@@ -16,6 +16,7 @@ import (
  */
 type SSEClient struct {
 	ClientId string
+	UserId   string
 	Writer   http.ResponseWriter
 	Flusher  http.Flusher
 	Ctx      context.Context
@@ -23,7 +24,7 @@ type SSEClient struct {
 }
 
 // SendEvent는 SSE 클라이언트에게 이벤트를 전송
-func (c *SSEClient) SendMessage(event model.SSEMessage) error {
+func (c *SSEClient) SendMessage(msg model.SSEMessage) error {
 	// 컨텍스트가 취소되었는지 확인
 	select {
 	case <-c.Ctx.Done():
@@ -32,8 +33,8 @@ func (c *SSEClient) SendMessage(event model.SSEMessage) error {
 		return err
 	default:
 		// SSE 형식으로 이벤트 전송
-		fmt.Fprintf(c.Writer, "event: %s\n", event.Type)
-		fmt.Fprintf(c.Writer, "data: %v\n\n", event.Payload)
+		fmt.Fprintf(c.Writer, "event: %s\n", msg.Type)
+		fmt.Fprintf(c.Writer, "data: %v\n\n", msg.Payload)
 		c.Flusher.Flush()
 		return nil
 	}
@@ -61,38 +62,44 @@ func NewUserSession(sessionId, userId string) *UserSession {
 		sessionId: sessionId,
 		userId:    userId,
 		clients:   make(map[string]*SSEClient),
+		mu:        &sync.RWMutex{},
 	}
 }
 
 // AddClient는 새 SSE 클라이언트를 세션에 추가
-func (s *UserSession) AddClient(clientID string, client *SSEClient) {
+func (s *UserSession) AddClient(clientId string, client *SSEClient) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.clients[clientID] = client
+	s.clients[clientId] = client
 }
 
 // RemoveClient는 세션에서 SSE 클라이언트를 제거
-func (s *UserSession) RemoveClient(clientID string) {
+func (s *UserSession) RemoveClient(clientId string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if client, exists := s.clients[clientID]; exists {
+	if client, exists := s.clients[clientId]; exists {
 		client.Close()
-		delete(s.clients, clientID)
+		logger.Printf("Closed client[userId: %s, clientId: %s]", s.userId, clientId)
+		delete(s.clients, clientId)
 	}
 }
 
 // Broadcast는 세션의 모든 클라이언트에게 이벤트를 전송
-func (s *UserSession) Broadcast(event model.SSEMessage) {
+func (s *UserSession) Broadcast(msg model.SSEMessage) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	for clientId, client := range s.clients {
-		err := client.SendMessage(event)
+		err := client.SendMessage(msg)
 		if err != nil {
 			// 오류 발생 시 클라이언트 제거
 			go s.RemoveClient(clientId)
 		}
 	}
+}
+
+func (s *UserSession) Count() int {
+	return len(s.clients)
 }
 
 // Close는 세션의 모든 클라이언트 연결을 종료
@@ -162,17 +169,31 @@ func (m *SSESessionManager) GetSessionByUserId(userId string) *UserSession {
 }
 
 // RemoveSession은 세션을 제거
-func (m *SSESessionManager) RemoveSession(sessionId string) {
+func (m *SSESessionManager) RemoveSession(userId string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if session, exists := m.sessions[sessionId]; exists {
+	if sessionId, exists := m.userIndex[userId]; exists {
+
 		// 연결 종료
-		session.Close()
+		if session, exists := m.sessions[sessionId]; exists {
+			session.Close()
+		}
+
+		logger.Printf("Closed session[userId:%s, sessionId:%s]", userId, sessionId)
 		// 인덱스에서 제거
-		delete(m.userIndex, session.userId)
+		delete(m.userIndex, userId)
+
 		// 세션 맵에서 제거
 		delete(m.sessions, sessionId)
+	}
+}
+
+func (m *SSESessionManager) Broadcast(msg model.SSEMessage) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, session := range m.sessions {
+		session.Broadcast(msg)
 	}
 }
 

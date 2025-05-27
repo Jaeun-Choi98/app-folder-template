@@ -14,10 +14,11 @@ type RESTServer struct {
 
 func NewRESTServer(controller controller.Controller, config *config.Configuration) *RESTServer {
 	server := &http.Server{
-		Addr:         config.RestIp + ":" + config.RestPort,
-		WriteTimeout: time.Second * 5,
-		ReadTimeout:  time.Second * 5,
-		Handler:      controller.Router,
+		Addr: config.RestIp + ":" + config.RestPort,
+		// if using sse, comment below
+		// WriteTimeout: time.Second * 5,
+		ReadTimeout: time.Second * 5,
+		Handler:     controller.Router,
 	}
 
 	return &RESTServer{
