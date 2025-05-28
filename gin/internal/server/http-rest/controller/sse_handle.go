@@ -125,11 +125,6 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 		return
 	}
 
-	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
-		return
-	}
-
 	// 사용자 세션 조회
 	session := ctl.SseService.GetSessionByUserId(userId)
 	if session == nil {
