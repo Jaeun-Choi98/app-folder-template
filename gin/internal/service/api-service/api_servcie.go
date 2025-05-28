@@ -2,18 +2,18 @@ package service
 
 import (
 	"pjt/internal/config"
+	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
-	repository "pjt/internal/repository/dao"
 	"pjt/internal/service"
 )
 
 type APIService struct {
-	Dao    repository.DaoInterface
+	Dao    dbhandler.DBHandlerInterface
 	Ram    *ram.Ram
 	Config *config.Configuration
 }
 
-func NewAPIService(dao repository.DaoInterface, ram *ram.Ram, config *config.Configuration) service.APIServcieInterface {
+func NewAPIService(dao dbhandler.DBHandlerInterface, ram *ram.Ram, config *config.Configuration) service.APIServcieInterface {
 	return &APIService{
 		Dao:    dao,
 		Ram:    ram,

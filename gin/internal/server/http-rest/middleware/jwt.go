@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"pjt/internal/transport/http-rest/http-utils/httperr"
-	"pjt/internal/transport/http-rest/http-utils/jwt"
+	"pjt/internal/server/http-rest/http-utils/httperr"
+	"pjt/internal/server/http-rest/http-utils/jwt"
 	"strings"
 
 	"github.com/gin-gonic/gin"

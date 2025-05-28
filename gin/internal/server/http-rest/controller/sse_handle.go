@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	model "pjt/internal/model/sse"
+	"pjt/internal/server/http-rest/http-utils/httperr"
 	sse "pjt/internal/service/sse-service"
-	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"time"
 
 	"github.com/gin-gonic/gin"

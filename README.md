@@ -17,14 +17,14 @@ pjt/ <br>
 │ ├── app/            # 애플리케이션 시작/종료 로직
 │ ├── service/        # 비즈니스 로직
 │ ├── model/          # 전역적으로 사용하는 모델
-│ ├── repository/     # 데이터 접근 계층
-│ │ ├── entity/       # 데이터베이스 엔티티
-│ │ ├── dao/          # 데이터 액세스 객체
+│ ├── db/             # 데이터 접근 계층
+│ │ ├── db-model/     # 데이터베이스 엔티티
+│ │ ├── db-handler/   # 데이터 액세스 객체
 │ │ └── mapper/       # 엔티티-모델 매핑 -> entity 폴더로 병합
-│ ├── transport/      # 전송 프로토콜 관련 코드
+│ ├── server/         # 실행 프로세스 관련 코드
 │ │ ├── http/         # HTTP 서버 관련
 │ │ │ ├── controller/ # HTTP 컨트롤러
-│ │ │ ├── http-model/  # HTTP 요청/응답 모델
+│ │ │ ├── http-model/ # HTTP 요청/응답 모델
 │ │ │ ├── mapper/     # 모델-DTO 매핑 -> model 폴더로 병합 예정 
 │ │ │ └── middleware/ # HTTP 미들웨어
 │ │ ├── tcp/          # TCP 서버 관련

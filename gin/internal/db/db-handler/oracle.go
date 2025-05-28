@@ -1,4 +1,4 @@
-package repository
+package dbhandler
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type Oracle struct {
 	db     *sql.DB
 }
 
-func NewOralce(config *config.Configuration) (DaoInterface, error) {
+func NewOralce(config *config.Configuration) (DBHandlerInterface, error) {
 	// connInfo := fmt.Sprintf(`user="%s" password="%s" connectString="%s"`, config.User, config.Passwd, config.Conn)
 	// db, err := sql.Open("godror", connInfo)
 	// if err != nil {

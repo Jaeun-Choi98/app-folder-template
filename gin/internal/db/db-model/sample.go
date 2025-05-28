@@ -1,4 +1,4 @@
-package entity
+package dbmodel
 
 import "database/sql"
 

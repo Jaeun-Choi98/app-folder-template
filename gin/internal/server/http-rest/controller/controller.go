@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"pjt/internal/config"
 	model "pjt/internal/model/sample"
+	"pjt/internal/server/http-rest/http-utils/httperr"
+	"pjt/internal/server/http-rest/http-utils/jwt"
+	"pjt/internal/server/http-rest/middleware"
 	"pjt/internal/service"
-	"pjt/internal/transport/http-rest/http-utils/httperr"
-	"pjt/internal/transport/http-rest/http-utils/jwt"
-	"pjt/internal/transport/http-rest/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"

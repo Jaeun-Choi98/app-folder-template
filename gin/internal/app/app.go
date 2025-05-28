@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"pjt/internal/container"
 	"pjt/internal/logger"
-	rest "pjt/internal/transport/http-rest"
+	rest "pjt/internal/server/http-rest"
 	"sync"
 	"syscall"
 	"time"
@@ -70,13 +70,12 @@ func (a *Application) handleShutdown() {
 	}()
 }
 
-func (a *Application) Shutdown() error {
+func (a *Application) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := a.restServer.Shutdown(ctx); err != nil {
 		logger.Printf("Error during shutdown: %v", err)
-		return err
 	}
 
 	err := a.container.ApiService.Close()
@@ -97,5 +96,4 @@ func (a *Application) Shutdown() error {
 	a.wg.Wait()
 	logger.Println("Application terminated")
 	a.cancel()
-	return nil
 }

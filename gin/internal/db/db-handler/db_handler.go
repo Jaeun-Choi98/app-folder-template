@@ -1,16 +1,16 @@
-package repository
+package dbhandler
 
 import (
 	"pjt/internal/config"
 )
 
-type DaoInterface interface {
+type DBHandlerInterface interface {
 	Test() string
 	Close() error
 	StartDBHeartbeat()
 	StopDBHeartbeat()
 }
 
-func NewMyDB(config *config.Configuration) (DaoInterface, error) {
+func NewMyDB(config *config.Configuration) (DBHandlerInterface, error) {
 	return NewOralce(config)
 }

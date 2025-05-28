@@ -1,18 +1,18 @@
 package ram
 
 import (
+	dbhandler "pjt/internal/db/db-handler"
 	model "pjt/internal/model/sample"
-	repository "pjt/internal/repository/dao"
 	"sync"
 )
 
 type Ram struct {
 	mu         *sync.RWMutex
-	dao        repository.DaoInterface
+	dao        dbhandler.DBHandlerInterface
 	OprtModels map[int]*model.SampleModel
 }
 
-func NewRam(dao repository.DaoInterface) (*Ram, error) {
+func NewRam(dao dbhandler.DBHandlerInterface) (*Ram, error) {
 
 	ram := &Ram{
 		mu:  &sync.RWMutex{},

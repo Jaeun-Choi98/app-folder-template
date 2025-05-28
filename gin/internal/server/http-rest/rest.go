@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 	"pjt/internal/config"
-	"pjt/internal/transport/http-rest/controller"
+	"pjt/internal/server/http-rest/controller"
 	"time"
 )
 

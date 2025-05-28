@@ -2,14 +2,14 @@ package container
 
 import (
 	"pjt/internal/config"
+	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
-	repository "pjt/internal/repository/dao"
+	rest "pjt/internal/server/http-rest"
+	"pjt/internal/server/http-rest/controller"
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
 	sseservice "pjt/internal/service/sse-service"
-	rest "pjt/internal/transport/http-rest"
-	"pjt/internal/transport/http-rest/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +18,7 @@ var container *Container
 
 type Container struct {
 	Config     *config.Configuration
-	Dao        repository.DaoInterface
+	Dao        dbhandler.DBHandlerInterface
 	ApiService service.APIServcieInterface
 	SseService service.SSEServiceInterface
 	Controller *controller.Controller
@@ -42,7 +42,7 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	dao, err := repository.NewMyDB(config)
+	dao, err := dbhandler.NewMyDB(config)
 	if err != nil {
 		return nil, err
 	}

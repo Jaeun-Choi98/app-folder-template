@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 	"pjt/internal/logger"
-	"pjt/internal/transport/http-rest/http-utils/httperr"
+	"pjt/internal/server/http-rest/http-utils/httperr"
 
 	"github.com/gin-gonic/gin"
 )
