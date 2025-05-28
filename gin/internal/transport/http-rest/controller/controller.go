@@ -14,17 +14,19 @@ import (
 )
 
 type Controller struct {
-	Router  *gin.Engine
-	Service service.ServcieInterface
-	Config  *config.Configuration
+	Router     *gin.Engine
+	ApiService service.APIServcieInterface
+	SseService service.SSEServiceInterface
+	Config     *config.Configuration
 }
 
-func NewController(router *gin.Engine, service service.ServcieInterface, config *config.Configuration) *Controller {
+func NewController(router *gin.Engine, apiService service.APIServcieInterface, sseService service.SSEServiceInterface, config *config.Configuration) *Controller {
 
 	controller := &Controller{
-		Router:  router,
-		Service: service,
-		Config:  config,
+		Router:     router,
+		ApiService: apiService,
+		SseService: sseService,
+		Config:     config,
 	}
 	controller.RoutePath()
 	return controller
@@ -37,7 +39,7 @@ func (c *Controller) RoutePath() {
 
 	// 쿠키를 사용해서 jwt 토큰을 전달
 	c.Router.GET("/test", func(ctx *gin.Context) {
-		str := c.Service.Test()
+		str := c.ApiService.Test()
 		jwt, err := jwt.NewJwtHS256(&model.SampleModel{Id: 1, Name: "cju"})
 		if err != nil {
 			ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
@@ -71,5 +73,5 @@ func (c *Controller) RoutePath() {
 }
 
 func (ctr *Controller) Close() error {
-	return ctr.Service.Close()
+	return ctr.ApiService.Close()
 }

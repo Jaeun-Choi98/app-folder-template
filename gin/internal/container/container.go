@@ -6,6 +6,8 @@ import (
 	"pjt/internal/logger"
 	repository "pjt/internal/repository/dao"
 	"pjt/internal/service"
+	apiservice "pjt/internal/service/api-service"
+	sseservice "pjt/internal/service/sse-service"
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
 
@@ -17,7 +19,8 @@ var container *Container
 type Container struct {
 	Config     *config.Configuration
 	Dao        repository.DaoInterface
-	Service    service.ServcieInterface
+	ApiService service.APIServcieInterface
+	SseService service.SSEServiceInterface
 	Controller *controller.Controller
 	RESTServer *rest.RESTServer
 }
@@ -49,14 +52,16 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	service := service.NewMyServcie(dao, ram, config)
-	controller := controller.NewController(gin.New(), service, config)
+	apiService := apiservice.NewAPIService(dao, ram, config)
+	sseService := sseservice.NewSSEService()
+	controller := controller.NewController(gin.New(), apiService, sseService, config)
 	rest := rest.NewRESTServer(*controller, config)
 
 	return &Container{
 		Config:     config,
 		Dao:        dao,
-		Service:    service,
+		ApiService: apiService,
+		SseService: sseService,
 		Controller: controller,
 		RESTServer: rest,
 	}, nil

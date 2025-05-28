@@ -79,10 +79,12 @@ func (a *Application) Shutdown() error {
 		return err
 	}
 
-	err := a.container.Service.Close()
+	err := a.container.ApiService.Close()
 	if err != nil {
 		logger.Printf("Failed to Close Service Instance:\n\t%v", err)
 	}
+	a.container.SseService.Close()
+
 	// db healthcheck 고루틴 종료
 	a.container.Dao.StopDBHeartbeat()
 	// 로그 정리 고루틴 종료

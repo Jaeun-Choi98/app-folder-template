@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	model "pjt/internal/model/sse"
-	"pjt/internal/service"
+	sse "pjt/internal/service/sse-service"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"time"
 
@@ -37,7 +37,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
 
 	// 새 SSE 클라이언트 생성
-	client := &service.SSEClient{
+	client := &sse.SSEClient{
 		ClientId: clientId,
 		UserId:   userId,
 		Writer:   ctx.Writer,
@@ -46,16 +46,9 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		Cancel:   cancel,
 	}
 
-	// 사용자 세션 가져오기 또는 생성
-	sseManager, err := ctl.Service.GetSSEManager()
-	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
-		return
-	}
-
-	session := sseManager.GetSessionByUserId(userId)
+	session := ctl.SseService.GetSessionByUserId(userId)
 	if session == nil {
-		session = sseManager.NewSession(userId)
+		session = ctl.SseService.NewSession(userId)
 	}
 
 	// 세션에 클라이언트 추가
@@ -74,7 +67,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		<-clientCtx.Done()
 		session.RemoveClient(clientId)
 		if session.Count() == 0 {
-			sseManager.RemoveSession(userId)
+			ctl.SseService.RemoveSession(userId)
 		}
 	}()
 
@@ -113,22 +106,15 @@ func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 		return
 	}
-
-	sseManager, err := ctl.Service.GetSSEManager()
-	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
-		return
-	}
-
 	// 이벤트 브로드캐스트
-	sseManager.Broadcast(msg)
+	ctl.SseService.Broadcast(msg)
 
 	// 성공 응답
 	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": "Msg sent to all user"})
 }
 
 // SendEventToUser는 특정 사용자에게 이벤트를 전송합니다.
-func (c *Controller) SendSSEMessageToUser(ctx *gin.Context) {
+func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	userId := ctx.Param("id")
 
 	// POST 요청 본문에서 이벤트 데이터 파싱
@@ -139,14 +125,13 @@ func (c *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 		return
 	}
 
-	sseManager, err := c.Service.GetSSEManager()
 	if err != nil {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 		return
 	}
 
 	// 사용자 세션 조회
-	session := sseManager.GetSessionByUserId(userId)
+	session := ctl.SseService.GetSessionByUserId(userId)
 	if session == nil {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 		return
