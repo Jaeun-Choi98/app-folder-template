@@ -1,0 +1,8 @@
+2025/05/28 13:20:47 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/28 13:20:55 [Wed, 28 May 2025 13:20:55 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/28 13:21:10 Shutting down...
+2025/05/28 13:21:16 Closed client[userId: 1, clientId: 8590d8f3-c9b2-4d30-b60c-cd9cf4c5cbcf]
+2025/05/28 13:21:16 Closed session[userId:1, sessionId:sess_1_1748406059295800500]
+2025/05/28 13:21:16 [Wed, 28 May 2025 13:21:16 KST] ::1 "GET /sse-connect/1 HTTP/1.1" 200 17.100sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+2025/05/28 13:21:16 [Heartbeat] DB heartbeat goroutine terminated
+2025/05/28 13:21:16 [Log Cleanup] Log cleanup goroutine terminated
