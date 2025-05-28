@@ -1,24 +1,7 @@
-2025/05/28 13:20:47 [Log Cleanup] Log cleanup completed: 0 files deleted in total
-2025/05/28 13:20:55 [Wed, 28 May 2025 13:20:55 KST] ::1 "GET / HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
-2025/05/28 13:21:10 Shutting down...
-2025/05/28 13:21:16 Closed client[userId: 1, clientId: 8590d8f3-c9b2-4d30-b60c-cd9cf4c5cbcf]
-2025/05/28 13:21:16 Closed session[userId:1, sessionId:sess_1_1748406059295800500]
-2025/05/28 13:21:16 [Wed, 28 May 2025 13:21:16 KST] ::1 "GET /sse-connect/1 HTTP/1.1" 200 17.100sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
-2025/05/28 13:21:16 [Heartbeat] DB heartbeat goroutine terminated
-2025/05/28 13:21:16 [Log Cleanup] Log cleanup goroutine terminated
-2025/05/28 17:36:28 [Log Cleanup] Old log files deleted: log\2025_05_27 (Deleted date: 2025-05-27)
-2025/05/28 17:36:28 [Log Cleanup] Log cleanup completed: 1 files deleted in total
-2025/05/28 17:36:48 Shutting down...
-2025/05/28 17:36:58 Error during shutdown: context deadline exceeded
-2025/05/28 17:37:09 Closed client[userId: 1, clientId: 9682fd99-2bff-46ff-a18c-0e0cf570269b]
-2025/05/28 17:37:09 Closed session[userId:1, sessionId:sess_1_1748421400316585100]
-2025/05/28 17:37:09 [Wed, 28 May 2025 17:37:09 KST] ::1 "GET /sse-connect/1 HTTP/1.1" 200 28.945sec "PostmanRuntime/7.44.0"
-2025/05/28 17:39:50 [Log Cleanup] Log cleanup completed: 0 files deleted in total
-2025/05/28 17:40:01 Shutting down...
-2025/05/28 17:40:11 Error during shutdown: context deadline exceeded
-2025/05/28 17:40:59 [Log Cleanup] Log cleanup completed: 0 files deleted in total
-2025/05/28 17:41:07 Shutting down...
-2025/05/28 17:41:17 Error during shutdown: context deadline exceeded
-2025/05/28 17:41:17 [Heartbeat] DB heartbeat goroutine terminated
-2025/05/28 17:41:17 [Wed, 28 May 2025 17:41:17 KST] ::1 "GET /sse-connect/1 HTTP/1.1" 200 12.797sec "PostmanRuntime/7.44.0"
-2025/05/28 17:41:17 [Log Cleanup] Log cleanup goroutine terminated
+2025/05/28 22:52:34 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/05/28 22:52:42 Shutdown signal received
+2025/05/28 22:52:42 Initiating Application Manager shutdown...
+2025/05/28 22:52:42 Shutting down previous application instance...
+2025/05/28 22:52:42 Shutting down...
+2025/05/28 22:52:42 Application Manager context cancelled
+2025/05/28 22:52:42 Application terminated

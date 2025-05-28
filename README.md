@@ -5,7 +5,7 @@ I want to manage and handle the project more efficiently by standardizing the ap
 ++ examples using gorilla no longer be writed. reference the gin folder
 
 ```
-pjt/ <br>
+pjt/
 ├── cmd/              # 애플리케이션 엔트리 포인트
 │ └── server/
 │ └── main.go
@@ -25,7 +25,7 @@ pjt/ <br>
 │ │ ├── http/         # HTTP 서버 관련
 │ │ │ ├── controller/ # HTTP 컨트롤러
 │ │ │ ├── http-model/ # HTTP 요청/응답 모델
-│ │ │ ├── mapper/     # 모델-DTO 매핑 -> model 폴더로 병합 예정 
+│ │ │ ├── mapper/     # 모델-DTO 매핑 -> model 폴더로 병합 예정
 │ │ │ └── middleware/ # HTTP 미들웨어
 │ │ ├── tcp/          # TCP 서버 관련
 │ │ │ ├── handler/    # TCP 핸들러
