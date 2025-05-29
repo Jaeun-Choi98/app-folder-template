@@ -8,31 +8,32 @@ import (
 	"os/signal"
 	"pjt/internal/container"
 	"pjt/internal/logger"
-	rest "pjt/internal/server/http-rest"
+	rest "pjt/internal/transport/http-rest"
+	"pjt/internal/transport/tcp"
 	"sync"
 	"syscall"
 	"time"
 )
 
 type Application struct {
-	container  *container.Container
-	restServer *rest.RESTServer
-	wg         *sync.WaitGroup
-	cancel     context.CancelFunc
+	container     *container.Container
+	restServer    *rest.RESTServer
+	tcpServer     *tcp.TCPServer
+	wg            sync.WaitGroup
+	mainCtxCancel context.CancelFunc
 }
 
 func NewApplication(container *container.Container, cancel context.CancelFunc) *Application {
 
 	return &Application{
-		container:  container,
-		wg:         &sync.WaitGroup{},
-		restServer: container.RESTServer,
-		cancel:     cancel,
+		container:     container,
+		restServer:    container.RESTServer,
+		tcpServer:     container.TCPServer,
+		mainCtxCancel: cancel,
 	}
 }
 
 func (a *Application) Init() error {
-
 	return nil
 }
 
@@ -55,6 +56,9 @@ func (a *Application) Start() error {
 
 		return nil
 	}
+
+	go a.tcpServer.Start()
+
 	a.handleShutdown()
 	return startRestServer()
 }
@@ -67,10 +71,16 @@ func (a *Application) handleShutdown() {
 		<-signalChan
 		logger.Println("Shutting down...")
 		a.Shutdown()
+		close(signalChan)
 	}()
 }
 
 func (a *Application) Shutdown() {
+
+	// shutdown tcp routine
+	a.tcpServer.Shutdown()
+
+	// shutdown rest routine
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -95,5 +105,7 @@ func (a *Application) Shutdown() {
 
 	a.wg.Wait()
 	logger.Println("Application terminated")
-	a.cancel()
+
+	// shutdwon main routine
+	a.mainCtxCancel()
 }

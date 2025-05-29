@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"pjt/internal/config"
 	model "pjt/internal/model/sample"
-	"pjt/internal/server/http-rest/http-utils/httperr"
-	"pjt/internal/server/http-rest/http-utils/jwt"
-	"pjt/internal/server/http-rest/middleware"
 	"pjt/internal/service"
+	"pjt/internal/transport/eventbus"
+	"pjt/internal/transport/http-rest/http-utils/httperr"
+	"pjt/internal/transport/http-rest/http-utils/jwt"
+	"pjt/internal/transport/http-rest/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,15 +18,17 @@ type Controller struct {
 	Router     *gin.Engine
 	ApiService service.APIServcieInterface
 	SseService service.SSEServiceInterface
+	EventBus   *eventbus.EventBus
 	Config     *config.Configuration
 }
 
-func NewController(router *gin.Engine, apiService service.APIServcieInterface, sseService service.SSEServiceInterface, config *config.Configuration) *Controller {
+func NewController(router *gin.Engine, apiService service.APIServcieInterface, sseService service.SSEServiceInterface, eventBus *eventbus.EventBus, config *config.Configuration) *Controller {
 
 	controller := &Controller{
 		Router:     router,
 		ApiService: apiService,
 		SseService: sseService,
+		EventBus:   eventBus,
 		Config:     config,
 	}
 	controller.RoutePath()

@@ -4,7 +4,8 @@ import (
 	"context"
 	"net/http"
 	"pjt/internal/config"
-	"pjt/internal/server/http-rest/controller"
+	"pjt/internal/logger"
+	"pjt/internal/transport/http-rest/controller"
 	"time"
 )
 
@@ -31,5 +32,6 @@ func (r *RESTServer) Start() error {
 }
 
 func (r *RESTServer) Shutdown(ctx context.Context) error {
+	logger.Println("[REST] REST goroutine terminated")
 	return r.server.Shutdown(ctx)
 }

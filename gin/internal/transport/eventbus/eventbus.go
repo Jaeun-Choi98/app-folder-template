@@ -11,33 +11,30 @@ import (
  * It implements a publish-subscribe pattern.
  */
 type EventBus struct {
-	subscribers map[string][]chan model.Event
+	subscribers map[model.EventType][]chan model.Event // key: EventType -> value: []chan Event
 	mu          sync.RWMutex
 }
 
-// NewEventBus creates a new event bus
 func NewEventBus() *EventBus {
 	return &EventBus{
-		subscribers: make(map[string][]chan model.Event),
+		subscribers: make(map[model.EventType][]chan model.Event),
 	}
 }
 
-// Subscribe returns a channel that will receive events published to the given topic
-func (b *EventBus) Subscribe(topic string) chan model.Event {
+func (b *EventBus) Subscribe(topic model.EventType) chan model.Event {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	ch := make(chan model.Event, 1)
+	ch := make(chan model.Event, 10)
 	b.subscribers[topic] = append(b.subscribers[topic], ch)
 	return ch
 }
 
-// Unsubscribe removes a subscription
-func (b *EventBus) Unsubscribe(topic string, ch chan model.Event) {
+func (b *EventBus) Unsubscribe(topic model.EventType, ch chan model.Event) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if subs, found := b.subscribers[topic]; found {
+	if subs, exsits := b.subscribers[topic]; exsits {
 		for i, sub := range subs {
 			if sub == ch {
 				close(ch)
@@ -48,18 +45,16 @@ func (b *EventBus) Unsubscribe(topic string, ch chan model.Event) {
 	}
 }
 
-// Publish sends an event to all subscribers of the given topic
-func (b *EventBus) Publish(topic string, event model.Event) {
+func (b *EventBus) Publish(topic model.EventType, event model.Event) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
 	if subs, found := b.subscribers[topic]; found {
 		for _, ch := range subs {
-			// Use non-blocking send to avoid deadlocks
 			select {
 			case ch <- event:
 			default:
-				// Channel is full, log this if needed
+
 			}
 		}
 	}

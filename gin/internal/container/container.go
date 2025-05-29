@@ -5,11 +5,13 @@ import (
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
-	rest "pjt/internal/server/http-rest"
-	"pjt/internal/server/http-rest/controller"
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
 	sseservice "pjt/internal/service/sse-service"
+	"pjt/internal/transport/eventbus"
+	rest "pjt/internal/transport/http-rest"
+	"pjt/internal/transport/http-rest/controller"
+	"pjt/internal/transport/tcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +25,8 @@ type Container struct {
 	SseService service.SSEServiceInterface
 	Controller *controller.Controller
 	RESTServer *rest.RESTServer
+	TCPServer  *tcp.TCPServer
+	EventBus   *eventbus.EventBus
 }
 
 func NewContainer() (*Container, error) {
@@ -52,10 +56,17 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
+	eventbus := eventbus.NewEventBus()
+
 	apiService := apiservice.NewAPIService(dao, ram, config)
 	sseService := sseservice.NewSSEService()
-	controller := controller.NewController(gin.New(), apiService, sseService, config)
+	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
+
+	tcp, err := tcp.NewTCPServer(eventbus)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Container{
 		Config:     config,
@@ -64,6 +75,8 @@ func NewContainer() (*Container, error) {
 		SseService: sseService,
 		Controller: controller,
 		RESTServer: rest,
+		TCPServer:  tcp,
+		EventBus:   eventbus,
 	}, nil
 }
 

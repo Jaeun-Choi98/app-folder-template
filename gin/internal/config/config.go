@@ -9,7 +9,7 @@ import (
 
 type Configuration struct {
 	// for saving to .ini file
-	mu      *sync.RWMutex
+	mu      sync.RWMutex
 	cfgFile *ini.File
 
 	// http-rest
@@ -34,7 +34,6 @@ func NewConfiguration() (*Configuration, error) {
 func initConfig(cfgFile *ini.File) *Configuration {
 	config := &Configuration{}
 
-	config.mu = &sync.RWMutex{}
 	config.cfgFile = cfgFile
 
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")

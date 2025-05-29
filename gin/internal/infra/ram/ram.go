@@ -7,7 +7,7 @@ import (
 )
 
 type Ram struct {
-	mu         *sync.RWMutex
+	mu         sync.RWMutex
 	dao        dbhandler.DBHandlerInterface
 	OprtModels map[int]*model.SampleModel
 }
@@ -15,7 +15,6 @@ type Ram struct {
 func NewRam(dao dbhandler.DBHandlerInterface) (*Ram, error) {
 
 	ram := &Ram{
-		mu:  &sync.RWMutex{},
 		dao: dao,
 	}
 
