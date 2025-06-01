@@ -5,6 +5,7 @@ import (
 	"pjt/internal/app"
 	"pjt/internal/container"
 	"pjt/internal/logger"
+	"time"
 )
 
 func main() {
@@ -20,8 +21,15 @@ func main() {
 		return
 	}
 
-	select {
-	case <-ctx.Done():
-		return
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			container.TCPServer.HeartbeatTest()
+		}
 	}
+
 }

@@ -12,6 +12,7 @@ import (
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
 	"pjt/internal/transport/tcp"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,7 +64,7 @@ func NewContainer() (*Container, error) {
 	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
 
-	tcp, err := tcp.NewTCPServer(eventbus)
+	tcp, err := tcp.NewTCPServer(eventbus, 5*time.Second)
 	if err != nil {
 		return nil, err
 	}

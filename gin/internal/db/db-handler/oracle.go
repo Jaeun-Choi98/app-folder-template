@@ -74,20 +74,14 @@ func (o *Oracle) StartDBHeartbeat() {
 		for {
 			select {
 			case <-o.ctx.Done():
-				logger.Println("[Heartbeat] DB heartbeat goroutine terminated")
+				logger.Println("[DB Heartbeat] DB heartbeat goroutine terminated")
 				return
 			case <-o.ticker.C:
 				if err := o.Ping(); err != nil {
-					logger.Printf("DB connection loss detected:\n\t%v", err)
 					// 재연결 시도
-					for i := 0; i < 3; i++ {
-						logger.Printf("Reconnecting to DB #%d", i+1)
-						if err := o.reConnect(); err == nil {
-							logger.Println("DB reconnection successful")
-							break
-						}
-						// 일정 시간 대기 후 재시도
-						time.Sleep(5 * time.Second)
+					logger.Println("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
+					if err := o.reConnect(); err == nil {
+						logger.Println("[DB Heartbeat] DB reconnection successful")
 					}
 				}
 			}

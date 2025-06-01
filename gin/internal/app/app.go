@@ -57,10 +57,14 @@ func (a *Application) Start() error {
 		return nil
 	}
 
+	a.handleShutdown()
+
 	go a.tcpServer.Start()
 
-	a.handleShutdown()
-	return startRestServer()
+	a.tcpServer.StartTCPServerHeartbeat()
+
+	go startRestServer()
+	return nil
 }
 
 func (a *Application) handleShutdown() {
@@ -77,7 +81,7 @@ func (a *Application) handleShutdown() {
 
 func (a *Application) Shutdown() {
 
-	// shutdown tcp routine
+	// shutdown tcp routine and tcp heartbeat routine
 	a.tcpServer.Shutdown()
 
 	// shutdown rest routine

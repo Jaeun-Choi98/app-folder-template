@@ -1,4 +1,4 @@
-package dbmodel
+package entity
 
 /**
  * entity -> model
