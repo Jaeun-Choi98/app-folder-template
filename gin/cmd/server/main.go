@@ -4,7 +4,6 @@ import (
 	"context"
 	"pjt/internal/app"
 	"pjt/internal/container"
-	"pjt/internal/logger"
 	"time"
 )
 
@@ -16,12 +15,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	app := app.NewApplication(container, cancel)
 
-	if err := app.Start(); err != nil {
-		logger.Printf("Failed to start Application:\n\t%v", err)
-		return
-	}
+	app.Start()
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(7 * time.Second)
 	defer ticker.Stop()
 	for {
 		select {
