@@ -14,6 +14,7 @@ import (
 // Configuration 객체 주입 필요 ( ip, port )
 type TCPClient struct {
 	conn        net.Conn
+	reader      *bufio.Reader
 	sendMsgChan chan string
 	wg          sync.WaitGroup
 	ctx         context.Context
@@ -27,6 +28,7 @@ type TCPClient struct {
 func NewTCPClient(timeout, reconnect time.Duration) (*TCPClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TCPClient{
+		reader:      bufio.NewReader(os.Stdin),
 		timeout:     timeout,
 		reconnect:   reconnect,
 		sendMsgChan: make(chan string),
@@ -35,48 +37,47 @@ func NewTCPClient(timeout, reconnect time.Duration) (*TCPClient, error) {
 	}, nil
 }
 
-func (t *TCPClient) Connect() error {
+func (c *TCPClient) Connect() error {
 
-	t.mu.Lock()
-	defer t.mu.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	conn, err := net.DialTimeout("tcp", "localhost:5000", t.timeout)
+	conn, err := net.DialTimeout("tcp", "localhost:5000", c.timeout)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	t.conn = conn
-	t.isConnected = true
+	c.conn = conn
+	c.isConnected = true
 	return nil
 }
 
-func (t *TCPClient) Start() error {
+func (c *TCPClient) Start() error {
+	defer c.wg.Done()
 
 	// 초기 연결
-	if err := t.Connect(); err != nil {
+	if err := c.Connect(); err != nil {
 		return err
 	}
 
-	t.wg.Add(1)
-	defer t.wg.Done()
-	// 이후에 receive 함수로 분리 필요.
-	reader := bufio.NewReader(os.Stdin)
+	c.wg.Add(1)
+
 	for {
 		go func() {
-			line, err := reader.ReadString('\n')
+			line, err := c.reader.ReadString('\n')
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			t.sendMsgChan <- line
+			c.sendMsgChan <- line
 		}()
 
 		select {
-		case <-t.ctx.Done():
+		case <-c.ctx.Done():
 			return nil
-		case data := <-t.sendMsgChan:
-			err := t.SendMessage(data)
+		case data := <-c.sendMsgChan:
+			err := c.SendMessage(data)
 			if err != nil {
 				log.Println(err)
 				return err

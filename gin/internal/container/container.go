@@ -11,7 +11,7 @@ import (
 	"pjt/internal/transport/eventbus"
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
-	"pjt/internal/transport/tcp"
+	tcp "pjt/internal/transport/tcp/server"
 	"time"
 
 	"github.com/gin-gonic/gin"

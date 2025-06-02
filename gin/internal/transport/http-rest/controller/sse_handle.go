@@ -62,18 +62,19 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	}
 	client.SendMessage(connectMsg)
 
+	eventChA := ctl.EventBus.Subscribe(modelevent.EVENTA)
+	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
+
 	// 클라이언트 요청이 종료되면 정리
 	// ctx.Request.Context()는 클라이언트가 연결을 끊으면 취소됩니다
 	go func() {
 		<-clientCtx.Done()
 		session.RemoveClient(clientId)
+		ctl.EventBus.Unsubscribe(modelevent.EVENTA, eventChA)
 		if session.Count() == 0 {
 			ctl.SseService.RemoveSession(userId)
 		}
 	}()
-
-	eventChA := ctl.EventBus.Subscribe(modelevent.EVENTA)
-	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
 
 	// 클라이언트가 연결을 끊을 때까지 연결 유지
 	// 심박(heartbeat)을 30초마다 전송

@@ -9,7 +9,7 @@ import (
 	"pjt/internal/container"
 	"pjt/internal/logger"
 	rest "pjt/internal/transport/http-rest"
-	"pjt/internal/transport/tcp"
+	tcp "pjt/internal/transport/tcp/server"
 	"sync"
 	"syscall"
 	"time"
@@ -37,8 +37,7 @@ func (a *Application) Init() error {
 	return nil
 }
 
-func (a *Application) Start() error {
-	a.wg.Add(1)
+func (a *Application) Start() {
 
 	// 30일이 지난 로그 파일 정리
 	logger.StartCleaning()
@@ -46,25 +45,34 @@ func (a *Application) Start() error {
 	// 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
 	a.container.Dao.StartDBHeartbeat()
 
+	a.wg.Add(1)
 	startRestServer := func() error {
 		defer a.wg.Done()
-
 		if err := a.restServer.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Printf("Failed to start application:\n\t%v", err)
 			return err
 		}
+		return nil
+	}
 
+	a.wg.Add(1)
+	startTCPServer := func() error {
+		defer a.wg.Done()
+		if err := a.tcpServer.Start(); err != nil {
+			logger.Printf("Failed to start TCP routine:\n\t%v", err)
+			return err
+		}
 		return nil
 	}
 
 	a.handleShutdown()
 
-	go a.tcpServer.Start()
+	go startTCPServer()
 
 	a.tcpServer.StartTCPServerHeartbeat()
 
 	go startRestServer()
-	return nil
+
 }
 
 func (a *Application) handleShutdown() {
@@ -85,7 +93,7 @@ func (a *Application) Shutdown() {
 	a.tcpServer.Shutdown()
 
 	// shutdown rest routine
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := a.restServer.Shutdown(ctx); err != nil {
