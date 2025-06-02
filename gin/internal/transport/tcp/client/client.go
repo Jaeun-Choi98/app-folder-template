@@ -3,10 +3,8 @@ package tcp
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"net"
-	"os"
 	"sync"
 	"time"
 )
@@ -16,10 +14,13 @@ type TCPClient struct {
 	conn        net.Conn
 	reader      *bufio.Reader
 	sendMsgChan chan string
-	wg          sync.WaitGroup
-	ctx         context.Context
-	cancel      context.CancelFunc
-	mu          sync.RWMutex
+	timeoutChan chan bool
+
+	wg     sync.WaitGroup
+	ctx    context.Context
+	cancel context.CancelFunc
+	mu     sync.RWMutex
+
 	isConnected bool
 	timeout     time.Duration
 	reconnect   time.Duration
@@ -28,13 +29,26 @@ type TCPClient struct {
 func NewTCPClient(timeout, reconnect time.Duration) (*TCPClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TCPClient{
-		reader:      bufio.NewReader(os.Stdin),
+		//reader:      bufio.NewReader(os.Stdin),
 		timeout:     timeout,
 		reconnect:   reconnect,
-		sendMsgChan: make(chan string),
+		sendMsgChan: make(chan string, 10),
+		timeoutChan: make(chan bool, 1),
 		ctx:         ctx,
 		cancel:      cancel,
 	}, nil
+}
+
+func (c *TCPClient) SetConnectionState(state bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.isConnected = state
+}
+
+func (c *TCPClient) IsConnected() bool {
+	c.mu.RLock()
+	defer c.mu.Unlock()
+	return c.isConnected
 }
 
 func (c *TCPClient) Connect() error {
@@ -50,11 +64,11 @@ func (c *TCPClient) Connect() error {
 
 	c.conn = conn
 	c.isConnected = true
+	c.reader = bufio.NewReader(c.conn)
 	return nil
 }
 
 func (c *TCPClient) Start() error {
-	defer c.wg.Done()
 
 	// 초기 연결
 	if err := c.Connect(); err != nil {
@@ -62,43 +76,59 @@ func (c *TCPClient) Start() error {
 	}
 
 	c.wg.Add(1)
+	return c.WaitForReceiveMessage()
+}
 
+func (c *TCPClient) WaitForReceiveMessage() error {
+	defer c.wg.Done()
 	for {
-		go func() {
-			line, err := c.reader.ReadString('\n')
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			c.sendMsgChan <- line
-		}()
+		if !c.IsConnected() {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		go c.ReceiveMessage()
 
 		select {
 		case <-c.ctx.Done():
 			return nil
 		case data := <-c.sendMsgChan:
-			err := c.SendMessage(data)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
+			c.SendMessage(data)
+		case <-c.timeoutChan:
 		}
 	}
 }
 
-func (t *TCPClient) SendMessage(msg string) error {
+func (c *TCPClient) ReceiveMessage() {
 
+	if tcpConn, ok := c.conn.(*net.TCPConn); ok {
+		tcpConn.SetDeadline(time.Now().Add(30 * time.Second))
+	}
+
+	line, err := c.reader.ReadString('\n')
+	if err != nil {
+		if tcpErr, ok := err.(net.Error); ok && tcpErr.Timeout() {
+			log.Println("[TCP Client] Connection is timeout")
+			c.timeoutChan <- true
+			return
+		}
+		log.Println(err)
+		c.SetConnectionState(false)
+		return
+	}
+
+	c.sendMsgChan <- line
+}
+
+func (t *TCPClient) SendMessage(msg string) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-
-	if !t.isConnected {
-		return fmt.Errorf("not connected")
-	}
 
 	byteMsg := append([]byte(msg), '\n')
 	_, err := t.conn.Write(byteMsg)
 	if err != nil {
 		log.Println(err)
+		t.SetConnectionState(false)
 		return err
 	}
 	return nil
@@ -106,12 +136,20 @@ func (t *TCPClient) SendMessage(msg string) error {
 
 func (t *TCPClient) Shutdown() error {
 	t.cancel()
-	t.wg.Wait()
-	log.Println("[TCP Client] TCP Client goroutine terminated")
+	for len(t.sendMsgChan) > 0 {
+		<-t.sendMsgChan
+	}
+	close(t.sendMsgChan)
+	for len(t.timeoutChan) > 0 {
+		<-t.timeoutChan
+	}
+	close(t.timeoutChan)
 	t.isConnected = false
 	if t.conn != nil {
 		return t.conn.Close()
 	}
+	t.wg.Wait()
+	log.Println("[TCP Client] TCP Client goroutine is terminated")
 	return nil
 }
 
@@ -122,7 +160,7 @@ func (t *TCPClient) StartTCPClientHeartbeat() {
 		for {
 			select {
 			case <-heartbeat.C:
-				connected := t.isConnected && t.checkConnection()
+				connected := t.IsConnected() && t.checkConnection()
 				if !connected {
 					log.Println("[TCP Client Heartbeat] Connection is closed, attempting to reconnect...")
 					if err := t.Connect(); err != nil {
@@ -130,7 +168,7 @@ func (t *TCPClient) StartTCPClientHeartbeat() {
 					}
 				}
 			case <-t.ctx.Done():
-				log.Println("[TCP Client Heartbeat] TCP Client heartbeat goroutine terminated")
+				log.Println("[TCP Client Heartbeat] TCP Client heartbeat goroutine is terminated")
 				return
 			}
 		}

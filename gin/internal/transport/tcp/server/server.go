@@ -144,8 +144,14 @@ func (t *TCPServer) Start() error {
 		return err
 	}
 
-	for {
+	t.wg.Add(1)
+	return t.WaitForAccept()
+}
 
+func (t *TCPServer) WaitForAccept() error {
+	defer t.wg.Done()
+
+	for {
 		t.mu.RLock()
 		listener := t.listener
 		isListening := t.isListening
@@ -248,15 +254,19 @@ func (t *TCPServer) SendMessage() {
 	}
 }
 
-func (t *TCPServer) Shutdown() error {
+func (t *TCPServer) Shutdown() {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.cancel()
 	for len(t.msgChannel) > 0 {
 		<-t.msgChannel
 	}
 	close(t.msgChannel)
+	if t.listener != nil {
+		t.listener.Close()
+	}
 	t.wg.Wait()
 	logger.Println("[TCP] TCP goroutine terminated")
-	return t.listener.Close()
 }
 
 func (t *TCPServer) StartTCPServerHeartbeat() {
