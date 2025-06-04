@@ -67,12 +67,17 @@ func (c *Controller) RoutePath() {
 	// JWT 인증이 필요한 SSE 엔드포인트
 	//router.HandleFunc("/api/v1/events", middleware.JWTAuth(c.HandleSSE)).Methods("GET")
 
-	// 특정 사용자에게 이벤트를 전송하는 관리 엔드포인트
-	// 이 엔드포인트는 내부 서비스만 접근할 수 있어야 합니다
-	//adminRouter := router.PathPrefix("/admin").Subrouter()
-	//adminRouter.HandleFunc("/send-event/{userID}", middleware.AdminAuth(c.SendEventToUser)).Methods("POST")
-	c.Router.GET("/sse-connect/:id", c.HandleSSEConnect)
 	c.Router.POST("/sse-send", c.SendSSEMessageAll)
+	/**
+	 * 특정 사용자에게 이벤트를 전송하는 관리 엔드포인트
+	 * 이 엔드포인트는 내부 서비스만 접근할 수 있어야 합니다
+	 */
+	c.Router.POST("/sse-send/:id", c.SendSSEMessageToUser)
+
+	sseConnect := c.Router.Group("/sse")
+	sseConnect.Use(middleware.SSEMiddleware(), middleware.StoreIdToContext())
+	sseConnect.GET("/connect", c.HandleSSEConnect)
+
 }
 
 func (ctr *Controller) Close() error {

@@ -8,10 +8,16 @@ type HttpError struct {
 	ErrMsg string `json:"error"`
 }
 
+const (
+	UNAUTHORIZED_CODE = http.StatusNotAcceptable
+	BADREQUEST_CODE   = http.StatusBadRequest
+	INNER_ERROR_CODE  = http.StatusInternalServerError
+)
+
 var (
-	UNAUTHORIZED = NewHttpError(http.StatusNotAcceptable, "권한 없음")
-	BADREQUEST   = NewHttpError(http.StatusBadRequest, "잘못된 요청")
-	INNER_ERROR  = NewHttpError(http.StatusInternalServerError, "서버 에러")
+	UNAUTHORIZED = NewHttpError(UNAUTHORIZED_CODE, "권한 없음")
+	BADREQUEST   = NewHttpError(BADREQUEST_CODE, "잘못된 요청")
+	INNER_ERROR  = NewHttpError(INNER_ERROR_CODE, "서버 에러")
 )
 
 func NewHttpError(code int, msg string) *HttpError {

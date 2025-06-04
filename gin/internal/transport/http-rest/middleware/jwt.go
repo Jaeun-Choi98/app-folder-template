@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"fmt"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/http-utils/jwt"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +15,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		// 쿠키를 사용하는 경우
 		cookie, err := ctx.Request.Cookie("jwt")
 		if err != nil {
-			ctx.Error(httperr.UNAUTHORIZED.AddErrMsg(err))
-			ctx.Abort()
+			ctx.AbortWithError(httperr.UNAUTHORIZED_CODE, httperr.UNAUTHORIZED)
 			return
 		}
 		jwtStr := cookie.Value
@@ -32,17 +31,30 @@ func JWTMiddleware() gin.HandlerFunc {
 		jwtStr, _ = strings.CutPrefix(jwtStr, "Bearer ")
 		claims, err := jwt.VaildJwtHS256(jwtStr)
 		if err != nil {
-			ctx.Error(httperr.UNAUTHORIZED.AddErrMsg(err))
-			ctx.Abort()
+			ctx.AbortWithError(httperr.UNAUTHORIZED_CODE, httperr.UNAUTHORIZED)
 			return
 		}
 
 		if claims.Name == "" {
-			ctx.Error(httperr.UNAUTHORIZED.AddErrMsg(fmt.Errorf("claim name is empty")))
-			ctx.Abort()
+			ctx.AbortWithError(httperr.UNAUTHORIZED_CODE, httperr.UNAUTHORIZED)
 			return
 		}
 
+		ctx.Next()
+	}
+}
+
+func StoreIdToContext() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var token string
+		if cookie, err := ctx.Request.Cookie("jwt"); err == nil {
+			if token = cookie.Value; token != "" {
+				token, _ = strings.CutPrefix(token, "Bearer ")
+				if claims, err := jwt.VaildJwtHS256(token); err == nil {
+					ctx.Set("id", strconv.Itoa(claims.SampleModelId))
+				}
+			}
+		}
 		ctx.Next()
 	}
 }

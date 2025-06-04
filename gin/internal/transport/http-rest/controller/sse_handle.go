@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	modelevent "pjt/internal/model/event"
@@ -14,37 +13,26 @@ import (
 	"github.com/google/uuid"
 )
 
-// HandleSSE는 클라이언트의 SSE 연결 요청을 처리합니다.
+/**
+ * 클라이언트의 SSE 연결 요청을 처리 하기 위한 핸들러
+ * 사용자의 ID가 없다면, ClientId를 UserId로 사용.
+ *
+ * 사용자ID가 없다면:
+ * -> 특정 사용자에게만 데이터를 전송하는 /login/sse-send/:id API를 사용할 수 없음.
+ * -> 하나의 세션에 하나의 클라이언트만 매칭 됨.
+ */
 func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
-	userId := ctx.Param("id")
 
-	// SSE 헤더 설정
-	ctx.Header("Content-Type", "text/event-stream")
-	ctx.Header("Cache-Control", "no-cache")
-	ctx.Header("Connection", "keep-alive")
-	ctx.Header("Access-Control-Allow-Origin", "*")
-
-	// HTTP Flusher 확인
-	flusher, ok := ctx.Writer.(http.Flusher)
-	if !ok {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(fmt.Errorf("streaming not supported")))
-		return
+	clientId := uuid.New().String()
+	userId := ctx.GetString("id")
+	if userId == "" {
+		userId = clientId
 	}
 
-	// 클라이언트 ID 생성
-	clientId := uuid.New().String()
-
-	// 클라이언트 컨텍스트 생성
-	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
-
-	// 새 SSE 클라이언트 생성
-	client := &sse.SSEClient{
-		ClientId: clientId,
-		UserId:   userId,
-		Writer:   ctx.Writer,
-		Flusher:  flusher,
-		Ctx:      clientCtx,
-		Cancel:   cancel,
+	client, err := sse.NewSSEClient(clientId, userId, ctx)
+	if err != nil {
+		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		return
 	}
 
 	session := ctl.SseService.GetSessionByUserId(userId)
@@ -68,7 +56,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	// 클라이언트 요청이 종료되면 정리
 	// ctx.Request.Context()는 클라이언트가 연결을 끊으면 취소됩니다
 	go func() {
-		<-clientCtx.Done()
+		<-client.Ctx.Done()
 		session.RemoveClient(clientId)
 		ctl.EventBus.Unsubscribe(modelevent.EVENTA, eventChA)
 		if session.Count() == 0 {
@@ -78,7 +66,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
 	// 클라이언트가 연결을 끊을 때까지 연결 유지
 	// 심박(heartbeat)을 30초마다 전송
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -94,7 +82,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 				session.RemoveClient(clientId)
 				return
 			}
-		case <-clientCtx.Done():
+		case <-client.Ctx.Done():
 			// 클라이언트 또는 서버에서 연결을 닫았음
 			return
 		case <-ticker.C:
