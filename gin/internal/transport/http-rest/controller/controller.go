@@ -63,9 +63,16 @@ func (c *Controller) RoutePath() {
 	needJwt.GET("/test", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "%s", "success jwt test")
 	})
-
-	// JWT 인증이 필요한 SSE 엔드포인트
-	//router.HandleFunc("/api/v1/events", middleware.JWTAuth(c.HandleSSE)).Methods("GET")
+	needJwt.GET("/remove-test", func(ctx *gin.Context) {
+		http.SetCookie(ctx.Writer, &http.Cookie{
+			Name:    "jwt",
+			Value:   "",
+			MaxAge:  60 * 60,
+			Expires: time.Now().Add(time.Minute * 60),
+			Path:    "/",
+		})
+		ctx.String(http.StatusOK, "%s", "remove-test ok")
+	})
 
 	c.Router.POST("/sse-send", c.SendSSEMessageAll)
 	/**
