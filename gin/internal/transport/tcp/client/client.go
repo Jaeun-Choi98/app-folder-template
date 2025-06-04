@@ -11,10 +11,10 @@ import (
 
 // Configuration 객체 주입 필요 ( ip, port )
 type TCPClient struct {
-	conn        net.Conn
-	reader      *bufio.Reader
-	sendMsgChan chan string
-	timeoutChan chan bool
+	conn           net.Conn
+	reader         *bufio.Reader
+	receiveMsgChan chan string
+	timeoutChan    chan bool
 
 	wg     sync.WaitGroup
 	ctx    context.Context
@@ -30,12 +30,12 @@ func NewTCPClient(timeout, reconnect time.Duration) (*TCPClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TCPClient{
 		//reader:      bufio.NewReader(os.Stdin),
-		timeout:     timeout,
-		reconnect:   reconnect,
-		sendMsgChan: make(chan string, 10),
-		timeoutChan: make(chan bool, 1),
-		ctx:         ctx,
-		cancel:      cancel,
+		timeout:        timeout,
+		reconnect:      reconnect,
+		receiveMsgChan: make(chan string, 10),
+		timeoutChan:    make(chan bool, 1),
+		ctx:            ctx,
+		cancel:         cancel,
 	}, nil
 }
 
@@ -92,7 +92,7 @@ func (c *TCPClient) WaitForReceiveMessage() error {
 		select {
 		case <-c.ctx.Done():
 			return nil
-		case data := <-c.sendMsgChan:
+		case data := <-c.receiveMsgChan:
 			c.SendMessage(data)
 		case <-c.timeoutChan:
 		}
@@ -117,7 +117,7 @@ func (c *TCPClient) ReceiveMessage() {
 		return
 	}
 
-	c.sendMsgChan <- line
+	c.receiveMsgChan <- line
 }
 
 func (t *TCPClient) SendMessage(msg string) error {
@@ -136,14 +136,16 @@ func (t *TCPClient) SendMessage(msg string) error {
 
 func (t *TCPClient) Shutdown() error {
 	t.cancel()
-	for len(t.sendMsgChan) > 0 {
-		<-t.sendMsgChan
+	for len(t.receiveMsgChan) > 0 {
+		<-t.receiveMsgChan
 	}
-	close(t.sendMsgChan)
+	close(t.receiveMsgChan)
+
 	for len(t.timeoutChan) > 0 {
 		<-t.timeoutChan
 	}
 	close(t.timeoutChan)
+
 	t.isConnected = false
 	if t.conn != nil {
 		return t.conn.Close()
