@@ -270,9 +270,15 @@ func (t *TCPServer) Shutdown() {
 }
 
 func (t *TCPServer) StartTCPServerHeartbeat() {
+	t.wg.Add(1)
 	go func() {
 		heartbeat := time.NewTicker(t.heartbeat)
-		defer heartbeat.Stop()
+
+		defer func() {
+			heartbeat.Stop()
+			t.wg.Done()
+		}()
+
 		for {
 			select {
 			case <-heartbeat.C:

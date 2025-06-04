@@ -93,8 +93,9 @@ func (c *TCPClient) WaitForReceiveMessage() error {
 		case <-c.ctx.Done():
 			return nil
 		case data := <-c.receiveMsgChan:
-			c.SendMessage(data)
+			c.HandleMessage(data)
 		case <-c.timeoutChan:
+			log.Println("[TCP Client] Receive connection is timeout")
 		}
 	}
 }
@@ -108,7 +109,6 @@ func (c *TCPClient) ReceiveMessage() {
 	line, err := c.reader.ReadString('\n')
 	if err != nil {
 		if tcpErr, ok := err.(net.Error); ok && tcpErr.Timeout() {
-			log.Println("[TCP Client] Connection is timeout")
 			c.timeoutChan <- true
 			return
 		}
@@ -118,6 +118,11 @@ func (c *TCPClient) ReceiveMessage() {
 	}
 
 	c.receiveMsgChan <- line
+}
+
+// HandleMessage is processing the received message.
+func (t *TCPClient) HandleMessage(msg string) {
+	t.SendMessage(msg)
 }
 
 func (t *TCPClient) SendMessage(msg string) error {
@@ -136,6 +141,7 @@ func (t *TCPClient) SendMessage(msg string) error {
 
 func (t *TCPClient) Shutdown() error {
 	t.cancel()
+
 	for len(t.receiveMsgChan) > 0 {
 		<-t.receiveMsgChan
 	}
@@ -150,15 +156,22 @@ func (t *TCPClient) Shutdown() error {
 	if t.conn != nil {
 		return t.conn.Close()
 	}
+
 	t.wg.Wait()
 	log.Println("[TCP Client] TCP Client goroutine is terminated")
 	return nil
 }
 
 func (t *TCPClient) StartTCPClientHeartbeat() {
+	t.wg.Add(1)
 	go func() {
 		heartbeat := time.NewTicker(t.reconnect)
-		defer heartbeat.Stop()
+
+		defer func() {
+			heartbeat.Stop()
+			t.wg.Done()
+		}()
+
 		for {
 			select {
 			case <-heartbeat.C:
@@ -196,21 +209,3 @@ func (t *TCPClient) checkConnection() bool {
 
 	return true
 }
-
-// client test
-// func main() {
-// 	tcpClient, err := NewTCPClient()
-// 	if err != nil {
-// 		log.Println(err)
-// 		return
-// 	}
-// 	signalChan := make(chan os.Signal, 1)
-// 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-// 	go tcpClient.Start()
-
-// 	<-signalChan
-// 	log.Println("Shutting down...")
-// 	tcpClient.Shutdown()
-// 	log.Println("TCP Client terminated")
-// 	close(signalChan)
-// }
