@@ -138,7 +138,7 @@ func (t *TCPServer) unregisterClient(clientId string) {
 
 func (t *TCPServer) Start() error {
 	//wg.Add(1)
-	//go t.SendMessage()
+	//go t.SendMessageRoutine()
 
 	if err := t.Listening(); err != nil {
 		return err
@@ -223,6 +223,7 @@ func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 	}
 }
 
+// if need to send to particular client, add parameter clientId
 func (t *TCPServer) handleMessage(msg string) {
 	switch msg {
 	case "EVENTA":
@@ -236,7 +237,8 @@ func (t *TCPServer) handleMessage(msg string) {
 	}
 }
 
-func (t *TCPServer) SendMessage() {
+// broadcast
+func (t *TCPServer) SendMessageToAllRoutine() {
 	for {
 		select {
 		case <-t.ctx.Done():
@@ -252,6 +254,22 @@ func (t *TCPServer) SendMessage() {
 			t.mu.RUnlock()
 		}
 	}
+}
+
+func (t *TCPServer) SendMessageToAllOnce(msg string) {
+	t.mu.RLock()
+	for _, client := range t.clients {
+		client.conn.Write([]byte(msg))
+	}
+	t.mu.RUnlock()
+}
+
+func (t *TCPServer) SendMessageToClient(msg string, clinetId string) {
+	t.mu.RLock()
+	if client, exists := t.clients[clinetId]; exists {
+		client.conn.Write([]byte(msg))
+	}
+	t.mu.RUnlock()
 }
 
 func (t *TCPServer) Shutdown() {
