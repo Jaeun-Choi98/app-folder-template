@@ -47,7 +47,7 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	dao, err := dbhandler.NewMyDB(config)
+	dao, err := dbhandler.NewDBHandler(config)
 	if err != nil {
 		return nil, err
 	}

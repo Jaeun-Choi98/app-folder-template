@@ -1,0 +1,21 @@
+[REST]
+IP=
+PORT=8080
+
+[DB]
+TYPE=oracle       # maria/mysql, postgres, odbc
+HOST=
+PORT=
+NAME=
+USER=
+PASSWD=
+HEARTBEAT=30
+TIMEOUT=10
+CHARSET=utf8mb4
+TIMEZONE=local
+PARSETIME=true    # for mysql/maria
+SERVICENAME=      # for oracle
+TNS=              # for oracle
+DRIVER=           # for odbc
+DSN=              # for odbc
+

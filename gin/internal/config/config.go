@@ -16,10 +16,34 @@ type Configuration struct {
 	RestIp   string
 	RestPort string
 
-	// repository
-	User   string
-	Passwd string
-	Conn   string
+	DatabaseConfig
+}
+
+type DatabaseConfig struct {
+	// db
+	DBType      string
+	DBHost      string
+	DBPort      string
+	DBUser      string
+	DBPasswd    string
+	DBName      string
+	DBHeartbeat int
+
+	// Options
+	DBConnectTimeout int
+	DBCharset        string
+	DBTimezone       string
+
+	// MySQL/MariaDB
+	ParseTime bool
+
+	// Oracle
+	ServiceName string
+	TNS         string
+
+	// ODBC
+	Driver string
+	DSN    string
 }
 
 func NewConfiguration() (*Configuration, error) {
@@ -38,8 +62,26 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
-	config.User = cfgFile.Section("ORACLE").Key("USER").MustString("")
-	config.Passwd = cfgFile.Section("ORACLE").Key("PASSWD").MustString("")
-	config.Conn = cfgFile.Section("ORACLE").Key("CONN").MustString("")
+
+	config.DBType = cfgFile.Section("DB").Key("TYPE").MustString("")
+	config.DBHost = cfgFile.Section("DB").Key("HOST").MustString("")
+	config.DBPort = cfgFile.Section("DB").Key("PORT").MustString("")
+	config.DBName = cfgFile.Section("DB").Key("NAME").MustString("")
+	config.DBUser = cfgFile.Section("DB").Key("USER").MustString("")
+	config.DBPasswd = cfgFile.Section("DB").Key("PASSWD").MustString("")
+	config.DBHeartbeat = cfgFile.Section("DB").Key("DBHEARTBEAT").MustInt(30)
+
+	config.DBConnectTimeout = cfgFile.Section("DB").Key("TIMEOUT").MustInt(10)
+	config.DBCharset = cfgFile.Section("DB").Key("CHARSET").MustString("")
+	config.DBTimezone = cfgFile.Section("DB").Key("TIMEZONE").MustString("")
+
+	config.ParseTime = cfgFile.Section("DB").Key("PARSETIME").MustBool(true)
+
+	config.ServiceName = cfgFile.Section("DB").Key("SERVICENAME").MustString("")
+	config.TNS = cfgFile.Section("DB").Key("TNS").MustString("")
+
+	config.Driver = cfgFile.Section("DB").Key("DRIVER").MustString("")
+	config.DSN = cfgFile.Section("DB").Key("DSN").MustString("")
+
 	return config
 }
