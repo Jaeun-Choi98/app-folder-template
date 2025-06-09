@@ -33,7 +33,7 @@ func NewDBHandler(config *config.Configuration) (DBHandlerInterface, error) {
 }
 
 func getPostgresDSN(c *config.Configuration) string {
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		c.DBUser, c.DBPasswd, c.DBHost, c.DBPort, c.DBName)
 
 	params := make([]string, 0)
@@ -70,7 +70,7 @@ func getPostgresDSN(c *config.Configuration) string {
 }
 
 func getMysqlOrMariaDSN(c *config.Configuration) string {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		c.DBUser, c.DBPasswd, c.DBHost, c.DBPort, c.DBName)
 
 	params := make([]string, 0)
@@ -108,7 +108,7 @@ func getMysqlOrMariaDSN(c *config.Configuration) string {
 
 func getOracleDSN(c *config.Configuration) string {
 	// user/password@host:port/service_name?param1=value1&param2=value2
-	connectString := fmt.Sprintf("%s:%d/%s", c.DBHost, c.DBPort, c.ServiceName)
+	connectString := fmt.Sprintf("%s:%s/%s", c.DBHost, c.DBPort, c.ServiceName)
 	dsn := fmt.Sprintf("%s/%s@%s", c.DBUser, c.DBPasswd, connectString)
 
 	params := make([]string, 0)
@@ -156,7 +156,7 @@ func getODBCDSN(c *config.Configuration) string {
 	}
 
 	if c.DBPort != "" {
-		parts = append(parts, fmt.Sprintf("PORT=%d", c.DBPort))
+		parts = append(parts, fmt.Sprintf("PORT=%s", c.DBPort))
 	}
 
 	// 연결 타임아웃 (드라이버에 따라 키워드 다름)
