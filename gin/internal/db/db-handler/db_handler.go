@@ -12,6 +12,7 @@ import (
 type DBHandlerInterface interface {
 	Test() string
 	Close() error
+	Ping() error
 	StartDBHeartbeat()
 	StopDBHeartbeat()
 }

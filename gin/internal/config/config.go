@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"pjt/internal/logger"
 	"sync"
 
@@ -67,7 +68,10 @@ func initConfig(cfgFile *ini.File) *Configuration {
 	config.DBHost = cfgFile.Section("DB").Key("HOST").MustString("")
 	config.DBPort = cfgFile.Section("DB").Key("PORT").MustString("")
 	config.DBName = cfgFile.Section("DB").Key("NAME").MustString("")
-	config.DBUser = cfgFile.Section("DB").Key("USER").MustString("")
+	// USER에 ## 주석이 들어가는 경우
+	decodedUser, _ := base64.StdEncoding.DecodeString(cfgFile.Section("DB").Key("USER").MustString(""))
+	config.DBUser = string(decodedUser)
+	// config.DBUser = cfgFile.Section("DB").Key("USER").MustString("")
 	config.DBPasswd = cfgFile.Section("DB").Key("PASSWD").MustString("")
 	config.DBHeartbeat = cfgFile.Section("DB").Key("DBHEARTBEAT").MustInt(30)
 
