@@ -1,0 +1,10 @@
+2025/06/16 13:59:21 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:00:51 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:01:08 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:03:41 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:04:05 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:04:47 invalid dsn, must be user:password@addr[/db[?param=X]]
+2025/06/16 14:19:37 unknown time zone local
+2025/06/16 14:20:57 unknown time zone local
+2025/06/16 14:28:40 unknown time zone local
+2025/06/16 14:28:56 unknown time zone local

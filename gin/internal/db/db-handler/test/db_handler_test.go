@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPingOracle(t *testing.T) {
+func TestPing(t *testing.T) {
 	container, err := container.NewContainer()
 	assert.NoError(t, err)
 	t.Log(container.Config.DBUser, container.Config.DBPasswd)

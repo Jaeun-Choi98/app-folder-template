@@ -82,6 +82,13 @@ func (c *TCPClient) Start() error {
 func (c *TCPClient) WaitForReceiveMessage() error {
 	defer c.wg.Done()
 	for {
+
+		select {
+		case <-c.ctx.Done():
+			return nil
+		default:
+		}
+
 		if !c.IsConnected() {
 			time.Sleep(1 * time.Second)
 			continue

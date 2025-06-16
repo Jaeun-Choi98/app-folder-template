@@ -157,6 +157,12 @@ func (t *TCPServer) WaitForAccept() error {
 		isListening := t.isListening
 		t.mu.RUnlock()
 
+		select {
+		case <-t.ctx.Done():
+			return nil
+		default:
+		}
+
 		if listener == nil || !isListening {
 			time.Sleep(1 * time.Second)
 			continue
@@ -274,7 +280,6 @@ func (t *TCPServer) SendMessageToClient(msg string, clinetId string) {
 
 func (t *TCPServer) Shutdown() {
 	t.mu.Lock()
-	defer t.mu.Unlock()
 	t.cancel()
 	for len(t.msgChannel) > 0 {
 		<-t.msgChannel
@@ -283,6 +288,7 @@ func (t *TCPServer) Shutdown() {
 	if t.listener != nil {
 		t.listener.Close()
 	}
+	t.mu.Unlock()
 	t.wg.Wait()
 	logger.Println("[TCP] TCP goroutine terminated")
 }

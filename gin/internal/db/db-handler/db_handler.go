@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"pjt/internal/config"
+	"pjt/internal/db/db-handler/maria"
 	"pjt/internal/db/db-handler/oracle"
 	"strings"
 	"time"
@@ -23,13 +24,13 @@ func NewDBHandler(config *config.Configuration) (DBHandlerInterface, error) {
 	case "oracle":
 		return oracle.NewOralce(getOracleDSN(config), time.Duration(config.DBHeartbeat)*time.Second)
 	case "maria":
-		return nil, nil
+		return maria.NewMaria(getMysqlOrMariaDSN(config), time.Duration(config.DBHeartbeat)*time.Second)
 	case "postgres":
 		return nil, nil
 	case "tibero":
 		return nil, nil
 	default:
-		return nil, errors.New("not exsits database type")
+		return nil, errors.New("not exsist database type")
 	}
 }
 
@@ -91,7 +92,7 @@ func getMysqlOrMariaDSN(c *config.Configuration) string {
 	// 시간대 설정 (loc 파라미터)
 	timeZone := c.DBTimezone
 	if timeZone == "" {
-		timeZone = "Local" // 기본값
+		timeZone = "Asia%2FSeoul" // 기본값
 	}
 	params = append(params, "loc="+timeZone)
 
@@ -103,7 +104,6 @@ func getMysqlOrMariaDSN(c *config.Configuration) string {
 	if len(params) > 0 {
 		dsn += "?" + strings.Join(params, "&")
 	}
-
 	return dsn
 }
 
