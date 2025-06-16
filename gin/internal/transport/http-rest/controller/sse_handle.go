@@ -3,8 +3,9 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	modelevent "pjt/internal/model/event"
-	modelsse "pjt/internal/model/sse"
+
+	"pjt/internal/service/sse-service"
+	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"time"
 
@@ -43,13 +44,13 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	session.AddClient(clientId, client)
 
 	// 연결 성공 이벤트 전송
-	connectMsg := modelsse.SSEMessage{
+	connectMsg := sse.Message{
 		Type:    "connect",
 		Payload: map[string]string{"message": "Connected successfully", "client_id": clientId},
 	}
 	client.SendMessage(connectMsg)
 
-	eventChA := ctl.EventBus.Subscribe(modelevent.EVENTA)
+	eventChA := ctl.EventBus.Subscribe(eventbus.EVENTA)
 	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
 
 	// 클라이언트 요청이 종료되면 정리
@@ -57,7 +58,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	go func() {
 		<-client.Ctx.Done()
 		session.RemoveClient(clientId)
-		ctl.EventBus.Unsubscribe(modelevent.EVENTA, eventChA)
+		ctl.EventBus.Unsubscribe(eventbus.EVENTA, eventChA)
 		if session.Count() == 0 {
 			ctl.SseService.RemoveSession(userId)
 		}
@@ -71,7 +72,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	for {
 		select {
 		case event := <-eventChA:
-			msg := modelsse.SSEMessage{
+			msg := sse.Message{
 				Type:    "EVENT",
 				Payload: event,
 			}
@@ -86,7 +87,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 			return
 		case <-ticker.C:
 			// 심박 전송 - 연결이 활성 상태인지 확인
-			heartbeat := modelsse.SSEMessage{
+			heartbeat := sse.Message{
 				Type:    "heartbeat",
 				Payload: time.Now().Unix(),
 			}
@@ -104,7 +105,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 
 	// POST 요청 본문에서 이벤트 데이터 파싱
-	var msg modelsse.SSEMessage
+	var msg sse.Message
 	if err := ctx.ShouldBindJSON(&msg); err != nil {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 		return
@@ -121,7 +122,7 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	userId := ctx.Param("id")
 
 	// POST 요청 본문에서 이벤트 데이터 파싱
-	var msg modelsse.SSEMessage
+	var msg sse.Message
 	err := ctx.ShouldBindJSON(&msg)
 	if err != nil {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))

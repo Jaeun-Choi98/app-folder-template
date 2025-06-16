@@ -1,11 +1,11 @@
-package service
+package sse
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"pjt/internal/logger"
-	ssemodel "pjt/internal/model/sse"
+
 	"sync"
 	"time"
 
@@ -104,7 +104,7 @@ func (s *SSEService) RemoveSession(userId string) {
 	}
 }
 
-func (s *SSEService) Broadcast(msg ssemodel.SSEMessage) {
+func (s *SSEService) Broadcast(msg Message) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	for _, session := range s.sessions {

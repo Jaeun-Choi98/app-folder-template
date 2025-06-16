@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"fmt"
-	model "pjt/internal/model/sample"
+	"pjt/internal/model"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"

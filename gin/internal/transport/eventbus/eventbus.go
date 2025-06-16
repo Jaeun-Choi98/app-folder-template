@@ -2,8 +2,6 @@ package eventbus
 
 import (
 	"sync"
-
-	model "pjt/internal/model/event"
 )
 
 /**
@@ -11,26 +9,26 @@ import (
  * It implements a publish-subscribe pattern.
  */
 type EventBus struct {
-	subscribers map[model.EventType][]chan model.Event // key: EventType -> value: []chan Event
+	subscribers map[EventType][]chan Event // key: EventType -> value: []chan Event
 	mu          sync.RWMutex
 }
 
 func NewEventBus() *EventBus {
 	return &EventBus{
-		subscribers: make(map[model.EventType][]chan model.Event),
+		subscribers: make(map[EventType][]chan Event),
 	}
 }
 
-func (b *EventBus) Subscribe(topic model.EventType) chan model.Event {
+func (b *EventBus) Subscribe(topic EventType) chan Event {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	ch := make(chan model.Event, 10)
+	ch := make(chan Event, 10)
 	b.subscribers[topic] = append(b.subscribers[topic], ch)
 	return ch
 }
 
-func (b *EventBus) Unsubscribe(topic model.EventType, ch chan model.Event) {
+func (b *EventBus) Unsubscribe(topic EventType, ch chan Event) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -45,7 +43,7 @@ func (b *EventBus) Unsubscribe(topic model.EventType, ch chan model.Event) {
 	}
 }
 
-func (b *EventBus) Publish(topic model.EventType, event model.Event) {
+func (b *EventBus) Publish(topic EventType, event Event) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 

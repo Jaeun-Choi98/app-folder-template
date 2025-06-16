@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 	"pjt/internal/config"
-	model "pjt/internal/model/sample"
+	"pjt/internal/model"
 	"pjt/internal/service"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"

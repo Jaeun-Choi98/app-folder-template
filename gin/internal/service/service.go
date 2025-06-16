@@ -1,7 +1,6 @@
 package service
 
 import (
-	ssemodel "pjt/internal/model/sse"
 	sse "pjt/internal/service/sse-service"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +17,6 @@ type SSEServiceInterface interface {
 	NewSSEClient(clientId, userId string, ctx *gin.Context) (*sse.SSEClient, error)
 	GetSessionById(sessionId string) *sse.UserSession
 	GetSessionByUserId(userId string) *sse.UserSession
-	Broadcast(msg ssemodel.SSEMessage)
+	Broadcast(msg sse.Message)
 	RemoveSession(userId string)
 }

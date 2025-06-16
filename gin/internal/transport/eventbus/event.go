@@ -1,4 +1,4 @@
-package model
+package eventbus
 
 type EventType int
 
@@ -15,10 +15,10 @@ type Event interface {
 
 type EventA struct {
 	Type    EventType
-	Payload MessageA
+	Payload PayloadA
 }
 
-type MessageA struct {
+type PayloadA struct {
 	Name string
 	Age  int
 }
@@ -33,10 +33,10 @@ func (a *EventA) GetType() EventType {
 
 type EventB struct {
 	Type    EventType
-	Payload MessageB
+	Payload PayloadB
 }
 
-type MessageB struct {
+type PayloadB struct {
 	Args []string
 	Cmd  string
 }

@@ -1,11 +1,10 @@
-package service
+package sse
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"pjt/internal/logger"
-	sse "pjt/internal/model/sse"
 )
 
 /**
@@ -39,7 +38,7 @@ type SSEClient struct {
 // }
 
 // SendEvent는 SSE 클라이언트에게 이벤트를 전송
-func (c *SSEClient) SendMessage(msg sse.SSEMessage) error {
+func (c *SSEClient) SendMessage(msg Message) error {
 	// 컨텍스트가 취소되었는지 확인
 	select {
 	case <-c.Ctx.Done():

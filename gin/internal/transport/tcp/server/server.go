@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"pjt/internal/logger"
-	model "pjt/internal/model/event"
 	"pjt/internal/transport/eventbus"
 	"strings"
 	"sync"
@@ -233,10 +232,10 @@ func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 func (t *TCPServer) handleMessage(msg string) {
 	switch msg {
 	case "EVENTA":
-		t.eventBus.Publish(model.EVENTA, &model.EventA{Type: model.EVENTA, Payload: model.MessageA{Name: "cju", Age: 11}})
+		t.eventBus.Publish(eventbus.EVENTA, &eventbus.EventA{Type: eventbus.EVENTA, Payload: eventbus.PayloadA{Name: "cju", Age: 11}})
 		logger.Println("[TCP] AAAAAAAAAAAAA")
 	case "EVENTB":
-		t.eventBus.Publish(model.EVENTB, &model.EventB{Type: model.EVENTB, Payload: model.MessageB{Args: []string{"sdf", "sdf"}, Cmd: "stres"}})
+		t.eventBus.Publish(eventbus.EVENTB, &eventbus.EventB{Type: eventbus.EVENTB, Payload: eventbus.PayloadB{Args: []string{"sdf", "sdf"}, Cmd: "stres"}})
 		logger.Println("[TCP] BBBBBBBBBBBBB")
 	default:
 		logger.Println("[TCP] Unknown Message Type")

@@ -2,7 +2,7 @@ package ram
 
 import (
 	dbhandler "pjt/internal/db/db-handler"
-	model "pjt/internal/model/sample"
+	"pjt/internal/model"
 	"sync"
 )
 

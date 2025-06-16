@@ -1,8 +1,7 @@
-package service
+package sse
 
 import (
 	"pjt/internal/logger"
-	ssemodel "pjt/internal/model/sse"
 	"sync"
 )
 
@@ -46,7 +45,7 @@ func (s *UserSession) RemoveClient(clientId string) {
 }
 
 // Broadcast는 세션의 모든 클라이언트에게 이벤트를 전송
-func (s *UserSession) Broadcast(msg ssemodel.SSEMessage) {
+func (s *UserSession) Broadcast(msg Message) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
