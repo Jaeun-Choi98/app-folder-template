@@ -1,11 +1,15 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"pjt/internal/logger"
 	ssemodel "pjt/internal/model/sse"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 /**
@@ -44,6 +48,22 @@ func (s *SSEService) NewSession(userId string) *UserSession {
 	s.userIndex[userId] = sessionId
 
 	return session
+}
+
+func (s *SSEService) NewSSEClient(clientId, userId string, ctx *gin.Context) (*SSEClient, error) {
+	flusher, ok := ctx.Writer.(http.Flusher)
+	if !ok {
+		return nil, fmt.Errorf("streaming not supported")
+	}
+	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
+	return &SSEClient{
+		ClientId: clientId,
+		UserId:   userId,
+		Writer:   ctx.Writer,
+		Flusher:  flusher,
+		Ctx:      clientCtx,
+		Cancel:   cancel,
+	}, nil
 }
 
 // GetSessionByID는 세션 ID로 세션을 조회

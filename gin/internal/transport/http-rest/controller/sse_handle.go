@@ -5,7 +5,6 @@ import (
 	"net/http"
 	modelevent "pjt/internal/model/event"
 	modelsse "pjt/internal/model/sse"
-	sse "pjt/internal/service/sse-service"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"time"
 
@@ -29,7 +28,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		userId = clientId
 	}
 
-	client, err := sse.NewSSEClient(clientId, userId, ctx)
+	client, err := ctl.SseService.NewSSEClient(clientId, userId, ctx)
 	if err != nil {
 		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 		return

@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"pjt/internal/logger"
 	sse "pjt/internal/model/sse"
-
-	"github.com/gin-gonic/gin"
 )
 
 /**
@@ -23,21 +21,22 @@ type SSEClient struct {
 	Cancel   context.CancelFunc
 }
 
-func NewSSEClient(clientId, userId string, ctx *gin.Context) (*SSEClient, error) {
-	flusher, ok := ctx.Writer.(http.Flusher)
-	if !ok {
-		return nil, fmt.Errorf("streaming not supported")
-	}
-	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
-	return &SSEClient{
-		ClientId: clientId,
-		UserId:   userId,
-		Writer:   ctx.Writer,
-		Flusher:  flusher,
-		Ctx:      clientCtx,
-		Cancel:   cancel,
-	}, nil
-}
+// SSEService의 메서드에서 구현.
+// func NewSSEClient(clientId, userId string, ctx *gin.Context) (*SSEClient, error) {
+// 	flusher, ok := ctx.Writer.(http.Flusher)
+// 	if !ok {
+// 		return nil, fmt.Errorf("streaming not supported")
+// 	}
+// 	clientCtx, cancel := context.WithCancel(ctx.Request.Context())
+// 	return &SSEClient{
+// 		ClientId: clientId,
+// 		UserId:   userId,
+// 		Writer:   ctx.Writer,
+// 		Flusher:  flusher,
+// 		Ctx:      clientCtx,
+// 		Cancel:   cancel,
+// 	}, nil
+// }
 
 // SendEvent는 SSE 클라이언트에게 이벤트를 전송
 func (c *SSEClient) SendMessage(msg sse.SSEMessage) error {
