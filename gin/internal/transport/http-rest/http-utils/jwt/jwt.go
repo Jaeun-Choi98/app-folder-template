@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"fmt"
-	"pjt/internal/model"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,13 +13,13 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewJwtHS256(sampleModel *model.SampleModel) (string, error) {
+func NewJwtHS256(id int, name string) (string, error) {
 
 	newClaims := CustomClaims{
-		SampleModelId: sampleModel.Id,
-		Name:          sampleModel.Name,
+		SampleModelId: id,
+		Name:          name,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   sampleModel.Name,
+			Subject:   name,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 60)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},

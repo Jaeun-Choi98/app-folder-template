@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"pjt/internal/config"
-	"pjt/internal/model"
 	"pjt/internal/service"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
@@ -43,7 +42,7 @@ func (c *Controller) RoutePath() {
 	// 쿠키를 사용해서 jwt 토큰을 전달
 	c.Router.GET("/test", func(ctx *gin.Context) {
 		str := c.ApiService.Test()
-		jwt, err := jwt.NewJwtHS256(&model.SampleModel{Id: 1, Name: "cju"})
+		jwt, err := jwt.NewJwtHS256(1, "name")
 		if err != nil {
 			ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
 			return
