@@ -8,6 +8,7 @@ import (
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
+	"pjt/internal/transport/http-rest/response"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -44,7 +45,7 @@ func (c *Controller) RoutePath() {
 		str := c.ApiService.Test()
 		jwt, err := jwt.NewJwtHS256(1, "name")
 		if err != nil {
-			ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
+			ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 			return
 		}
 		http.SetCookie(ctx.Writer, &http.Cookie{

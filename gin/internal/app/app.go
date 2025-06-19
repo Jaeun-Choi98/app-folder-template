@@ -39,9 +39,6 @@ func (a *Application) Init() error {
 
 func (a *Application) Start() {
 
-	// 30일이 지난 로그 파일 정리
-	logger.StartCleaning()
-
 	a.wg.Add(1)
 	startRestServer := func() error {
 		defer a.wg.Done()
@@ -73,6 +70,9 @@ func (a *Application) Start() {
 	}
 
 	a.handleShutdown()
+
+	// 30일이 지난 로그 파일 정리
+	logger.StartCleaning()
 
 	go startTCPServer()
 

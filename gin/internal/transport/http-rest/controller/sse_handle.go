@@ -7,6 +7,7 @@ import (
 	"pjt/internal/service/sse-service"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
+	"pjt/internal/transport/http-rest/response"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -30,7 +31,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
 	client, err := ctl.SseService.NewSSEClient(clientId, userId, ctx)
 	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
+		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 
@@ -104,7 +105,7 @@ func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 	// POST 요청 본문에서 이벤트 데이터 파싱
 	var msg sse.Message
 	if err := ctx.ShouldBindJSON(&msg); err != nil {
-		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
+		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 	// 이벤트 브로드캐스트
@@ -122,14 +123,14 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	var msg sse.Message
 	err := ctx.ShouldBindJSON(&msg)
 	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
+		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 
 	// 사용자 세션 조회
 	session := ctl.SseService.GetSessionByUserId(userId)
 	if session == nil {
-		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
+		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 
