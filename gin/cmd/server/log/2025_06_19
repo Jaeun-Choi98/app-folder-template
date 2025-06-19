@@ -1,0 +1,146 @@
+2025/06/19 14:22:58 [Log Cleanup] Old log files deleted: log\2025_06_03 (Deleted date: 2025-06-16)
+2025/06/19 14:22:58 [Log Cleanup] Old log files deleted: log\2025_06_16 (Deleted date: 2025-06-16)
+2025/06/19 14:22:58 [Log Cleanup] Log cleanup completed: 2 files deleted in total
+2025/06/19 14:22:59 [TCP] Connected new client: [::1]:62079
+2025/06/19 14:22:59 EOF
+2025/06/19 14:22:59 [TCP] Disconnected client: [::1]:62079
+2025/06/19 14:23:00 [TCP] Connected new client: [::1]:62081
+2025/06/19 14:23:00 EOF
+2025/06/19 14:23:00 [TCP] Disconnected client: [::1]:62081
+2025/06/19 14:23:01 [TCP] Connected new client: [::1]:62082
+2025/06/19 14:23:01 EOF
+2025/06/19 14:23:01 [TCP] Disconnected client: [::1]:62082
+2025/06/19 14:23:02 [TCP] Connected new client: [::1]:62083
+2025/06/19 14:23:02 EOF
+2025/06/19 14:23:02 [TCP] Disconnected client: [::1]:62083
+2025/06/19 14:23:03 [TCP] Connected new client: [::1]:62084
+2025/06/19 14:23:03 EOF
+2025/06/19 14:23:03 [TCP] Disconnected client: [::1]:62084
+2025/06/19 14:23:04 [TCP] Connected new client: [::1]:62085
+2025/06/19 14:23:04 EOF
+2025/06/19 14:23:04 [TCP] Disconnected client: [::1]:62085
+2025/06/19 14:23:05 accept tcp [::]:5000: use of closed network connection
+2025/06/19 14:23:05 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:23:06 [TCP] Connected new client: [::1]:62088
+2025/06/19 14:23:06 EOF
+2025/06/19 14:23:06 [TCP] Disconnected client: [::1]:62088
+2025/06/19 14:23:07 [TCP] Connected new client: [::1]:62089
+2025/06/19 14:23:07 EOF
+2025/06/19 14:23:07 [TCP] Disconnected client: [::1]:62089
+2025/06/19 14:23:08 [TCP] Connected new client: [::1]:62090
+2025/06/19 14:23:08 EOF
+2025/06/19 14:23:08 [TCP] Disconnected client: [::1]:62090
+2025/06/19 14:23:09 [TCP] Connected new client: [::1]:62091
+2025/06/19 14:23:09 EOF
+2025/06/19 14:23:09 [TCP] Disconnected client: [::1]:62091
+2025/06/19 14:23:09 Shutting down...
+2025/06/19 14:23:09 [TCP] TCP goroutine terminated
+2025/06/19 14:23:09 [REST] REST goroutine terminated
+2025/06/19 14:23:09 [System Monitoring] System Monitoring goroutine terminated
+2025/06/19 14:23:09 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/19 14:23:13 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/19 14:23:14 [TCP] Connected new client: [::1]:62094
+2025/06/19 14:23:14 EOF
+2025/06/19 14:23:14 [TCP] Disconnected client: [::1]:62094
+2025/06/19 14:23:15 [TCP] Connected new client: [::1]:62096
+2025/06/19 14:23:15 EOF
+2025/06/19 14:23:15 [TCP] Disconnected client: [::1]:62096
+2025/06/19 14:23:16 [TCP] Connected new client: [::1]:62097
+2025/06/19 14:23:16 EOF
+2025/06/19 14:23:16 [TCP] Disconnected client: [::1]:62097
+2025/06/19 14:23:17 [TCP] Connected new client: [::1]:62098
+2025/06/19 14:23:17 EOF
+2025/06/19 14:23:17 [TCP] Disconnected client: [::1]:62098
+2025/06/19 14:23:18 [TCP] Connected new client: [::1]:62099
+2025/06/19 14:23:18 EOF
+2025/06/19 14:23:18 [TCP] Disconnected client: [::1]:62099
+2025/06/19 14:23:19 [TCP] Connected new client: [::1]:62100
+2025/06/19 14:23:19 EOF
+2025/06/19 14:23:19 [TCP] Disconnected client: [::1]:62100
+2025/06/19 14:23:20 accept tcp [::]:5000: use of closed network connection
+2025/06/19 14:23:20 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:23:21 [TCP] Connected new client: [::1]:62103
+2025/06/19 14:23:21 EOF
+2025/06/19 14:23:21 [TCP] Disconnected client: [::1]:62103
+2025/06/19 14:23:22 [TCP] Connected new client: [::1]:62104
+2025/06/19 14:23:22 EOF
+2025/06/19 14:23:22 [TCP] Disconnected client: [::1]:62104
+2025/06/19 14:23:23 [TCP] Connected new client: [::1]:62107
+2025/06/19 14:23:23 EOF
+2025/06/19 14:23:23 [TCP] Disconnected client: [::1]:62107
+2025/06/19 14:23:24 [TCP] Connected new client: [::1]:62108
+2025/06/19 14:23:24 EOF
+2025/06/19 14:23:24 [TCP] Disconnected client: [::1]:62108
+2025/06/19 14:23:25 [TCP] Connected new client: [::1]:62109
+2025/06/19 14:23:25 EOF
+2025/06/19 14:23:25 [TCP] Disconnected client: [::1]:62109
+2025/06/19 14:23:26 [TCP] Connected new client: [::1]:62110
+2025/06/19 14:23:26 EOF
+2025/06/19 14:23:26 [TCP] Disconnected client: [::1]:62110
+2025/06/19 14:23:27 accept tcp [::]:5000: use of closed network connection
+2025/06/19 14:23:27 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:23:28 [TCP] Connected new client: [::1]:62113
+2025/06/19 14:23:28 EOF
+2025/06/19 14:23:28 [TCP] Disconnected client: [::1]:62113
+2025/06/19 14:23:29 [TCP] Connected new client: [::1]:62114
+2025/06/19 14:23:29 EOF
+2025/06/19 14:23:29 [TCP] Disconnected client: [::1]:62114
+2025/06/19 14:23:30 [TCP] Connected new client: [::1]:62115
+2025/06/19 14:23:30 EOF
+2025/06/19 14:23:30 [TCP] Disconnected client: [::1]:62115
+2025/06/19 14:23:31 [TCP] Connected new client: [::1]:62116
+2025/06/19 14:23:31 EOF
+2025/06/19 14:23:31 [TCP] Disconnected client: [::1]:62116
+2025/06/19 14:23:32 Shutting down...
+2025/06/19 14:23:32 [TCP] TCP goroutine terminated
+2025/06/19 14:23:32 [REST] REST goroutine terminated
+2025/06/19 14:23:32 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:23:34 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:23:37 Error during shutdown: context deadline exceeded
+2025/06/19 14:23:37 [System Monitoring] System Monitoring goroutine terminated
+2025/06/19 14:23:37 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/19 14:25:26 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/19 14:25:27 [TCP] Connected new client: [::1]:62128
+2025/06/19 14:25:27 EOF
+2025/06/19 14:25:27 [TCP] Disconnected client: [::1]:62128
+2025/06/19 14:25:28 [TCP] Connected new client: [::1]:62130
+2025/06/19 14:25:28 EOF
+2025/06/19 14:25:28 [TCP] Disconnected client: [::1]:62130
+2025/06/19 14:25:29 [TCP] Connected new client: [::1]:62131
+2025/06/19 14:25:29 EOF
+2025/06/19 14:25:29 [TCP] Disconnected client: [::1]:62131
+2025/06/19 14:25:30 [TCP] Connected new client: [::1]:62132
+2025/06/19 14:25:30 EOF
+2025/06/19 14:25:30 [TCP] Disconnected client: [::1]:62132
+2025/06/19 14:25:31 [TCP] Connected new client: [::1]:62133
+2025/06/19 14:25:31 EOF
+2025/06/19 14:25:31 [TCP] Disconnected client: [::1]:62133
+2025/06/19 14:25:32 [TCP] Connected new client: [::1]:62134
+2025/06/19 14:25:32 EOF
+2025/06/19 14:25:32 [TCP] Disconnected client: [::1]:62134
+2025/06/19 14:25:33 accept tcp [::]:5000: use of closed network connection
+2025/06/19 14:25:33 [System Monitoring] Listening is closed, attempting to reconnect...
+2025/06/19 14:25:34 [TCP] Connected new client: [::1]:62139
+2025/06/19 14:25:34 EOF
+2025/06/19 14:25:34 [TCP] Disconnected client: [::1]:62139
+2025/06/19 14:25:35 [TCP] Connected new client: [::1]:62140
+2025/06/19 14:25:35 EOF
+2025/06/19 14:25:35 [TCP] Disconnected client: [::1]:62140
+2025/06/19 14:25:36 [TCP] Connected new client: [::1]:62141
+2025/06/19 14:25:36 EOF
+2025/06/19 14:25:36 [TCP] Disconnected client: [::1]:62141
+2025/06/19 14:25:37 [TCP] Connected new client: [::1]:62142
+2025/06/19 14:25:37 EOF
+2025/06/19 14:25:37 [TCP] Disconnected client: [::1]:62142
+2025/06/19 14:25:38 [TCP] Connected new client: [::1]:62143
+2025/06/19 14:25:38 EOF
+2025/06/19 14:25:38 [TCP] Disconnected client: [::1]:62143
+2025/06/19 14:25:39 [TCP] Connected new client: [::1]:62144
+2025/06/19 14:25:39 EOF
+2025/06/19 14:25:39 [TCP] Disconnected client: [::1]:62144
+2025/06/19 14:25:40 Shutting down...
+2025/06/19 14:25:40 [System Monitoring] System Monitoring goroutine terminated
+2025/06/19 14:25:40 [TCP] TCP goroutine terminated
+2025/06/19 14:25:40 [REST] REST goroutine terminated
+2025/06/19 14:25:45 Error during shutdown: context deadline exceeded
+2025/06/19 14:25:45 [Log Cleanup] Log cleanup goroutine terminated

@@ -42,9 +42,6 @@ func (a *Application) Start() {
 	// 30일이 지난 로그 파일 정리
 	logger.StartCleaning()
 
-	// 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
-	a.container.Dao.StartDBHeartbeat()
-
 	a.wg.Add(1)
 	startRestServer := func() error {
 		defer a.wg.Done()
@@ -65,11 +62,29 @@ func (a *Application) Start() {
 		return nil
 	}
 
+	a.wg.Add(1)
+	startSystemMonitoring := func() error {
+		defer a.wg.Done()
+		if err := a.container.SystemMonitoring.Start(); err != nil {
+			logger.Printf("Failed to start SystemMonitoring routine:\n\t%v", err)
+			return err
+		}
+		return nil
+	}
+
 	a.handleShutdown()
 
 	go startTCPServer()
 
-	a.tcpServer.StartTCPServerHeartbeat()
+	/**
+	 * If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
+	 */
+	// // 5초마다 TCP Listener 상태를 확인, 리스너가 닫혀있다면 다시 리스닝 시도
+	// a.tcpServer.StartTCPServerHeartbeat()
+	// // 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
+	// a.container.Dao.StartDBHeartbeat()
+
+	go startSystemMonitoring()
 
 	go startRestServer()
 
@@ -87,7 +102,11 @@ func (a *Application) handleShutdown() {
 	}()
 }
 
+// monitoring ( routine ) -> tcp ( routine ) -> rest ( routine ) -> log ( routine ) -> each object ( close )
 func (a *Application) Shutdown() {
+
+	// shutdown monitoring routine
+	a.container.SystemMonitoring.Shutdown()
 
 	// shutdown tcp routine and tcp heartbeat routine
 	a.tcpServer.Shutdown()
@@ -100,20 +119,25 @@ func (a *Application) Shutdown() {
 		logger.Printf("Error during shutdown: %v", err)
 	}
 
+	// db healthcheck 고루틴 종료
+	//a.container.Dao.StopDBHeartbeat()
+
+	// shutdown log routine
+	logger.Shutdown()
+
+	// close servcie object
 	err := a.container.ApiService.Close()
 	if err != nil {
 		logger.Printf("Failed to Close Service Instance:\n\t%v", err)
 	}
 	a.container.SseService.Close()
 
-	// db healthcheck 고루틴 종료
-	a.container.Dao.StopDBHeartbeat()
-	// 로그 정리 고루틴 종료
-	logger.StopCleaning()
 	// 로그 파일 닫음
 	logger.Close()
 	// 컨테이너 객체 nil로 초기화
 	a.container.Close()
+	// EventBus 채널 닫음
+	a.container.EventBus.Close()
 
 	a.wg.Wait()
 	logger.Println("Application terminated")

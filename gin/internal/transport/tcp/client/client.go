@@ -182,7 +182,7 @@ func (t *TCPClient) StartTCPClientHeartbeat() {
 		for {
 			select {
 			case <-heartbeat.C:
-				connected := t.IsConnected() && t.checkConnection()
+				connected := t.IsConnected() && t.CheckConnection()
 				if !connected {
 					log.Println("[TCP Client Heartbeat] Connection is closed, attempting to reconnect...")
 					if err := t.Connect(); err != nil {
@@ -198,7 +198,7 @@ func (t *TCPClient) StartTCPClientHeartbeat() {
 }
 
 // check the connection
-func (t *TCPClient) checkConnection() bool {
+func (t *TCPClient) CheckConnection() bool {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 

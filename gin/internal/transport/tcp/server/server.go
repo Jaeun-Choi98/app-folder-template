@@ -232,10 +232,10 @@ func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 func (t *TCPServer) handleMessage(msg string) {
 	switch msg {
 	case "EVENTA":
-		t.eventBus.Publish(eventbus.EVENTA, &eventbus.EventA{Type: eventbus.EVENTA, Payload: eventbus.PayloadA{Name: "cju", Age: 11}})
+		t.eventBus.Publish(eventbus.EVENTA, &eventbus.EventA{Type: "EVENTA", Payload: eventbus.PayloadA{Name: "cju", Age: 11}})
 		logger.Println("[TCP] AAAAAAAAAAAAA")
 	case "EVENTB":
-		t.eventBus.Publish(eventbus.EVENTB, &eventbus.EventB{Type: eventbus.EVENTB, Payload: eventbus.PayloadB{Args: []string{"sdf", "sdf"}, Cmd: "stres"}})
+		t.eventBus.Publish(eventbus.EVENTB, &eventbus.EventB{Type: "EVENTB", Payload: eventbus.PayloadB{Args: []string{"sdf", "sdf"}, Cmd: "stres"}})
 		logger.Println("[TCP] BBBBBBBBBBBBB")
 	default:
 		logger.Println("[TCP] Unknown Message Type")
@@ -292,6 +292,10 @@ func (t *TCPServer) Shutdown() {
 	logger.Println("[TCP] TCP goroutine terminated")
 }
 
+/**
+ * If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
+ */
+
 func (t *TCPServer) StartTCPServerHeartbeat() {
 	t.wg.Add(1)
 	go func() {
@@ -305,7 +309,7 @@ func (t *TCPServer) StartTCPServerHeartbeat() {
 		for {
 			select {
 			case <-heartbeat.C:
-				if !t.IsListening() || !t.checkConnection() {
+				if !t.IsListening() || !t.CheckConnection() {
 					logger.Println("[TCP Server Heartbeat] Connection is closed, attempting to reconnect...")
 					if err := t.Listening(); err != nil {
 						logger.Printf("[TCP Server Heartbeat] Failed to reconnect:\n\t%v", err)
@@ -319,7 +323,7 @@ func (t *TCPServer) StartTCPServerHeartbeat() {
 	}()
 }
 
-func (t *TCPServer) checkConnection() bool {
+func (t *TCPServer) CheckConnection() bool {
 	t.mu.RLock()
 	listener := t.listener
 	isListening := t.isListening

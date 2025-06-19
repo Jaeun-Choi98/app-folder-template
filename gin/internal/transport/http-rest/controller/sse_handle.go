@@ -7,7 +7,6 @@ import (
 	"pjt/internal/service/sse-service"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -31,7 +30,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
 	client, err := ctl.SseService.NewSSEClient(clientId, userId, ctx)
 	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
 		return
 	}
 
@@ -52,6 +51,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
 	eventChA := ctl.EventBus.Subscribe(eventbus.EVENTA)
 	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
+	eventSysSttCh := ctl.EventBus.Subscribe(eventbus.SysSttType)
 
 	// 클라이언트 요청이 종료되면 정리
 	// ctx.Request.Context()는 클라이언트가 연결을 끊으면 취소됩니다
@@ -65,9 +65,6 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	}()
 
 	// 클라이언트가 연결을 끊을 때까지 연결 유지
-	// 심박(heartbeat)을 30초마다 전송
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
 
 	for {
 		select {
@@ -85,13 +82,13 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		case <-client.Ctx.Done():
 			// 클라이언트 또는 서버에서 연결을 닫았음
 			return
-		case <-ticker.C:
+		case event := <-eventSysSttCh:
 			// 심박 전송 - 연결이 활성 상태인지 확인
-			heartbeat := sse.Message{
-				Type:    "heartbeat",
-				Payload: time.Now().Unix(),
+			sseMsg := sse.Message{
+				Type:    event.GetType(),
+				Payload: event.GetPayload(),
 			}
-			err := client.SendMessage(heartbeat)
+			err := client.SendMessage(sseMsg)
 			if err != nil {
 				// 오류 발생 시 연결 종료
 				session.RemoveClient(clientId)
@@ -107,7 +104,7 @@ func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 	// POST 요청 본문에서 이벤트 데이터 파싱
 	var msg sse.Message
 	if err := ctx.ShouldBindJSON(&msg); err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
 		return
 	}
 	// 이벤트 브로드캐스트
@@ -125,14 +122,14 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	var msg sse.Message
 	err := ctx.ShouldBindJSON(&msg)
 	if err != nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
 		return
 	}
 
 	// 사용자 세션 조회
 	session := ctl.SseService.GetSessionByUserId(userId)
 	if session == nil {
-		ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+		ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
 		return
 	}
 

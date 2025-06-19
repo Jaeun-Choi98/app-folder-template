@@ -57,3 +57,15 @@ func (b *EventBus) Publish(topic EventType, event Event) {
 		}
 	}
 }
+
+func (b *EventBus) Close() {
+	for topic, subs := range b.subscribers {
+		for _, ch := range subs {
+			for len(ch) > 0 {
+				<-ch
+			}
+			close(ch)
+		}
+		delete(b.subscribers, topic)
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"pjt/internal/transport/eventbus"
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
+	"pjt/internal/transport/monitoring"
 	tcp "pjt/internal/transport/tcp/server"
 	"time"
 
@@ -20,14 +21,15 @@ import (
 var container *Container
 
 type Container struct {
-	Config     *config.Configuration
-	Dao        dbhandler.DBHandlerInterface
-	ApiService service.APIServcieInterface
-	SseService service.SSEServiceInterface
-	Controller *controller.Controller
-	RESTServer *rest.RESTServer
-	TCPServer  *tcp.TCPServer
-	EventBus   *eventbus.EventBus
+	Config           *config.Configuration
+	Dao              dbhandler.DBHandlerInterface
+	ApiService       service.APIServcieInterface
+	SseService       service.SSEServiceInterface
+	Controller       *controller.Controller
+	RESTServer       *rest.RESTServer
+	TCPServer        *tcp.TCPServer
+	EventBus         *eventbus.EventBus
+	SystemMonitoring *monitoring.SystemMonitoring
 }
 
 func NewContainer() (*Container, error) {
@@ -69,15 +71,18 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
+	monitoring := monitoring.NewSystemMonitoring(dao, tcp, eventbus, 1*time.Second)
+
 	return &Container{
-		Config:     config,
-		Dao:        dao,
-		ApiService: apiService,
-		SseService: sseService,
-		Controller: controller,
-		RESTServer: rest,
-		TCPServer:  tcp,
-		EventBus:   eventbus,
+		Config:           config,
+		Dao:              dao,
+		ApiService:       apiService,
+		SseService:       sseService,
+		Controller:       controller,
+		RESTServer:       rest,
+		TCPServer:        tcp,
+		EventBus:         eventbus,
+		SystemMonitoring: monitoring,
 	}, nil
 }
 

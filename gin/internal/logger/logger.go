@@ -139,7 +139,7 @@ func cleanOldLogs() {
 	Printf("[Log Cleanup] Log cleanup completed: %d files deleted in total", deletedCount)
 }
 
-func StopCleaning() {
+func Shutdown() {
 	customLogger.cancel()
 	customLogger.ticker.Stop()
 	customLogger.wg.Wait()

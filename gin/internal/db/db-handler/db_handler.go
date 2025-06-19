@@ -14,8 +14,11 @@ type DBHandlerInterface interface {
 	Test() string
 	Close() error
 	Ping() error
+
+	// If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
 	StartDBHeartbeat()
 	StopDBHeartbeat()
+	Connect() error
 }
 
 func NewDBHandler(config *config.Configuration) (DBHandlerInterface, error) {

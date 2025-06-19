@@ -44,7 +44,7 @@ func (c *Controller) RoutePath() {
 		str := c.ApiService.Test()
 		jwt, err := jwt.NewJwtHS256(1, "name")
 		if err != nil {
-			ctx.Error(httperr.INNER_ERROR.AddErrMsg(err))
+			ctx.Error(httperr.INNER_ERROR.Add(err, httperr.FAIL))
 			return
 		}
 		http.SetCookie(ctx.Writer, &http.Cookie{

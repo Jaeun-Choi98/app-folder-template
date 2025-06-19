@@ -13,7 +13,7 @@ func TestLogger(t *testing.T) {
 	logger.SetLogger(customLogger)
 
 	logger.StartCleaning()
-	defer logger.StopCleaning()
+	defer logger.Shutdown()
 	time.Sleep(time.Second * 3)
 
 	assert.NoError(t, err)

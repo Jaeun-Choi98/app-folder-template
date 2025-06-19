@@ -71,7 +71,9 @@ func (o *Oracle) Close() error {
 /**
  * 일정 시간마다 DB 커넥션을 확인하고, 연결 끊김 시에 재연결을 위한 고루틴 함수
  * Log prefix: [Heartbeat]
+ *  If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
  */
+
 func (o *Oracle) StartDBHeartbeat() {
 	o.wg.Add(1)
 	go func() {
