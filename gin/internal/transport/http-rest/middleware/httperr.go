@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"net/http"
 	"pjt/internal/logger"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 
@@ -13,7 +12,10 @@ func ErrorMiddleware() gin.HandlerFunc {
 		ctx.Next()
 		for _, ctxErr := range ctx.Errors {
 			if err, ok := ctxErr.Err.(*httperr.HttpError); ok {
-				if err.Code == http.StatusInternalServerError {
+				// if err.Code == http.StatusInternalServerError {
+				// 	logger.Println(err.ErrMsg)
+				// }
+				if err.ErrMsg != "" {
 					logger.Println(err.ErrMsg)
 				}
 				ctx.JSON(err.Code, err)
