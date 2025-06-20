@@ -6,9 +6,9 @@ import (
 )
 
 type HttpError struct {
-	Code        int
-	ErrResponse *response.BaseResponse
-	ErrMsg      string
+	Code         int
+	BaseResponse *response.BaseResponse
+	ErrMsg       string
 }
 
 const (
@@ -35,11 +35,10 @@ func (h *HttpError) Error() string {
 }
 
 func (h *HttpError) Add(err error, res *response.BaseResponse) *HttpError {
+	n := NewHttpError(h.Code)
 	if err != nil {
-		h.ErrMsg = err.Error()
+		n.ErrMsg = err.Error()
 	}
-	if res != nil {
-		h.ErrResponse = res
-	}
-	return h
+	n.BaseResponse = res
+	return n
 }
