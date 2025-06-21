@@ -61,7 +61,7 @@ func NewContainer() (*Container, error) {
 
 	eventbus := eventbus.NewEventBus()
 
-	apiService := apiservice.NewAPIService(dao, ram, config)
+	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
 	sseService := sseservice.NewSSEService()
 	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)

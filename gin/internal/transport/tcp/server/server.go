@@ -75,6 +75,9 @@ type TCPServer struct {
 
 	isListening bool
 	heartbeat   time.Duration
+
+	timeOutCnt    int
+	maxTimeOutCnt int
 }
 
 func NewTCPServer(eventBus *eventbus.EventBus, heartbeat time.Duration) (*TCPServer, error) {
@@ -82,12 +85,13 @@ func NewTCPServer(eventBus *eventbus.EventBus, heartbeat time.Duration) (*TCPSer
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &TCPServer{
-		clients:    make(map[string]*TCPClient),
-		msgChannel: make(chan string, 10),
-		eventBus:   eventBus,
-		ctx:        ctx,
-		cancel:     cancel,
-		heartbeat:  heartbeat,
+		clients:       make(map[string]*TCPClient),
+		msgChannel:    make(chan string, 10),
+		eventBus:      eventBus,
+		ctx:           ctx,
+		cancel:        cancel,
+		heartbeat:     heartbeat,
+		maxTimeOutCnt: 3,
 	}, nil
 }
 
@@ -101,19 +105,22 @@ func (t *TCPServer) SetListeningState(state bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.isListening = state
+	t.listener = nil
 }
 
 func (t *TCPServer) Listening() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	listener, err := net.Listen("tcp", ":5000")
-	if err != nil {
-		logger.Println(err)
-		return err
+	if t.listener == nil {
+		listener, err := net.Listen("tcp", ":5000")
+		if err != nil {
+			logger.Println(err)
+			return err
+		}
+		t.listener = listener
 	}
 
-	t.listener = listener
 	t.isListening = true
 
 	return nil
@@ -300,16 +307,25 @@ func (t *TCPServer) StartTCPServerHeartbeat() {
 	t.wg.Add(1)
 	go func() {
 		heartbeat := time.NewTicker(t.heartbeat)
+		healthCheck := time.NewTicker(t.heartbeat * 3)
 
 		defer func() {
 			heartbeat.Stop()
+			healthCheck.Stop()
 			t.wg.Done()
 		}()
 
 		for {
 			select {
 			case <-heartbeat.C:
-				if !t.IsListening() || !t.CheckConnection() {
+				if !t.IsListening() {
+					logger.Println("[TCP Server Heartbeat] Connection is closed, attempting to reconnect...")
+					if err := t.Listening(); err != nil {
+						logger.Printf("[TCP Server Heartbeat] Failed to reconnect:\n\t%v", err)
+					}
+				}
+			case <-healthCheck.C:
+				if t.IsListening() && !t.CheckConnection() {
 					logger.Println("[TCP Server Heartbeat] Connection is closed, attempting to reconnect...")
 					if err := t.Listening(); err != nil {
 						logger.Printf("[TCP Server Heartbeat] Failed to reconnect:\n\t%v", err)
@@ -333,10 +349,21 @@ func (t *TCPServer) CheckConnection() bool {
 		return false
 	}
 
-	testConn, err := net.DialTimeout("tcp", "localhost:5000", 100*time.Millisecond)
+	testConn, err := net.DialTimeout("tcp", "localhost:5000", 300*time.Millisecond)
 	if err != nil {
-		t.SetListeningState(false)
-		return false
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			if t.timeOutCnt >= t.maxTimeOutCnt {
+				t.timeOutCnt = 0
+				listener.Close()
+				t.SetListeningState(false)
+				return false
+			}
+			t.timeOutCnt++
+			return false
+		} else {
+			t.SetListeningState(false)
+			return false
+		}
 	}
 	testConn.Close()
 

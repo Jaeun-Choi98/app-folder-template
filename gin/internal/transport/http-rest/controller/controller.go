@@ -36,8 +36,8 @@ func NewController(router *gin.Engine, apiService service.APIServcieInterface, s
 }
 
 func (c *Controller) RoutePath() {
-	c.Router.Use(middleware.ErrorMiddleware())
 	c.Router.Use(middleware.LogMiddleware())
+	c.Router.Use(middleware.ErrorMiddleware())
 	c.Router.Use(middleware.NewCORSMiddleware([]string{"*"}))
 
 	// 쿠키를 사용해서 jwt 토큰을 전달
