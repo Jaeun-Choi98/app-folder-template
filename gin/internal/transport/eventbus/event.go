@@ -5,60 +5,65 @@ type EventType int
 const (
 	Invalid EventType = iota
 	SysSttType
-	EVENTA
-	EVENTB
+	EventAType
+	EventBType
 )
 
-type Event interface {
-	GetPayload() any
-	GetType() string
-}
+var (
+	SysStt = NewEvent("sysstt")
+	EventA = NewEvent("eventA")
+	EventB = NewEvent("eventB")
+)
 
-type SysStt struct {
+type Event struct {
 	Type    string
 	Payload any
 }
 
-func (s *SysStt) GetPayload() any {
-	return s.Payload
+func NewEvent(t string) *Event {
+	return &Event{
+		Type: t,
+	}
 }
 
-func (s *SysStt) GetType() string {
-	return s.Type
+func (e *Event) Add(payload any) *Event {
+	n := NewEvent(e.Type)
+	n.Payload = payload
+	return n
 }
 
-type EventA struct {
-	Type    string
-	Payload PayloadA
+// SysStt
+type SysSttPayload struct {
+	ServerTime  string `json:"svrTime"`
+	DBState     int8   `json:"dbComm"`
+	TCPListener int8   `json:"tcpListener"`
 }
 
-type PayloadA struct {
-	Name string
-	Age  int
+// Base
+type BasePayload struct {
+	Type string `json:"type"`
+	Data any    `json:"data"`
 }
 
-func (a *EventA) GetPayload() any {
-	return a.Payload
+func NewAddPayload() *BasePayload {
+	return &BasePayload{
+		Type: "add",
+	}
 }
 
-func (a *EventA) GetType() string {
-	return a.Type
+func NewDeletePayload() *BasePayload {
+	return &BasePayload{
+		Type: "delete",
+	}
 }
 
-type EventB struct {
-	Type    string
-	Payload PayloadB
+func NewEditPayload() *BasePayload {
+	return &BasePayload{
+		Type: "edit",
+	}
 }
 
-type PayloadB struct {
-	Args []string
-	Cmd  string
-}
-
-func (b *EventB) GetPayload() any {
-	return b.Payload
-}
-
-func (b *EventB) GetType() string {
-	return b.Type
+func (s *BasePayload) SetData(data any) *BasePayload {
+	s.Data = data
+	return s
 }

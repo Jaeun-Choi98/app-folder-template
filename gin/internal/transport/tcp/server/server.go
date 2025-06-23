@@ -239,10 +239,10 @@ func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 func (t *TCPServer) handleMessage(msg string) {
 	switch msg {
 	case "EVENTA":
-		t.eventBus.Publish(eventbus.EVENTA, &eventbus.EventA{Type: "EVENTA", Payload: eventbus.PayloadA{Name: "cju", Age: 11}})
+		t.eventBus.Publish(eventbus.EventAType, eventbus.EventA.Add(map[string]any{"str": "ab1d", "int": 1, "arr": []int{1, 2, 3}}))
 		logger.Println("[TCP] AAAAAAAAAAAAA")
 	case "EVENTB":
-		t.eventBus.Publish(eventbus.EVENTB, &eventbus.EventB{Type: "EVENTB", Payload: eventbus.PayloadB{Args: []string{"sdf", "sdf"}, Cmd: "stres"}})
+		t.eventBus.Publish(eventbus.EventBType, eventbus.EventB.Add(eventbus.NewAddPayload().SetData(10)))
 		logger.Println("[TCP] BBBBBBBBBBBBB")
 	default:
 		logger.Println("[TCP] Unknown Message Type")

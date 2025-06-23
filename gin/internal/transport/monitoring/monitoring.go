@@ -118,10 +118,12 @@ func (s *SystemMonitoring) Start() error {
 		}
 
 		// 이벤트 버스에 데이터 publish
-		s.EventBus.Publish(eventbus.SysSttType,
-			&eventbus.SysStt{Type: "sysstt",
-				Payload: map[string]any{"svrTime": time.Now().Format(time.DateTime),
-					"dbComm": dbComm, "tcpListenr": tcpListener}})
+		s.EventBus.Publish(eventbus.SysSttType, eventbus.SysStt.Add(eventbus.SysSttPayload{
+			ServerTime:  time.Now().Format(time.DateTime),
+			DBState:     dbComm,
+			TCPListener: tcpListener,
+		}))
+
 	}
 }
 

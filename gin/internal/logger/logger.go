@@ -13,7 +13,7 @@ import (
 
 // global variable (package-level variable x)
 var customLogger *CustomLogger
-var maxAgeDays = -1
+var maxAgeDays = 0
 
 type CustomLogger struct {
 	wg      *sync.WaitGroup

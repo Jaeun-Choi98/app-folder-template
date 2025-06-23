@@ -50,7 +50,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	}
 	client.SendMessage(connectMsg)
 
-	eventChA := ctl.EventBus.Subscribe(eventbus.EVENTA)
+	eventChA := ctl.EventBus.Subscribe(eventbus.EventAType)
 	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
 	eventSysSttCh := ctl.EventBus.Subscribe(eventbus.SysSttType)
 
@@ -59,40 +59,37 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	go func() {
 		<-client.Ctx.Done()
 		session.RemoveClient(clientId)
-		ctl.EventBus.Unsubscribe(eventbus.EVENTA, eventChA)
+		ctl.EventBus.Unsubscribe(eventbus.EventAType, eventChA)
 		if session.Count() == 0 {
 			ctl.SseService.RemoveSession(userId)
 		}
 	}()
 
-	// 클라이언트가 연결을 끊을 때까지 연결 유지
+	sendMessage := func(event *eventbus.Event) error {
+		msg := sse.Message{
+			Type:    event.Type,
+			Payload: event.Payload,
+		}
+		if err := client.SendMessage(msg); err != nil {
+			// 오류 발생 시 연결 종료
+			session.RemoveClient(clientId)
+			return err
+		}
+		return nil
+	}
 
+	// 클라이언트가 연결을 끊을 때까지 연결 유지
 	for {
 		select {
-		case event := <-eventChA:
-			msg := sse.Message{
-				Type:    "EVENT",
-				Payload: event,
-			}
-			err := client.SendMessage(msg)
-			if err != nil {
-				// 오류 발생 시 연결 종료
-				session.RemoveClient(clientId)
-				return
-			}
 		case <-client.Ctx.Done():
 			// 클라이언트 또는 서버에서 연결을 닫았음
 			return
-		case event := <-eventSysSttCh:
-			// 심박 전송 - 연결이 활성 상태인지 확인
-			sseMsg := sse.Message{
-				Type:    event.GetType(),
-				Payload: event.GetPayload(),
+		case event := <-eventChA:
+			if err := sendMessage(event); err != nil {
+				return
 			}
-			err := client.SendMessage(sseMsg)
-			if err != nil {
-				// 오류 발생 시 연결 종료
-				session.RemoveClient(clientId)
+		case event := <-eventSysSttCh:
+			if err := sendMessage(event); err != nil {
 				return
 			}
 		}
