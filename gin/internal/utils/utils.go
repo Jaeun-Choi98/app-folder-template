@@ -163,3 +163,64 @@ func setFieldValue(field reflect.Value, newValue interface{}, fieldIndex int, fi
 	field.Set(newVal)
 	return nil
 }
+
+/**
+ * 맵을 사용해서 구조체 필드를 선택적으로 수정
+ * @param s interface{} - 수정할 구조체 (포인터)
+ * @param fieldValues map[string]interface{} - 필드명:값 맵
+ */
+func ModifyStruct(s interface{}, fieldValues map[string]interface{}) error {
+	v := reflect.ValueOf(s)
+
+	// 포인터가 아니면 수정 불가
+	if v.Kind() != reflect.Ptr {
+		return fmt.Errorf("not a pointer")
+	}
+
+	// 실제 값 가져오기
+	v = v.Elem()
+
+	// 각 필드별로 값 설정
+	for fieldName, newValue := range fieldValues {
+		field := v.FieldByName(fieldName)
+
+		// 필드가 존재하지 않으면 에러
+		if !field.IsValid() {
+			return fmt.Errorf("field '%s' not found", fieldName)
+		}
+
+		// 수정 가능한지 확인
+		if !field.CanSet() {
+			return fmt.Errorf("field '%s' cannot be set", fieldName)
+		}
+
+		// 값 설정
+		if err := setFieldValue2(field, newValue, fieldName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func setFieldValue2(field reflect.Value, newValue interface{}, fieldName string) error {
+	if newValue == nil {
+		return fmt.Errorf("field '%s' cannot set nil value", fieldName)
+	}
+
+	newVal := reflect.ValueOf(newValue)
+	fieldType := field.Type()
+
+	// 타입이 다르면 변환 시도
+	if newVal.Type() != fieldType {
+		if newVal.Type().ConvertibleTo(fieldType) {
+			newVal = newVal.Convert(fieldType)
+		} else {
+			return fmt.Errorf("field '%s' type mismatch: expected %s, got %s",
+				fieldName, fieldType, newVal.Type())
+		}
+	}
+
+	field.Set(newVal)
+	return nil
+}
