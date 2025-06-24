@@ -9,6 +9,7 @@ import (
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
 	"pjt/internal/transport/http-rest/response"
+	"pjt/internal/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +53,7 @@ func (c *Controller) RoutePath() {
 			Name:    "jwt",
 			Value:   jwt,
 			MaxAge:  60 * 60,
-			Expires: time.Now().Add(time.Minute * 60),
+			Expires: time.Now().Add(time.Minute * 60).In(utils.LocalKorea),
 			Path:    "/",
 		})
 		ctx.String(http.StatusOK, "%s", str)
@@ -68,7 +69,7 @@ func (c *Controller) RoutePath() {
 			Name:    "jwt",
 			Value:   "",
 			MaxAge:  60 * 60,
-			Expires: time.Now().Add(time.Minute * 60),
+			Expires: time.Now().Add(time.Minute * 60).In(utils.LocalKorea),
 			Path:    "/",
 		})
 		ctx.String(http.StatusOK, "%s", "remove-test ok")

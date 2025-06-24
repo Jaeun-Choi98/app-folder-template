@@ -3,9 +3,22 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"golang.org/x/exp/constraints"
 )
+
+var (
+	LocalKorea = NewKoreaLocation()
+)
+
+func NewKoreaLocation() *time.Location {
+	local, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		return nil
+	}
+	return local
+}
 
 type Number interface {
 	constraints.Integer

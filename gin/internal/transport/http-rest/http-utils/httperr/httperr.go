@@ -12,6 +12,7 @@ type HttpError struct {
 }
 
 const (
+	NOT_FOUND_CODE    = http.StatusNotFound
 	UNAUTHORIZED_CODE = http.StatusNotAcceptable
 	BADREQUEST_CODE   = http.StatusBadRequest
 	INNER_ERROR_CODE  = http.StatusInternalServerError
@@ -19,6 +20,7 @@ const (
 
 var (
 	// http status
+	NOT_FOUND    = NewHttpError(NOT_FOUND_CODE)
 	UNAUTHORIZED = NewHttpError(UNAUTHORIZED_CODE)
 	BADREQUEST   = NewHttpError(BADREQUEST_CODE)
 	INNER_ERROR  = NewHttpError(INNER_ERROR_CODE)
