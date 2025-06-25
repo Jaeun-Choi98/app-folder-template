@@ -59,9 +59,11 @@ func (m *Maria) Ping() error {
 }
 
 func (m *Maria) Close() error {
+	m.cancel()
 	if m.db != nil {
 		return m.db.Close()
 	}
+	m.wg.Wait()
 	return nil
 }
 
@@ -95,12 +97,4 @@ func (m *Maria) StartDBHeartbeat() {
 			}
 		}
 	}()
-}
-
-func (m *Maria) StopDBHeartbeat() {
-	m.cancel()
-	m.wg.Wait()
-	if m.db != nil {
-		m.db.Close()
-	}
 }

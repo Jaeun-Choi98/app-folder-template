@@ -17,7 +17,6 @@ type DBHandlerInterface interface {
 
 	// If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
 	StartDBHeartbeat()
-	StopDBHeartbeat()
 	Connect() error
 }
 

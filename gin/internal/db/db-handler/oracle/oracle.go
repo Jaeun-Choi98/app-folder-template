@@ -62,9 +62,11 @@ func (o *Oracle) Ping() error {
 }
 
 func (o *Oracle) Close() error {
+	o.cancel()
 	if o.db != nil {
 		return o.db.Close()
 	}
+	o.wg.Wait()
 	return nil
 }
 
@@ -99,12 +101,4 @@ func (o *Oracle) StartDBHeartbeat() {
 			}
 		}
 	}()
-}
-
-func (o *Oracle) StopDBHeartbeat() {
-	o.cancel()
-	o.wg.Wait()
-	if o.db != nil {
-		o.db.Close()
-	}
 }

@@ -85,9 +85,3 @@ func NewContainer() (*Container, error) {
 		SystemMonitoring: monitoring,
 	}, nil
 }
-
-// 컨테이너 객체(싱글톤 객체)를 nil로 초기화.
-// nil이 아닐 경우 NewContainer()를 호출할 시 이전의 컨테이너 객체를 반환.
-func (c *Container) Close() {
-	container = nil
-}

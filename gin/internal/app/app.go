@@ -119,23 +119,19 @@ func (a *Application) Shutdown() {
 		logger.Printf("Error during shutdown: %v", err)
 	}
 
-	// db healthcheck 고루틴 종료
-	//a.container.Dao.StopDBHeartbeat()
-
 	// shutdown log routine
 	logger.Shutdown()
 
-	// close servcie object
+	// close servcie object, close: api -> close: dao -> db ctx cancel -> shutdown: DBHeartbeat
 	err := a.container.ApiService.Close()
 	if err != nil {
-		logger.Printf("Failed to Close Service Instance:\n\t%v", err)
+		logger.Printf("Failed to close APIService instance:\n\t%v", err)
 	}
 	a.container.SseService.Close()
 
 	// 로그 파일 닫음
 	logger.Close()
-	// 컨테이너 객체 nil로 초기화
-	a.container.Close()
+
 	// EventBus 채널 닫음
 	a.container.EventBus.Close()
 
