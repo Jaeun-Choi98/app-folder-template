@@ -96,7 +96,7 @@ func DeepCopyValue(src, dst reflect.Value) {
 * @param endIdx int - 종료 필드 인덱스 (-1이면 마지막까지)
 * @param params ...interface{} - 순차적으로 적용할 값들
 **/
-func ModifyStructFields(s interface{}, startIdx int, endIdx int, params ...interface{}) error {
+func ModifyStructByIndex(s interface{}, startIdx int, endIdx int, params ...interface{}) error {
 	v := reflect.ValueOf(s)
 
 	// 포인터가 아니면 수정 불가
@@ -139,28 +139,11 @@ func ModifyStructFields(s interface{}, startIdx int, endIdx int, params ...inter
 		newValue := params[paramIdx]
 
 		// 타입이 정확히 일치하는지 확인 후 설정
-		if err := setFieldValue(field, newValue, i, fieldType.Name); err != nil {
+		if err := setFieldValue(field, newValue, fieldType.Name); err != nil {
 			return err
 		}
 		paramIdx++
 	}
-	return nil
-}
-
-func setFieldValue(field reflect.Value, newValue interface{}, fieldIndex int, fieldName string) error {
-	if newValue == nil {
-		return fmt.Errorf("utils err: modifying struct fields line 72: field[%d] %s cannot set nil value", fieldIndex, fieldName)
-	}
-
-	newVal := reflect.ValueOf(newValue)
-	fieldType := field.Type()
-
-	if newVal.Type() != fieldType {
-		return fmt.Errorf("utils err: modifying struct fields line 80: field[%d] %s type mismatch: expected %s, got %s",
-			fieldIndex, fieldName, fieldType, newVal.Type())
-	}
-
-	field.Set(newVal)
 	return nil
 }
 
@@ -169,7 +152,7 @@ func setFieldValue(field reflect.Value, newValue interface{}, fieldIndex int, fi
  * @param s interface{} - 수정할 구조체 (포인터)
  * @param fieldValues map[string]interface{} - 필드명:값 맵
  */
-func ModifyStruct(s interface{}, fieldValues map[string]interface{}) error {
+func ModifyStructByMap(s interface{}, fieldValues map[string]interface{}) error {
 	v := reflect.ValueOf(s)
 
 	// 포인터가 아니면 수정 불가
@@ -195,7 +178,7 @@ func ModifyStruct(s interface{}, fieldValues map[string]interface{}) error {
 		}
 
 		// 값 설정
-		if err := setFieldValue2(field, newValue, fieldName); err != nil {
+		if err := setFieldValue(field, newValue, fieldName); err != nil {
 			return err
 		}
 	}
@@ -203,7 +186,7 @@ func ModifyStruct(s interface{}, fieldValues map[string]interface{}) error {
 	return nil
 }
 
-func setFieldValue2(field reflect.Value, newValue interface{}, fieldName string) error {
+func setFieldValue(field reflect.Value, newValue interface{}, fieldName string) error {
 	if newValue == nil {
 		return fmt.Errorf("field '%s' cannot set nil value", fieldName)
 	}

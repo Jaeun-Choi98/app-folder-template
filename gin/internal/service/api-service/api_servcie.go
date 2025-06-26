@@ -1,12 +1,41 @@
 package service
 
 import (
+	"errors"
 	"pjt/internal/config"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
 	"pjt/internal/service"
 	"pjt/internal/transport/eventbus"
 	"sync"
+)
+
+/**
+ * in service layer, varifing reference integrity and unique key.
+ * also, doing default value injection about patch api.
+ * e.g.
+ * delete -> if parent table, verify referenced key
+ * update, insert -> if child table, verify reference key, and verify unique key ( logical or physical )
+ *
+ *
+ * service layer is role of view about db or ram.cache(im memory db)
+ * it means processing pk and logical delete(column:DelYN) in db or ram.cache
+ *
+ * also, doing processing nil value about patch api. ( default value: using ram.cache or db )
+ */
+
+var (
+	errExistsNum  = errors.New("num already exists")
+	errExistsID   = errors.New("ID already exists")
+	errExistsName = errors.New("name already exists")
+
+	// 아래 에러는 식별자가 아닌 값으로 검사를 진행할 때 사용
+	errNotExistsName = errors.New("not exists name")
+
+	errRefIntegrity = errors.New("referential integrity is not satisfied")
+
+	errInvalidID = errors.New("invalid ID")
+	errInvalidPW = errors.New("invalid PW")
 )
 
 type APIService struct {

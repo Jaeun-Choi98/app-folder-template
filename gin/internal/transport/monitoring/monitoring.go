@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"context"
-	"log"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/logger"
 	"pjt/internal/transport/eventbus"
@@ -46,22 +45,23 @@ func (s *SystemMonitoring) Start() error {
 	var dbComm, tcpListener int8
 
 	recoverProcessTCP := func() {
-		logger.Println("[System Monitoring] Listening is closed, attempting to reconnect...")
+		logger.Println("[System Monitoring] Listening is closed, attempting to listen...")
 		go func() {
 			if s.isRecoveringTCP {
-				log.Println("sdfsdfsdsfsdfsdfsdf")
 				return
 			}
 			s.isRecoveringTCP = true
 			if err := s.Tcp.Listening(); err != nil {
 				logger.Printf("[System Monitoring] Failed to listen:\n\t%v", err)
+			} else {
+				logger.Println("[System Monitoring] TCP listening successful")
 			}
 			s.isRecoveringTCP = false
 		}()
 	}
 
 	recoverProcessDB := func() {
-		logger.Println("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
+		logger.Println("[System Monitoring] DB Connection is closed, attempting to reconnect...")
 
 		go func() {
 			if s.isRecoveringDB {
@@ -69,7 +69,7 @@ func (s *SystemMonitoring) Start() error {
 			}
 			s.isRecoveringDB = true
 			if err := s.Dao.Connect(); err == nil {
-				logger.Println("[DB Heartbeat] DB reconnection successful")
+				logger.Println("[System Monitoring] DB reconnection successful")
 			}
 			s.isRecoveringDB = false
 		}()
