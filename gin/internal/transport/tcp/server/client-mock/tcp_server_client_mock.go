@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"bufio"
@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"testing"
 	"time"
 )
 
@@ -81,7 +80,7 @@ func (t *TCPClient) Shutdown() error {
 	return t.conn.Close()
 }
 
-func TestTCPServer(t *testing.T) {
+func main() {
 	tcpClient, err := NewTCPClient()
 	if err != nil {
 		log.Println(err)
