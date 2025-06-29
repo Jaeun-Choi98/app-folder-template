@@ -27,7 +27,7 @@ func main() {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			container.TCPServer.HeartbeatTest()
+			//container.TCPServer.HeartbeatTest()
 		}
 	}
 

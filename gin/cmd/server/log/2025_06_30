@@ -1,0 +1,451 @@
+2025/06/30 00:02:15 [Log Cleanup] Old log files deleted: log\2025_06_29 (Deleted date: 2025-06-29)
+2025/06/30 00:02:15 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:02:15 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:02:15 [Log Cleanup] Log cleanup completed: 1 files deleted in total
+2025/06/30 00:02:16 [TCP] Connected new client: [::1]:50137
+2025/06/30 00:02:16 [TCP] Disconnected client: [::1]:50137
+2025/06/30 00:02:37 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:02:37 [System Monitoring] DB reconnection successful
+2025/06/30 00:02:37 [TCP] Connected new client: [::1]:50334
+2025/06/30 00:02:37 [TCP] Disconnected client: [::1]:50334
+2025/06/30 00:02:42 [Mon, 30 Jun 2025 00:02:42 KST] ::1 "GET /events HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+2025/06/30 00:02:42 [Mon, 30 Jun 2025 00:02:42 KST] ::1 "GET /favicon.ico HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+2025/06/30 00:02:59 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:02:59 [System Monitoring] DB reconnection successful
+2025/06/30 00:02:59 [TCP] Connected new client: [::1]:50604
+2025/06/30 00:02:59 [TCP] Disconnected client: [::1]:50604
+2025/06/30 00:03:20 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:03:20 [System Monitoring] DB reconnection successful
+2025/06/30 00:03:20 [TCP] Connected new client: [::1]:50662
+2025/06/30 00:03:20 [TCP] Disconnected client: [::1]:50662
+2025/06/30 00:03:41 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:03:41 [System Monitoring] DB reconnection successful
+2025/06/30 00:03:41 [TCP] Connected new client: [::1]:50797
+2025/06/30 00:03:41 [TCP] Disconnected client: [::1]:50797
+2025/06/30 00:03:52 Closed client[userId: 138836e0-adb0-4792-8176-159ab5a95d67, clientId: 138836e0-adb0-4792-8176-159ab5a95d67]
+2025/06/30 00:03:52 Closed session[userId:138836e0-adb0-4792-8176-159ab5a95d67, sessionId:sess_138836e0-adb0-4792-8176-159ab5a95d67_1751209404960235200]
+2025/06/30 00:03:52 [Mon, 30 Jun 2025 00:03:52 KST] ::1 "GET /sse/connect HTTP/1.1" 200 27.331sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+2025/06/30 00:03:53 Shutting down...
+2025/06/30 00:04:02 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:04:02 [System Monitoring] System Monitoring goroutine terminated
+2025/06/30 00:04:02 [System Monitoring] DB reconnection successful
+2025/06/30 00:04:02 [REST] REST goroutine terminated
+2025/06/30 00:04:02 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:04:02 [TCP] TCP goroutine terminated
+2025/06/30 00:04:38 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:04:38 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:04:38 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:04:47 Shutting down...
+2025/06/30 00:04:47 [REST] REST goroutine terminated
+2025/06/30 00:04:47 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:04:47 [TCP] TCP goroutine terminated
+2025/06/30 00:06:34 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:06:34 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:06:34 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:06:39 Shutting down...
+2025/06/30 00:06:39 [REST] REST goroutine terminated
+2025/06/30 00:06:39 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:06:39 [TCP] TCP goroutine terminated
+2025/06/30 00:07:10 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:07:10 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:07:10 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:07:16 Shutting down...
+2025/06/30 00:07:16 [REST] REST goroutine terminated
+2025/06/30 00:07:16 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:07:16 [TCP] TCP goroutine terminated
+2025/06/30 00:07:46 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:07:46 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:07:46 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:07:52 Shutting down...
+2025/06/30 00:07:52 [REST] REST goroutine terminated
+2025/06/30 00:07:52 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:07:52 [TCP] TCP goroutine terminated
+2025/06/30 00:08:47 sd
+2025/06/30 00:09:13 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:09:13 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:09:13 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:09:19 Shutting down...
+2025/06/30 00:09:19 [REST] REST goroutine terminated
+2025/06/30 00:09:19 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:09:19 [TCP] TCP goroutine terminated
+2025/06/30 00:09:28 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:09:28 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:09:28 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:09:30 Shutting down...
+2025/06/30 00:09:30 [REST] REST goroutine terminated
+2025/06/30 00:09:30 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:09:30 [TCP] TCP goroutine terminated
+2025/06/30 00:09:43 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:09:43 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:09:43 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:09:50 Shutting down...
+2025/06/30 00:09:50 [REST] REST goroutine terminated
+2025/06/30 00:09:50 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:09:50 [TCP] TCP goroutine terminated
+2025/06/30 00:16:58 user="smart_shelter" standalone params={authMode:0 connectionClass:<nil> connectionClassLength:0 purity:0 newPassword:<nil> newPasswordLength:0 appContext:<nil> numAppContext:0 externalAuth:0 externalHandle:<nil> pool:<nil> tag:<nil> tagLength:0 matchAnyTag:0 outTag:<nil> outTagLength:0 outTagFound:0 shardingKeyColumns:<nil> numShardingKeyColumns:0 superShardingKeyColumns:<nil> numSuperShardingKeyColumns:0 outNewSession:0}: ORA-12541: Cannot connect. No listener at host 192.168.197.129 port 15210.
+Help: https://docs.oracle.com/error-help/db/ora-12541/
+2025/06/30 00:16:58 user="smart_shelter" standalone params={authMode:0 connectionClass:<nil> connectionClassLength:0 purity:0 newPassword:<nil> newPasswordLength:0 appContext:<nil> numAppContext:0 externalAuth:0 externalHandle:<nil> pool:<nil> tag:<nil> tagLength:0 matchAnyTag:0 outTag:<nil> outTagLength:0 outTagFound:0 shardingKeyColumns:<nil> numShardingKeyColumns:0 superShardingKeyColumns:<nil> numSuperShardingKeyColumns:0 outNewSession:0}: ORA-12541: Cannot connect. No listener at host 192.168.197.129 port 15210.
+Help: https://docs.oracle.com/error-help/db/ora-12541/
+2025/06/30 00:17:58 dial tcp 192.168.197.129:33060: i/o timeout
+2025/06/30 00:17:58 dial tcp 192.168.197.129:33060: i/o timeout
+2025/06/30 00:18:11 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:18:11 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:18:11 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:18:21 Shutting down...
+2025/06/30 00:18:21 [REST] REST goroutine terminated
+2025/06/30 00:18:21 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:18:21 [TCP] TCP goroutine terminated
+2025/06/30 00:18:37 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:18:37 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:18:37 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:18:38 [TCP] Connected new client: [::1]:51411
+2025/06/30 00:18:38 [TCP] Disconnected client: [::1]:51411
+2025/06/30 00:18:48 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:18:48 [System Monitoring] DB reconnection successful
+2025/06/30 00:18:48 [TCP] Connected new client: [::1]:51419
+2025/06/30 00:18:48 [TCP] Disconnected client: [::1]:51419
+2025/06/30 00:18:58 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:18:58 [System Monitoring] DB reconnection successful
+2025/06/30 00:18:58 [TCP] Connected new client: [::1]:51424
+2025/06/30 00:18:58 [TCP] Disconnected client: [::1]:51424
+2025/06/30 00:19:05 Shutting down...
+2025/06/30 00:19:08 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:19:08 [System Monitoring] System Monitoring goroutine terminated
+2025/06/30 00:19:08 [REST] REST goroutine terminated
+2025/06/30 00:19:08 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:19:08 [System Monitoring] DB reconnection successful
+2025/06/30 00:19:08 [TCP] TCP goroutine terminated
+2025/06/30 00:23:28 dial tcp 192.168.197.129:33060: i/o timeout
+2025/06/30 00:23:28 dial tcp 192.168.197.129:33060: i/o timeout
+2025/06/30 00:32:09 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:32:09 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:32:09 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:32:10 [TCP] Connected new client: [::1]:51833
+2025/06/30 00:32:10 [TCP] Disconnected client: [::1]:51833
+2025/06/30 00:32:11 [TCP] Connected new client: [::1]:51836
+2025/06/30 00:32:11 [TCP] Disconnected client: [::1]:51836
+2025/06/30 00:32:12 [TCP] Connected new client: [::1]:51838
+2025/06/30 00:32:12 [TCP] Disconnected client: [::1]:51838
+2025/06/30 00:32:13 [TCP] Connected new client: [::1]:51840
+2025/06/30 00:32:13 [TCP] Disconnected client: [::1]:51840
+2025/06/30 00:32:14 [TCP] Connected new client: [::1]:51843
+2025/06/30 00:32:14 [TCP] Disconnected client: [::1]:51843
+2025/06/30 00:32:15 [TCP] Connected new client: [::1]:51845
+2025/06/30 00:32:15 [TCP] Disconnected client: [::1]:51845
+2025/06/30 00:32:16 [TCP] Connected new client: [::1]:51849
+2025/06/30 00:32:16 [TCP] Disconnected client: [::1]:51849
+2025/06/30 00:32:17 [TCP] Connected new client: [::1]:51852
+2025/06/30 00:32:17 [TCP] Disconnected client: [::1]:51852
+2025/06/30 00:32:18 [TCP] Connected new client: [::1]:51854
+2025/06/30 00:32:18 [TCP] Disconnected client: [::1]:51854
+2025/06/30 00:32:19 [TCP] Connected new client: [::1]:51857
+2025/06/30 00:32:19 [TCP] Disconnected client: [::1]:51857
+2025/06/30 00:32:19 [TCP] Connected new client: [::1]:51859
+2025/06/30 00:32:19 [TCP] Disconnected client: [::1]:51859
+2025/06/30 00:32:20 [TCP] Connected new client: [::1]:51861
+2025/06/30 00:32:20 [TCP] Disconnected client: [::1]:51861
+2025/06/30 00:32:20 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:20 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:21 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:21 [TCP] Connected new client: [::1]:51864
+2025/06/30 00:32:21 [TCP] Disconnected client: [::1]:51864
+2025/06/30 00:32:21 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:22 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:22 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:22 [TCP] Connected new client: [::1]:51866
+2025/06/30 00:32:22 [TCP] Disconnected client: [::1]:51866
+2025/06/30 00:32:23 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:23 [TCP] Connected new client: [::1]:51869
+2025/06/30 00:32:23 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:23 [TCP] Disconnected client: [::1]:51869
+2025/06/30 00:32:24 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:24 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:24 [TCP] Connected new client: [::1]:51870
+2025/06/30 00:32:24 [TCP] Disconnected client: [::1]:51870
+2025/06/30 00:32:25 [TCP] Connected new client: [::1]:51872
+2025/06/30 00:32:25 [TCP] Disconnected client: [::1]:51872
+2025/06/30 00:32:25 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:25 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:26 [TCP] Connected new client: [::1]:51875
+2025/06/30 00:32:26 [TCP] Disconnected client: [::1]:51875
+2025/06/30 00:32:26 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:26 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:27 [TCP] Connected new client: [::1]:51877
+2025/06/30 00:32:27 [TCP] Disconnected client: [::1]:51877
+2025/06/30 00:32:27 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:27 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:28 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:28 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:28 [TCP] Connected new client: [::1]:51879
+2025/06/30 00:32:28 [TCP] Disconnected client: [::1]:51879
+2025/06/30 00:32:29 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:29 [TCP] Connected new client: [::1]:51882
+2025/06/30 00:32:29 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:29 [TCP] Disconnected client: [::1]:51882
+2025/06/30 00:32:29 [TCP] Connected new client: [::1]:51883
+2025/06/30 00:32:29 [TCP] Disconnected client: [::1]:51883
+2025/06/30 00:32:30 [TCP] Connected new client: [::1]:51885
+2025/06/30 00:32:30 [TCP] Disconnected client: [::1]:51885
+2025/06/30 00:32:30 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:30 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:31 [TCP] Connected new client: [::1]:51888
+2025/06/30 00:32:31 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:31 [TCP] Disconnected client: [::1]:51888
+2025/06/30 00:32:31 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:32 [TCP] Connected new client: [::1]:51891
+2025/06/30 00:32:32 [TCP] Disconnected client: [::1]:51891
+2025/06/30 00:32:32 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:32 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:33 [TCP] Connected new client: [::1]:51893
+2025/06/30 00:32:33 [TCP] Disconnected client: [::1]:51893
+2025/06/30 00:32:34 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:34 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:34 [TCP] Connected new client: [::1]:51895
+2025/06/30 00:32:34 [TCP] Disconnected client: [::1]:51895
+2025/06/30 00:32:35 [TCP] Connected new client: [::1]:51898
+2025/06/30 00:32:35 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:35 [TCP] Disconnected client: [::1]:51898
+2025/06/30 00:32:35 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:36 [TCP] Connected new client: [::1]:51900
+2025/06/30 00:32:36 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:36 [TCP] Disconnected client: [::1]:51900
+2025/06/30 00:32:36 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:37 [TCP] Connected new client: [::1]:51902
+2025/06/30 00:32:37 [TCP] Disconnected client: [::1]:51902
+2025/06/30 00:32:37 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:37 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:38 [TCP] Connected new client: [::1]:51905
+2025/06/30 00:32:38 [TCP] Disconnected client: [::1]:51905
+2025/06/30 00:32:38 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:38 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:39 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:39 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:39 [TCP] Connected new client: [::1]:51907
+2025/06/30 00:32:39 [TCP] Disconnected client: [::1]:51907
+2025/06/30 00:32:39 [TCP] Connected new client: [::1]:51909
+2025/06/30 00:32:39 [TCP] Disconnected client: [::1]:51909
+2025/06/30 00:32:40 [TCP] Connected new client: [::1]:51911
+2025/06/30 00:32:40 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:40 [TCP] Disconnected client: [::1]:51911
+2025/06/30 00:32:40 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:40 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:40 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:41 [TCP] Connected new client: [::1]:51918
+2025/06/30 00:32:41 [TCP] Disconnected client: [::1]:51918
+2025/06/30 00:32:41 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:41 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:42 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:42 [TCP] Connected new client: [::1]:51920
+2025/06/30 00:32:42 [TCP] Disconnected client: [::1]:51920
+2025/06/30 00:32:42 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:43 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:43 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:43 [TCP] Connected new client: [::1]:51922
+2025/06/30 00:32:43 [TCP] Disconnected client: [::1]:51922
+2025/06/30 00:32:44 [TCP] Connected new client: [::1]:51925
+2025/06/30 00:32:44 [TCP] Disconnected client: [::1]:51925
+2025/06/30 00:32:44 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:44 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:45 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:45 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:45 [TCP] Connected new client: [::1]:51927
+2025/06/30 00:32:45 [TCP] Disconnected client: [::1]:51927
+2025/06/30 00:32:46 [TCP] Connected new client: [::1]:51929
+2025/06/30 00:32:46 [TCP] Disconnected client: [::1]:51929
+2025/06/30 00:32:46 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:46 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:47 [TCP] Connected new client: [::1]:51932
+2025/06/30 00:32:47 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:47 [TCP] Disconnected client: [::1]:51932
+2025/06/30 00:32:47 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:48 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:48 [TCP] Connected new client: [::1]:51934
+2025/06/30 00:32:48 [TCP] Disconnected client: [::1]:51934
+2025/06/30 00:32:48 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:49 [TCP] Connected new client: [::1]:51936
+2025/06/30 00:32:49 [TCP] Disconnected client: [::1]:51936
+2025/06/30 00:32:49 [TCP] Connected new client: [::1]:51938
+2025/06/30 00:32:49 [TCP] Disconnected client: [::1]:51938
+2025/06/30 00:32:49 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:49 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:49 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:49 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:50 [TCP] Connected new client: [::1]:51940
+2025/06/30 00:32:50 [TCP] Disconnected client: [::1]:51940
+2025/06/30 00:32:50 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:50 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:51 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:51 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:51 [TCP] Connected new client: [::1]:51944
+2025/06/30 00:32:51 [TCP] Disconnected client: [::1]:51944
+2025/06/30 00:32:52 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:52 [TCP] Connected new client: [::1]:51946
+2025/06/30 00:32:52 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:52 [TCP] Disconnected client: [::1]:51946
+2025/06/30 00:32:53 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:53 [TCP] Connected new client: [::1]:51948
+2025/06/30 00:32:53 [TCP] Disconnected client: [::1]:51948
+2025/06/30 00:32:53 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:54 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:54 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:54 [TCP] Connected new client: [::1]:51951
+2025/06/30 00:32:54 [TCP] Disconnected client: [::1]:51951
+2025/06/30 00:32:55 Shutting down...
+2025/06/30 00:32:55 [System Monitoring] System Monitoring goroutine terminated
+2025/06/30 00:32:55 [REST] REST goroutine terminated
+2025/06/30 00:32:55 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:55 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:56 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:56 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:57 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:57 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:58 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:58 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:59 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:59 [System Monitoring] DB reconnection successful
+2025/06/30 00:32:59 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:32:59 [System Monitoring] DB reconnection successful
+2025/06/30 00:33:00 Error during shutdown: context deadline exceeded
+2025/06/30 00:33:00 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:33:00 [TCP] TCP goroutine terminated
+2025/06/30 00:37:20 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/06/30 00:37:20 [Log Cleanup] Failed to delete file:
+	 remove log\2025_06_30: The process cannot access the file because it is being used by another process.
+2025/06/30 00:37:20 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/06/30 00:37:21 [TCP] Connected new client: [::1]:52096
+2025/06/30 00:37:21 [TCP] Disconnected client: [::1]:52096
+2025/06/30 00:37:22 [TCP] Connected new client: [::1]:52099
+2025/06/30 00:37:22 [TCP] Disconnected client: [::1]:52099
+2025/06/30 00:37:23 [TCP] Connected new client: [::1]:52100
+2025/06/30 00:37:23 [TCP] Disconnected client: [::1]:52100
+2025/06/30 00:37:24 [TCP] Connected new client: [::1]:52101
+2025/06/30 00:37:24 [TCP] Disconnected client: [::1]:52101
+2025/06/30 00:37:25 [TCP] Connected new client: [::1]:52103
+2025/06/30 00:37:25 [TCP] Disconnected client: [::1]:52103
+2025/06/30 00:37:26 [TCP] Connected new client: [::1]:52105
+2025/06/30 00:37:26 [TCP] Disconnected client: [::1]:52105
+2025/06/30 00:37:27 [TCP] Connected new client: [::1]:52106
+2025/06/30 00:37:27 [TCP] Disconnected client: [::1]:52106
+2025/06/30 00:37:28 [TCP] Connected new client: [::1]:52108
+2025/06/30 00:37:28 [TCP] Disconnected client: [::1]:52108
+2025/06/30 00:37:29 [TCP] Connected new client: [::1]:52109
+2025/06/30 00:37:29 [TCP] Disconnected client: [::1]:52109
+2025/06/30 00:37:30 [TCP] Connected new client: [::1]:52110
+2025/06/30 00:37:30 [TCP] Disconnected client: [::1]:52110
+2025/06/30 00:37:30 [TCP] Connected new client: [::1]:52111
+2025/06/30 00:37:30 [TCP] Disconnected client: [::1]:52111
+2025/06/30 00:37:31 [TCP] Connected new client: [::1]:52113
+2025/06/30 00:37:31 [TCP] Disconnected client: [::1]:52113
+2025/06/30 00:37:31 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:37:31 [System Monitoring] DB reconnection successful
+2025/06/30 00:37:32 [TCP] Connected new client: [::1]:52114
+2025/06/30 00:37:32 [TCP] Disconnected client: [::1]:52114
+2025/06/30 00:37:33 [TCP] Connected new client: [::1]:52116
+2025/06/30 00:37:33 [TCP] Disconnected client: [::1]:52116
+2025/06/30 00:37:34 [TCP] Connected new client: [::1]:52118
+2025/06/30 00:37:34 [TCP] Disconnected client: [::1]:52118
+2025/06/30 00:37:35 [TCP] Connected new client: [::1]:52119
+2025/06/30 00:37:35 [TCP] Disconnected client: [::1]:52119
+2025/06/30 00:37:36 [TCP] Connected new client: [::1]:52120
+2025/06/30 00:37:36 [TCP] Disconnected client: [::1]:52120
+2025/06/30 00:37:37 [TCP] Connected new client: [::1]:52122
+2025/06/30 00:37:37 [TCP] Disconnected client: [::1]:52122
+2025/06/30 00:37:38 [TCP] Connected new client: [::1]:52123
+2025/06/30 00:37:38 [TCP] Disconnected client: [::1]:52123
+2025/06/30 00:37:39 [TCP] Connected new client: [::1]:52124
+2025/06/30 00:37:39 [TCP] Disconnected client: [::1]:52124
+2025/06/30 00:37:40 [TCP] Connected new client: [::1]:52126
+2025/06/30 00:37:40 [TCP] Disconnected client: [::1]:52126
+2025/06/30 00:37:40 [TCP] Connected new client: [::1]:52127
+2025/06/30 00:37:40 [TCP] Disconnected client: [::1]:52127
+2025/06/30 00:37:41 [TCP] Connected new client: [::1]:52128
+2025/06/30 00:37:41 [TCP] Disconnected client: [::1]:52128
+2025/06/30 00:37:42 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:37:42 [TCP] Connected new client: [::1]:52132
+2025/06/30 00:37:42 [System Monitoring] DB reconnection successful
+2025/06/30 00:37:42 [TCP] Disconnected client: [::1]:52132
+2025/06/30 00:37:43 [TCP] Connected new client: [::1]:52135
+2025/06/30 00:37:43 [TCP] Disconnected client: [::1]:52135
+2025/06/30 00:37:44 [TCP] Connected new client: [::1]:52136
+2025/06/30 00:37:44 [TCP] Disconnected client: [::1]:52136
+2025/06/30 00:37:45 [TCP] Connected new client: [::1]:52137
+2025/06/30 00:37:45 [TCP] Disconnected client: [::1]:52137
+2025/06/30 00:37:46 [TCP] Connected new client: [::1]:52139
+2025/06/30 00:37:46 [TCP] Disconnected client: [::1]:52139
+2025/06/30 00:37:47 [TCP] Connected new client: [::1]:52140
+2025/06/30 00:37:47 [TCP] Disconnected client: [::1]:52140
+2025/06/30 00:37:48 [TCP] Connected new client: [::1]:52141
+2025/06/30 00:37:48 [TCP] Disconnected client: [::1]:52141
+2025/06/30 00:37:49 [TCP] Connected new client: [::1]:52143
+2025/06/30 00:37:49 [TCP] Disconnected client: [::1]:52143
+2025/06/30 00:37:50 [TCP] Connected new client: [::1]:52144
+2025/06/30 00:37:50 [TCP] Disconnected client: [::1]:52144
+2025/06/30 00:37:50 [TCP] Connected new client: [::1]:52145
+2025/06/30 00:37:50 [TCP] Disconnected client: [::1]:52145
+2025/06/30 00:37:51 [TCP] Connected new client: [::1]:52146
+2025/06/30 00:37:51 [TCP] Disconnected client: [::1]:52146
+2025/06/30 00:37:52 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:37:52 [System Monitoring] DB reconnection successful
+2025/06/30 00:37:52 [TCP] Connected new client: [::1]:52148
+2025/06/30 00:37:52 [TCP] Disconnected client: [::1]:52148
+2025/06/30 00:37:53 [TCP] Connected new client: [::1]:52150
+2025/06/30 00:37:53 [TCP] Disconnected client: [::1]:52150
+2025/06/30 00:37:54 [TCP] Connected new client: [::1]:52151
+2025/06/30 00:37:54 [TCP] Disconnected client: [::1]:52151
+2025/06/30 00:37:55 [TCP] Connected new client: [::1]:52153
+2025/06/30 00:37:55 [TCP] Disconnected client: [::1]:52153
+2025/06/30 00:37:56 [TCP] Connected new client: [::1]:52154
+2025/06/30 00:37:56 [TCP] Disconnected client: [::1]:52154
+2025/06/30 00:37:57 [TCP] Connected new client: [::1]:52155
+2025/06/30 00:37:57 [TCP] Disconnected client: [::1]:52155
+2025/06/30 00:37:58 [TCP] Connected new client: [::1]:52157
+2025/06/30 00:37:58 [TCP] Disconnected client: [::1]:52157
+2025/06/30 00:37:59 [TCP] Connected new client: [::1]:52158
+2025/06/30 00:37:59 [TCP] Disconnected client: [::1]:52158
+2025/06/30 00:38:00 [TCP] Connected new client: [::1]:52159
+2025/06/30 00:38:00 [TCP] Disconnected client: [::1]:52159
+2025/06/30 00:38:00 [TCP] Connected new client: [::1]:52160
+2025/06/30 00:38:00 [TCP] Disconnected client: [::1]:52160
+2025/06/30 00:38:01 [TCP] Connected new client: [::1]:52168
+2025/06/30 00:38:01 [TCP] Disconnected client: [::1]:52168
+2025/06/30 00:38:02 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:38:02 [System Monitoring] DB reconnection successful
+2025/06/30 00:38:02 [TCP] Connected new client: [::1]:52172
+2025/06/30 00:38:02 [TCP] Disconnected client: [::1]:52172
+2025/06/30 00:38:03 [TCP] Connected new client: [::1]:52174
+2025/06/30 00:38:03 [TCP] Disconnected client: [::1]:52174
+2025/06/30 00:38:04 [TCP] Connected new client: [::1]:52176
+2025/06/30 00:38:04 [TCP] Disconnected client: [::1]:52176
+2025/06/30 00:38:05 [TCP] Connected new client: [::1]:52177
+2025/06/30 00:38:05 [TCP] Disconnected client: [::1]:52177
+2025/06/30 00:38:06 [TCP] Connected new client: [::1]:52178
+2025/06/30 00:38:06 [TCP] Disconnected client: [::1]:52178
+2025/06/30 00:38:07 [TCP] Connected new client: [::1]:52180
+2025/06/30 00:38:07 [TCP] Disconnected client: [::1]:52180
+2025/06/30 00:38:08 [TCP] Connected new client: [::1]:52181
+2025/06/30 00:38:08 [TCP] Disconnected client: [::1]:52181
+2025/06/30 00:38:09 [TCP] Connected new client: [::1]:52182
+2025/06/30 00:38:09 [TCP] Disconnected client: [::1]:52182
+2025/06/30 00:38:10 [TCP] Connected new client: [::1]:52184
+2025/06/30 00:38:10 [TCP] Disconnected client: [::1]:52184
+2025/06/30 00:38:10 [TCP] Connected new client: [::1]:52185
+2025/06/30 00:38:10 [TCP] Disconnected client: [::1]:52185
+2025/06/30 00:38:11 Shutting down...
+2025/06/30 00:38:11 [System Monitoring] System Monitoring goroutine terminated
+2025/06/30 00:38:11 [REST] REST goroutine terminated
+2025/06/30 00:38:12 [System Monitoring] DB Connection is closed, attempting to reconnect...
+2025/06/30 00:38:12 [System Monitoring] DB reconnection successful
+2025/06/30 00:38:16 Error during shutdown: context deadline exceeded
+2025/06/30 00:38:16 [Log Cleanup] Log cleanup goroutine terminated
+2025/06/30 00:38:16 [TCP] TCP goroutine terminated
