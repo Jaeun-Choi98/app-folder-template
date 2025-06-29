@@ -1,72 +1,25 @@
 package tcp
 
 import (
-	"bufio"
 	"context"
-	"log"
 	"net"
 	"pjt/internal/logger"
 	"pjt/internal/transport/eventbus"
-	"strings"
+	"pjt/internal/transport/tcp/server/client"
+	"pjt/internal/transport/tcp/server/handler"
+	"pjt/internal/transport/tcp/server/parser"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-/**
- * 서버에서 클라이언트를 별도로 관리하기 위한 구조체체
- */
-
-type TCPClient struct {
-	clientId string
-	conn     net.Conn
-	reader   *bufio.Reader
-
-	msgChannel     chan string
-	timeoutChannel chan bool
-
-	ctx    context.Context
-	cancel context.CancelFunc
-}
-
-func NewTCPClient(parentCtx context.Context, clinetId string, conn net.Conn) *TCPClient {
-	ctx, cancel := context.WithCancel(parentCtx)
-	return &TCPClient{
-		clientId:       clinetId,
-		conn:           conn,
-		reader:         bufio.NewReader(conn),
-		msgChannel:     make(chan string, 10),
-		timeoutChannel: make(chan bool, 1),
-		ctx:            ctx,
-		cancel:         cancel,
-	}
-}
-
-func (c *TCPClient) Close() {
-	if c.conn != nil {
-		c.conn.Close()
-	}
-	close(c.msgChannel)
-	close(c.timeoutChannel)
-	c.reader = nil
-	c.cancel()
-}
-
-func (c *TCPClient) ReadMessage() (string, error) {
-	line, err := c.reader.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(line), nil
-}
-
 type TCPServer struct {
-	listener   net.Listener
-	clients    map[string]*TCPClient
-	msgChannel chan string
+	listener net.Listener
+	clients  *client.ClientManager
 
-	eventBus *eventbus.EventBus
+	parser  parser.Parser
+	handler *handler.MessageHandler
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -83,11 +36,14 @@ type TCPServer struct {
 func NewTCPServer(eventBus *eventbus.EventBus, heartbeat time.Duration) (*TCPServer, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
+	parserFactory := parser.NewParserFactory()
 
 	return &TCPServer{
-		clients:       make(map[string]*TCPClient),
-		msgChannel:    make(chan string, 10),
-		eventBus:      eventBus,
+		clients: client.NewClientManager(ctx, eventBus),
+		parser:  parserFactory.CreateParser(parser.ProtocolText),
+		handler: handler.NewMessageHandler(eventBus),
+		//msgChannel:    make(chan string, 10),
+		//eventBus:      eventBus,
 		ctx:           ctx,
 		cancel:        cancel,
 		heartbeat:     heartbeat,
@@ -126,21 +82,21 @@ func (t *TCPServer) Listening() error {
 	return nil
 }
 
-func (t *TCPServer) registerClient(clientId string, client *TCPClient) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// func (t *TCPServer) registerClient(clientId string, client *client.TCPClient) {
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	if _, exists := t.clients[clientId]; !exists {
-		t.clients[clientId] = client
-	}
-}
+// 	if _, exists := t.clients[clientId]; !exists {
+// 		t.clients[clientId] = client
+// 	}
+// }
 
-func (t *TCPServer) unregisterClient(clientId string) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+// func (t *TCPServer) unregisterClient(clientId string) {
+// 	t.mu.Lock()
+// 	defer t.mu.Unlock()
 
-	delete(t.clients, clientId)
-}
+// 	delete(t.clients, clientId)
+// }
 
 func (t *TCPServer) Start() error {
 	//wg.Add(1)
@@ -194,106 +150,47 @@ func (t *TCPServer) WaitForAccept() error {
 
 func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 
-	client := NewTCPClient(t.ctx, uuid.New().String(), conn)
+	c := client.NewClient(t.ctx, uuid.New().String(), conn, t.parser, t.handler)
 	defer func() {
-		t.unregisterClient(client.clientId)
-		client.Close()
-		logger.Printf("[TCP] Disconnected client: %s", client.conn.RemoteAddr().String())
+		t.clients.Unregister(c.ClientId)
+		c.Close()
+		logger.Printf("[TCP] Disconnected client: %s", c.Conn.RemoteAddr().String())
 		t.wg.Done()
 	}()
 
-	t.registerClient(client.clientId, client)
-	logger.Printf("[TCP] Connected new client: %s", client.conn.RemoteAddr().String())
-	for {
-		go func() {
-			if tcpClient, ok := client.conn.(*net.TCPConn); ok {
-				tcpClient.SetDeadline(time.Now().Add(30 * time.Second))
-			}
-			msg, err := client.ReadMessage()
-			if err != nil {
-				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-					client.timeoutChannel <- true
-					return
-				}
-				logger.Println(err)
-				client.cancel()
-				return
-			}
-			client.msgChannel <- msg
-		}()
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-client.ctx.Done():
-			return
-		case <-client.timeoutChannel:
-			logger.Printf("[TCP] Clinet conn is timeout: %s", client.conn.RemoteAddr().String())
-		case msg := <-client.msgChannel:
-			t.handleMessage(msg)
-		}
-	}
+	t.clients.Register(c)
+	logger.Printf("[TCP] Connected new client: %s", c.Conn.RemoteAddr().String())
+	c.MessageProcessingLoop()
 }
 
 // if need to send to particular client, add parameter clientId
-func (t *TCPServer) handleMessage(msg string) {
-	switch msg {
-	case "EVENTA":
-		t.eventBus.Publish(eventbus.EventAType, eventbus.EventA.Add(map[string]any{"str": "ab1d", "int": 1, "arr": []int{1, 2, 3}}))
-		logger.Println("[TCP] AAAAAAAAAAAAA")
-	case "EVENTB":
-		t.eventBus.Publish(eventbus.EventBType, eventbus.EventB.Add(eventbus.NewAddPayload().SetData(10)))
-		logger.Println("[TCP] BBBBBBBBBBBBB")
-	default:
-		logger.Println("[TCP] Unknown Message Type")
-	}
-}
-
-// broadcast
-func (t *TCPServer) SendMessageToAllRoutine() {
-	for {
-		select {
-		case <-t.ctx.Done():
-			// 정상 종료 시에 SendMessage goroutine이 제대로 닫히는지 확인.
-			log.Println("[TCP] SendMessage goroutine is terminated")
-			t.wg.Done()
-			return
-		case strMsg := <-t.msgChannel:
-			t.mu.RLock()
-			for _, client := range t.clients {
-				client.conn.Write([]byte(strMsg))
-			}
-			t.mu.RUnlock()
-		}
-	}
-}
-
-func (t *TCPServer) SendMessageToAllOnce(msg string) {
-	t.mu.RLock()
-	for _, client := range t.clients {
-		client.conn.Write([]byte(msg))
-	}
-	t.mu.RUnlock()
-}
-
-func (t *TCPServer) SendMessageToClient(msg string, clinetId string) {
-	t.mu.RLock()
-	if client, exists := t.clients[clinetId]; exists {
-		client.conn.Write([]byte(msg))
-	}
-	t.mu.RUnlock()
-}
+// func (t *TCPServer) handleMessage(msg string) {
+// 	switch msg {
+// 	case "EVENTA":
+// 		t.eventBus.Publish(eventbus.EventAType, eventbus.EventA.Add(map[string]any{"str": "ab1d", "int": 1, "arr": []int{1, 2, 3}}))
+// 		logger.Println("[TCP] AAAAAAAAAAAAA")
+// 	case "EVENTB":
+// 		t.eventBus.Publish(eventbus.EventBType, eventbus.EventB.Add(eventbus.NewAddPayload().SetData(10)))
+// 		logger.Println("[TCP] BBBBBBBBBBBBB")
+// 	default:
+// 		logger.Println("[TCP] Unknown Message Type")
+// 	}
+// }
 
 func (t *TCPServer) Shutdown() {
 	t.mu.Lock()
 	t.cancel()
-	for len(t.msgChannel) > 0 {
-		<-t.msgChannel
-	}
-	close(t.msgChannel)
+	// for len(t.msgChannel) > 0 {
+	// 	<-t.msgChannel
+	// }
+	// close(t.msgChannel)
 	if t.listener != nil {
 		t.listener.Close()
 	}
+
+	// send 루틴 종료
+	t.clients.Close()
+
 	t.mu.Unlock()
 	t.wg.Wait()
 	logger.Println("[TCP] TCP goroutine terminated")

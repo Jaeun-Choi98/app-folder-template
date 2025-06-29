@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"pjt/internal/service/sse-service"
+	"pjt/internal/service/sse-service/sse"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/response"

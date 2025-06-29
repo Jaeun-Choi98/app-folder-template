@@ -32,7 +32,7 @@ func NewDBHandler(config *config.Configuration) (DBHandlerInterface, error) {
 	case "tibero":
 		return nil, nil
 	default:
-		return nil, errors.New("not exsist database type")
+		return nil, errors.New("not exsits database type")
 	}
 }
 

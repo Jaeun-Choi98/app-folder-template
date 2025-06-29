@@ -9,7 +9,7 @@ import (
  * UserSession은 특정 사용자에 대한 모든 SSE 클라이언트 연결을 관리
  * 한 사용자는 여러 클라이언트(브라우저 탭, 기기 등)에서 연결
  */
-type UserSession struct {
+type Session struct {
 	sessionId string
 	userId    string
 	clients   map[string]*SSEClient
@@ -17,8 +17,8 @@ type UserSession struct {
 }
 
 // NewUserSession은 새로운 사용자 세션을 생성
-func NewUserSession(sessionId, userId string) *UserSession {
-	return &UserSession{
+func NewUserSession(sessionId, userId string) *Session {
+	return &Session{
 		sessionId: sessionId,
 		userId:    userId,
 		clients:   make(map[string]*SSEClient),
@@ -27,14 +27,14 @@ func NewUserSession(sessionId, userId string) *UserSession {
 }
 
 // AddClient는 새 SSE 클라이언트를 세션에 추가
-func (s *UserSession) AddClient(clientId string, client *SSEClient) {
+func (s *Session) AddClient(clientId string, client *SSEClient) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.clients[clientId] = client
 }
 
 // RemoveClient는 세션에서 SSE 클라이언트를 제거
-func (s *UserSession) RemoveClient(clientId string) {
+func (s *Session) RemoveClient(clientId string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if client, exists := s.clients[clientId]; exists {
@@ -45,7 +45,7 @@ func (s *UserSession) RemoveClient(clientId string) {
 }
 
 // Broadcast는 세션의 모든 클라이언트에게 이벤트를 전송
-func (s *UserSession) Broadcast(msg Message) {
+func (s *Session) Broadcast(msg Message) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -58,12 +58,12 @@ func (s *UserSession) Broadcast(msg Message) {
 	}
 }
 
-func (s *UserSession) Count() int {
+func (s *Session) Count() int {
 	return len(s.clients)
 }
 
 // Close는 세션의 모든 클라이언트 연결을 종료
-func (s *UserSession) Close() {
+func (s *Session) Close() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

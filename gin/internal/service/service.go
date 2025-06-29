@@ -1,7 +1,7 @@
 package service
 
 import (
-	sse "pjt/internal/service/sse-service"
+	"pjt/internal/service/sse-service/sse"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,10 +13,10 @@ type APIServcieInterface interface {
 
 type SSEServiceInterface interface {
 	Close()
-	NewSession(userId string) *sse.UserSession
+	NewSession(userId string) *sse.Session
 	NewSSEClient(clientId, userId string, ctx *gin.Context) (*sse.SSEClient, error)
-	GetSessionById(sessionId string) *sse.UserSession
-	GetSessionByUserId(userId string) *sse.UserSession
+	GetSessionById(sessionId string) *sse.Session
+	GetSessionByUserId(userId string) *sse.Session
 	Broadcast(msg sse.Message)
 	RemoveSession(userId string)
 }

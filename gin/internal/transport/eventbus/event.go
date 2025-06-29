@@ -5,6 +5,7 @@ type EventType int
 const (
 	Invalid EventType = iota
 	SysSttType
+	TCPSendType
 	EventAType
 	EventBType
 )
@@ -37,6 +38,12 @@ type SysSttPayload struct {
 	ServerTime  string `json:"svrTime"`
 	DBState     int8   `json:"dbComm"`
 	TCPListener int8   `json:"tcpListener"`
+}
+
+// TCPClientSend
+type TCPClientSendPayload struct {
+	ClientId string
+	Message  []byte
 }
 
 // Base

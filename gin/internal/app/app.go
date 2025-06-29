@@ -108,9 +108,6 @@ func (a *Application) Shutdown() {
 	// shutdown monitoring routine
 	a.container.SystemMonitoring.Shutdown()
 
-	// shutdown tcp routine and tcp heartbeat routine
-	a.tcpServer.Shutdown()
-
 	// shutdown rest routine
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -121,6 +118,9 @@ func (a *Application) Shutdown() {
 
 	// shutdown log routine
 	logger.Shutdown()
+
+	// shutdown tcp routine and tcp heartbeat routine
+	a.tcpServer.Shutdown()
 
 	// close servcie object, close: api -> close: dao -> db ctx cancel -> shutdown: DBHeartbeat
 	err := a.container.ApiService.Close()

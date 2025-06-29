@@ -17,6 +17,7 @@ type SystemMonitoring struct {
 	wg sync.WaitGroup
 
 	heartbeat       time.Duration
+	isPingToDB      bool
 	isRecoveringDB  bool
 	isRecoveringTCP bool
 
@@ -94,11 +95,17 @@ func (s *SystemMonitoring) Start() error {
 				tcpListener = 1
 			}
 
-			if err := s.Dao.Ping(); err != nil {
-				recoverProcessDB()
-				dbComm = 0
-			} else {
-				dbComm = 1
+			if !s.isPingToDB {
+				go func() {
+					s.isPingToDB = true
+					if err := s.Dao.Ping(); err != nil {
+						recoverProcessDB()
+						dbComm = 0
+					} else {
+						dbComm = 1
+					}
+					s.isPingToDB = false
+				}()
 			}
 
 		case <-healthCheck.C:
@@ -109,11 +116,17 @@ func (s *SystemMonitoring) Start() error {
 				tcpListener = 1
 			}
 
-			if err := s.Dao.Ping(); err != nil {
-				recoverProcessDB()
-				dbComm = 0
-			} else {
-				dbComm = 1
+			if !s.isPingToDB {
+				go func() {
+					s.isPingToDB = true
+					if err := s.Dao.Ping(); err != nil {
+						recoverProcessDB()
+						dbComm = 0
+					} else {
+						dbComm = 1
+					}
+					s.isPingToDB = false
+				}()
 			}
 		}
 

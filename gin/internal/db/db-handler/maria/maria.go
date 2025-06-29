@@ -17,6 +17,7 @@ type Maria struct {
 	wg        sync.WaitGroup
 	ctx       context.Context
 	cancel    context.CancelFunc
+	timeout   time.Duration
 	heartbeat time.Duration
 }
 
@@ -27,6 +28,7 @@ func NewMaria(dsn string, heartbeat time.Duration) (*Maria, error) {
 		ctx:       ctx,
 		cancel:    cancel,
 		heartbeat: heartbeat,
+		timeout:   5 * time.Second,
 	}
 	if err := maria.Connect(); err != nil {
 		return nil, err
@@ -38,6 +40,12 @@ func (m *Maria) Connect() error {
 	db, err := sql.Open("mysql", m.dsn)
 	if err != nil {
 		logger.Println(err)
+		return err
+	}
+
+	if err := db.Ping(); err != nil {
+		logger.Println(err)
+		db.Close()
 		return err
 	}
 
@@ -70,8 +78,12 @@ func (m *Maria) Close() error {
 /**
  * 일정 시간마다 DB 커넥션을 확인하고, 연결 끊김 시에 재연결을 위한 고루틴 함수
  * Log prefix: [Heartbeat]
- *  If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
+ *
+ * 아래 함수들은 개별적으로 모니터링이 필요할 때 사용
+ * 현재는 사용하지 않고, SystemMonitoring 객체를 이용함
+ * 로직은 SystemMonitoring과 같음
  */
+
 func (m *Maria) StartDBHeartbeat() {
 	m.wg.Add(1)
 	go func() {
