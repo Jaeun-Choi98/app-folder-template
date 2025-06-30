@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 )
@@ -44,7 +45,10 @@ func (p *TextParser) Parse(conn net.Conn) (*BaseMessage, error) {
 	reader := bufio.NewReader(conn)
 	line, err := reader.ReadString('\n')
 	if err != nil {
-		return nil, fmt.Errorf("failed to read text message: %w", err)
+		if err != io.EOF {
+			return nil, fmt.Errorf("failed to read text message: %w", err)
+		}
+		return nil, err
 	}
 
 	content := strings.TrimSpace(line)

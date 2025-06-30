@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"pjt/internal/logger"
+	"pjt/internal/service"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/tcp/server/client"
 	"pjt/internal/transport/tcp/server/handler"
@@ -19,7 +20,7 @@ type TCPServer struct {
 	clients  *client.ClientManager
 
 	parser  parser.Parser
-	handler *handler.MessageHandler
+	handler handler.HandlerManagerInterface
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -33,17 +34,15 @@ type TCPServer struct {
 	maxTimeOutCnt int
 }
 
-func NewTCPServer(eventBus *eventbus.EventBus, heartbeat time.Duration) (*TCPServer, error) {
+func NewTCPServer(eventBus *eventbus.EventBus, tcpServcie service.TCPServiceInterface, heartbeat time.Duration) (*TCPServer, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	parserFactory := parser.NewParserFactory()
 
 	return &TCPServer{
-		clients: client.NewClientManager(ctx, eventBus),
-		parser:  parserFactory.CreateParser(parser.ProtocolText),
-		handler: handler.NewMessageHandler(eventBus),
-		//msgChannel:    make(chan string, 10),
-		//eventBus:      eventBus,
+		clients:       client.NewClientManager(ctx, eventBus),
+		parser:        parserFactory.CreateParser(parser.ProtocolRTMS),
+		handler:       handler.NewHandlerManager(tcpServcie),
 		ctx:           ctx,
 		cancel:        cancel,
 		heartbeat:     heartbeat,
@@ -81,22 +80,6 @@ func (t *TCPServer) Listening() error {
 
 	return nil
 }
-
-// func (t *TCPServer) registerClient(clientId string, client *client.TCPClient) {
-// 	t.mu.Lock()
-// 	defer t.mu.Unlock()
-
-// 	if _, exists := t.clients[clientId]; !exists {
-// 		t.clients[clientId] = client
-// 	}
-// }
-
-// func (t *TCPServer) unregisterClient(clientId string) {
-// 	t.mu.Lock()
-// 	defer t.mu.Unlock()
-
-// 	delete(t.clients, clientId)
-// }
 
 func (t *TCPServer) Start() error {
 	//wg.Add(1)
@@ -151,44 +134,30 @@ func (t *TCPServer) WaitForAccept() error {
 func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 
 	c := client.NewClient(t.ctx, uuid.New().String(), conn, t.parser, t.handler)
+
+	// sendWork Test
+	//c := client.NewClient(t.ctx, "1", conn, t.parser, t.handler)
+
 	defer func() {
 		t.clients.Unregister(c.ClientId)
 		c.Close()
-		logger.Printf("[TCP] Disconnected client: %s", c.Conn.RemoteAddr().String())
+		//logger.Printf("[TCP] Disconnected client: %s", c.Conn.RemoteAddr().String())
 		t.wg.Done()
 	}()
 
 	t.clients.Register(c)
-	logger.Printf("[TCP] Connected new client: %s", c.Conn.RemoteAddr().String())
+	//logger.Printf("[TCP] Connected new client: %s", c.Conn.RemoteAddr().String())
 	c.MessageProcessingLoop()
 }
-
-// if need to send to particular client, add parameter clientId
-// func (t *TCPServer) handleMessage(msg string) {
-// 	switch msg {
-// 	case "EVENTA":
-// 		t.eventBus.Publish(eventbus.EventAType, eventbus.EventA.Add(map[string]any{"str": "ab1d", "int": 1, "arr": []int{1, 2, 3}}))
-// 		logger.Println("[TCP] AAAAAAAAAAAAA")
-// 	case "EVENTB":
-// 		t.eventBus.Publish(eventbus.EventBType, eventbus.EventB.Add(eventbus.NewAddPayload().SetData(10)))
-// 		logger.Println("[TCP] BBBBBBBBBBBBB")
-// 	default:
-// 		logger.Println("[TCP] Unknown Message Type")
-// 	}
-// }
 
 func (t *TCPServer) Shutdown() {
 	t.mu.Lock()
 	t.cancel()
-	// for len(t.msgChannel) > 0 {
-	// 	<-t.msgChannel
-	// }
-	// close(t.msgChannel)
 	if t.listener != nil {
 		t.listener.Close()
 	}
 
-	// send 루틴 종료
+	// shutdown sendWorker routine
 	t.clients.Close()
 
 	t.mu.Unlock()
@@ -199,7 +168,6 @@ func (t *TCPServer) Shutdown() {
 /**
  * If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
  */
-
 func (t *TCPServer) StartTCPServerHeartbeat() {
 	t.wg.Add(1)
 	go func() {

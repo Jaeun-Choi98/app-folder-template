@@ -44,6 +44,7 @@ type SysSttPayload struct {
 type TCPClientSendPayload struct {
 	ClientId string
 	Message  []byte
+	Res      chan error
 }
 
 // Base

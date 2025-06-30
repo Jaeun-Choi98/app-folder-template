@@ -8,6 +8,7 @@ import (
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
 	sseservice "pjt/internal/service/sse-service"
+	tcpservice "pjt/internal/service/tcp-service"
 	"pjt/internal/transport/eventbus"
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
@@ -25,6 +26,7 @@ type Container struct {
 	Dao              dbhandler.DBHandlerInterface
 	ApiService       service.APIServcieInterface
 	SseService       service.SSEServiceInterface
+	TcpServcie       service.TCPServiceInterface
 	Controller       *controller.Controller
 	RESTServer       *rest.RESTServer
 	TCPServer        *tcp.TCPServer
@@ -63,10 +65,11 @@ func NewContainer() (*Container, error) {
 
 	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
 	sseService := sseservice.NewSSEService()
+	tcpService := tcpservice.NewTCPService(eventbus)
 	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
 
-	tcp, err := tcp.NewTCPServer(eventbus, 5*time.Second)
+	tcp, err := tcp.NewTCPServer(eventbus, tcpService, 5*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +81,7 @@ func NewContainer() (*Container, error) {
 		Dao:              dao,
 		ApiService:       apiService,
 		SseService:       sseService,
+		TcpServcie:       tcpService,
 		Controller:       controller,
 		RESTServer:       rest,
 		TCPServer:        tcp,

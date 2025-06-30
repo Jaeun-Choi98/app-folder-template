@@ -86,6 +86,25 @@ func (c *Controller) RoutePath() {
 	sseConnect.Use(middleware.SSEMiddleware(), middleware.StoreIdToContext())
 	sseConnect.GET("/connect", c.HandleSSEConnect)
 
+	// TCP 송신 테스트, 테스트 하려면 tcp/server.go 에서 클라이언트 ID를 임의로 설정해야함.
+	c.Router.GET("/send-work", func(ctx *gin.Context) {
+		res := make(chan error, 1)
+		c.EventBus.Publish(eventbus.TCPSendType, eventbus.NewEvent("tcp").Add(&eventbus.TCPClientSendPayload{
+			ClientId: "1",
+			Message:  []byte("dsfdsf"),
+			Res:      res,
+		}))
+
+		select {
+		case err := <-res:
+			if err != nil {
+				ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
+			}
+		case <-time.After(3 * time.Second):
+			ctx.Error(httperr.INNER_ERROR.Add(nil, response.TIMEOUT_SIG))
+		}
+	})
+
 }
 
 func (ctr *Controller) Close() error {

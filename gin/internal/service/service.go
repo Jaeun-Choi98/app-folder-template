@@ -20,3 +20,7 @@ type SSEServiceInterface interface {
 	Broadcast(msg sse.Message)
 	RemoveSession(userId string)
 }
+
+type TCPServiceInterface interface {
+	Handle0x010() error
+}

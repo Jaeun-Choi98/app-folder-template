@@ -31,16 +31,68 @@ func NewClientManager(pctx context.Context, eb *eventbus.EventBus) *ClientManage
 	return cm
 }
 
-// 비동기 전송 처리
-func (c *ClientManager) sendWorker(sendQueue chan *eventbus.Event) {
+func (cm *ClientManager) Close() {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.cancel()
+	for _, client := range cm.clients {
+		client.Close()
+	}
+	cm.count = 0
+}
+
+func (cm *ClientManager) Register(client *Client) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	if _, exists := cm.clients[client.ClientId]; !exists {
+		cm.clients[client.ClientId] = client
+		cm.count++
+	}
+}
+
+func (cm *ClientManager) Unregister(clientId string) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	if _, exists := cm.clients[clientId]; exists {
+		delete(cm.clients, clientId)
+		cm.count--
+	}
+}
+
+func (cm *ClientManager) GetClientCount() int {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	return cm.count
+}
+
+func (cm *ClientManager) GetClient(clientId string) *Client {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	if client, exists := cm.clients[clientId]; exists {
+		return client
+	}
+	return nil
+}
+
+// 수정 필요
+func (cm *ClientManager) sendWorker(sendQueue chan *eventbus.Event) {
 	for {
 		select {
-		case <-c.ctx.Done():
+		case <-cm.ctx.Done():
 			return
 		case event := <-sendQueue:
-			req := event.Payload.(*eventbus.TCPClientSendPayload)
-			err := c.sendToClientDirect(req.ClientId, req.Message)
-			logger.Println(err)
+			req, ok := event.Payload.(*eventbus.TCPClientSendPayload)
+			if !ok {
+				logger.Println("[TCP] ClientManager.sendWork failed to assert struct")
+				continue
+			}
+			go func() {
+				err := cm.sendToClientDirect(req.ClientId, req.Message)
+				if err != nil {
+					logger.Println(err)
+				}
+				req.Res <- err
+			}()
 		}
 	}
 }
@@ -57,49 +109,6 @@ func (cm *ClientManager) sendToClientDirect(clientID string, message []byte) err
 	return client.SendMessage(message)
 }
 
-func (c *ClientManager) Close() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.cancel()
-	for _, client := range c.clients {
-		client.Close()
-	}
-	c.count = 0
-}
-
-func (c *ClientManager) Register(client *Client) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if _, exists := c.clients[client.ClientId]; !exists {
-		c.clients[client.ClientId] = client
-		c.count++
-	}
-}
-
-func (c *ClientManager) Unregister(clientId string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if _, exists := c.clients[clientId]; exists {
-		delete(c.clients, clientId)
-		c.count--
-	}
-}
-
-func (c *ClientManager) GetClientCount() int {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.count
-}
-
-func (c *ClientManager) GetClient(clientId string) *Client {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	if client, exists := c.clients[clientId]; exists {
-		return client
-	}
-	return nil
-}
-
-func (c *ClientManager) Broadcast(msg []byte) {
+func (cm *ClientManager) Broadcast(msg []byte) {
 
 }
