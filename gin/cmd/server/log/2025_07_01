@@ -7,3 +7,83 @@
 2025/07/01 09:12:21 [REST] REST goroutine terminated
 2025/07/01 09:12:21 [Log Cleanup] Log cleanup goroutine terminated
 2025/07/01 09:12:21 [TCP] TCP goroutine terminated
+2025/07/01 14:44:59 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/01 14:44:59 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_01: The process cannot access the file because it is being used by another process.
+2025/07/01 14:44:59 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/01 14:47:04 client not found: 1
+2025/07/01 14:47:04 client not found: 1
+2025/07/01 14:47:04 [Tue, 01 Jul 2025 14:47:04 KST] ::1 "GET /send-work HTTP/1.1" 500 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:48:24 Shutting down...
+2025/07/01 14:48:24 [REST] REST goroutine terminated
+2025/07/01 14:48:24 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/01 14:48:24 [TCP] TCP goroutine terminated
+2025/07/01 14:48:27 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/01 14:48:27 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_01: The process cannot access the file because it is being used by another process.
+2025/07/01 14:48:27 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/01 14:48:31 [Tue, 01 Jul 2025 14:48:31 KST] ::1 "GET /test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:49:35 [Tue, 01 Jul 2025 14:49:35 KST] ::1 "GET /jwt/test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:49:45 [Tue, 01 Jul 2025 14:49:45 KST] ::1 "GET /jwt/remove-test HTTP/1.1" 200 0.001sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:12 [Tue, 01 Jul 2025 14:51:12 KST] ::1 "GET /jwdsfsdf HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:19 [Tue, 01 Jul 2025 14:51:19 KST] ::1 "GET /favicon.ico HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:19 [Tue, 01 Jul 2025 14:51:19 KST] ::1 "GET /logo192.png HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:19 [Tue, 01 Jul 2025 14:51:19 KST] ::1 "GET /logo512.png HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:22 [Tue, 01 Jul 2025 14:51:22 KST] ::1 "GET /sdfdsf HTTP/1.1" 404 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:51:29 Shutting down...
+2025/07/01 14:51:29 [REST] REST goroutine terminated
+2025/07/01 14:51:29 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/01 14:51:29 [TCP] TCP goroutine terminated
+2025/07/01 14:52:12 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/01 14:52:12 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_01: The process cannot access the file because it is being used by another process.
+2025/07/01 14:52:12 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/01 14:52:20 [Tue, 01 Jul 2025 14:52:20 KST] ::1 "GET /test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:25 [Tue, 01 Jul 2025 14:52:25 KST] ::1 "GET /jwt/test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:27 [Tue, 01 Jul 2025 14:52:27 KST] ::1 "GET /jwt/test HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:27 [Tue, 01 Jul 2025 14:52:27 KST] ::1 "GET /favicon.ico HTTP/1.1" 200 0.031sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:38 [Tue, 01 Jul 2025 14:52:38 KST] ::1 "GET /jwt/sdfsdf HTTP/1.1" 200 0.001sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:38 [Tue, 01 Jul 2025 14:52:38 KST] ::1 "GET /favicon.ico HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:38 [Tue, 01 Jul 2025 14:52:38 KST] ::1 "GET /logo192.png HTTP/1.1" 200 0.011sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:38 [Tue, 01 Jul 2025 14:52:38 KST] ::1 "GET /logo512.png HTTP/1.1" 200 0.008sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:52:44 [Tue, 01 Jul 2025 14:52:44 KST] ::1 "GET /zzz HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:30 [Tue, 01 Jul 2025 14:53:30 KST] ::1 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:40 Closed client[userId: 0e3978e1-758c-4eed-9462-9cdf9012d9c6, clientId: 0e3978e1-758c-4eed-9462-9cdf9012d9c6]
+2025/07/01 14:53:40 Closed session[userId:0e3978e1-758c-4eed-9462-9cdf9012d9c6, sessionId:sess_0e3978e1-758c-4eed-9462-9cdf9012d9c6_1751349210193598600]
+2025/07/01 14:53:40 [Tue, 01 Jul 2025 14:53:40 KST] ::1 "GET /sse/connect HTTP/1.1" 200 10.401sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET / HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /static/css/main.e6c13ad2.css HTTP/1.1" 200 0.009sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /static/css/main.e6c13ad2.css.map HTTP/1.1" 200 0.006sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /static/js/main.a4409907.js HTTP/1.1" 200 0.067sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /static/js/main.a4409907.js.map HTTP/1.1" 200 0.010sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /favicon.ico HTTP/1.1" 200 0.001sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /manifest.json HTTP/1.1" 200 0.006sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /logo192.png HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /favicon.ico HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /logo192.png HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:44 [Tue, 01 Jul 2025 14:53:44 KST] ::1 "GET /logo512.png HTTP/1.1" 200 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:54 client not found: 1
+2025/07/01 14:53:54 client not found: 1
+2025/07/01 14:53:54 [Tue, 01 Jul 2025 14:53:54 KST] ::1 "GET /send-work HTTP/1.1" 500 0.000sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:54 Closed client[userId: 8e0cdba1-6636-4f11-b9ec-0cf189e562fd, clientId: 8e0cdba1-6636-4f11-b9ec-0cf189e562fd]
+2025/07/01 14:53:54 Closed session[userId:8e0cdba1-6636-4f11-b9ec-0cf189e562fd, sessionId:sess_8e0cdba1-6636-4f11-b9ec-0cf189e562fd_1751349227522821400]
+2025/07/01 14:53:54 [Tue, 01 Jul 2025 14:53:54 KST] ::1 "GET /sse/connect HTTP/1.1" 200 7.264sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:53:58 Shutting down...
+2025/07/01 14:53:58 [REST] REST goroutine terminated
+2025/07/01 14:53:58 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/01 14:53:58 [TCP] TCP goroutine terminated
+2025/07/01 14:54:21 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/01 14:54:21 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_01: The process cannot access the file because it is being used by another process.
+2025/07/01 14:54:21 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/01 14:54:36 client not found: 1
+2025/07/01 14:54:36 client not found: 1
+2025/07/01 14:54:36 [Tue, 01 Jul 2025 14:54:36 KST] ::1 "GET /send-work HTTP/1.1" 500 0.001sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:54:49 client not found: 1
+2025/07/01 14:54:49 client not found: 1
+2025/07/01 14:54:49 [Tue, 01 Jul 2025 14:54:49 KST] ::1 "GET /send-work HTTP/1.1" 500 0.001sec "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+2025/07/01 14:55:45 Shutting down...
+2025/07/01 14:55:45 [System Monitoring] System Monitoring goroutine terminated
+2025/07/01 14:55:45 [REST] REST goroutine terminated
+2025/07/01 14:55:45 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/01 14:55:45 [TCP] TCP goroutine terminated

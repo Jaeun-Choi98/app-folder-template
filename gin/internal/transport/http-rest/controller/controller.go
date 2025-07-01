@@ -105,6 +105,7 @@ func (c *Controller) RoutePath() {
 		}
 	})
 
+	c.Router.Use(middleware.SpaHandlerGin("build", "index.html"))
 }
 
 func (ctr *Controller) Close() error {
