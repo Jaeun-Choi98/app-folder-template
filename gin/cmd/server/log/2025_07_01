@@ -1,0 +1,9 @@
+2025/07/01 09:09:07 [Log Cleanup] Old log files deleted: log\2025_06_30 (Deleted date: 2025-06-30)
+2025/07/01 09:09:07 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/01 09:09:07 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_01: The process cannot access the file because it is being used by another process.
+2025/07/01 09:09:07 [Log Cleanup] Log cleanup completed: 1 files deleted in total
+2025/07/01 09:12:21 Shutting down...
+2025/07/01 09:12:21 [REST] REST goroutine terminated
+2025/07/01 09:12:21 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/01 09:12:21 [TCP] TCP goroutine terminated
