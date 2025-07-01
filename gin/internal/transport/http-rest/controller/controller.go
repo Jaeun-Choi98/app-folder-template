@@ -105,7 +105,8 @@ func (c *Controller) RoutePath() {
 		}
 	})
 
-	c.Router.Use(middleware.SpaHandlerGin("build", "index.html"))
+	c.Router.Use(middleware.SpaHandlerOther("/spatest", "spa-test"))
+	c.Router.Use(middleware.SpaHandlerRoot("build", "index.html"))
 }
 
 func (ctr *Controller) Close() error {
