@@ -95,13 +95,6 @@ func SpaHandlerOther(urlPrefix, staticPath string) gin.HandlerFunc {
 
 		absPath := filepath.Join(staticPath, cleanPath)
 
-		/**
-		 * 명시적으로 Abort()를 해서 "/"에 해당하는 spa핸들러가 처리하지 못하도록 함.
-		 * e.g. "/example/non-exists-file"로 요청이 들어왔을 때,
-		 * 해당 url path 파일을 찾지 못한다면 404에러를 띄워야 함.
-		 *
-		 * 만약 Abort()를 하지 않는다면, "/" (SpaHandlerRoot)가 처리해서 fallback으로 처리됨.
-		 */
 		_, err := os.Stat(absPath)
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
@@ -113,6 +106,13 @@ func SpaHandlerOther(urlPrefix, staticPath string) gin.HandlerFunc {
 				return
 			}
 		}
+		/**
+		 * 명시적으로 Abort()를 해서 "/"에 해당하는 spa핸들러가 처리하지 못하도록 함.
+		 * e.g. "/example/non-exists-file"로 요청이 들어왔을 때,
+		 * 해당 url path 파일을 찾지 못한다면 404에러를 띄워야 함.
+		 *
+		 * 만약 Abort()를 하지 않는다면, "/" (SpaHandlerRoot)가 처리해서 fallback으로 처리됨.
+		 */
 
 		/**
 		 * StripPrefix는 c.Request.URL.Path에서 urlPrefix를 제거하고 ServeHTTP를 제공함.
