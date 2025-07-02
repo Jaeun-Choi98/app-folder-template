@@ -58,7 +58,7 @@ func SerializeRTMSResponse(opCode uint16, sequence byte, data []byte) ([]byte, e
 	length := uint32(11 + len(data))
 	unitNo := byte(1)
 
-	lrc := calculateRTMSLRC(length, sequence, unitNo, opCode, data)
+	lrc := CalculateRTMSLRC(length, sequence, unitNo, opCode, data)
 
 	return NewBinaryWriter(binary.LittleEndian).
 		WriteByteOne(0x7E).
@@ -72,7 +72,7 @@ func SerializeRTMSResponse(opCode uint16, sequence byte, data []byte) ([]byte, e
 		Bytes(), nil
 }
 
-func calculateRTMSLRC(length uint32, sequence byte, unitNo byte, opCode uint16, data []byte) byte {
+func CalculateRTMSLRC(length uint32, sequence byte, unitNo byte, opCode uint16, data []byte) byte {
 	var sum byte
 
 	lengthBytes := make([]byte, 4)

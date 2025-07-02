@@ -49,32 +49,32 @@ func (a *Application) Start() {
 		return nil
 	}
 
-	// a.wg.Add(1)
-	// startTCPServer := func() error {
-	// 	defer a.wg.Done()
-	// 	if err := a.tcpServer.Start(); err != nil {
-	// 		logger.Printf("Failed to start TCP routine:\n\t%v", err)
-	// 		return err
-	// 	}
-	// 	return nil
-	// }
+	a.wg.Add(1)
+	startTCPServer := func() error {
+		defer a.wg.Done()
+		if err := a.tcpServer.Start(); err != nil {
+			logger.Printf("Failed to start TCP routine:\n\t%v", err)
+			return err
+		}
+		return nil
+	}
 
-	// a.wg.Add(1)
-	// startSystemMonitoring := func() error {
-	// 	defer a.wg.Done()
-	// 	if err := a.container.SystemMonitoring.Start(); err != nil {
-	// 		logger.Printf("Failed to start SystemMonitoring routine:\n\t%v", err)
-	// 		return err
-	// 	}
-	// 	return nil
-	// }
+	a.wg.Add(1)
+	startSystemMonitoring := func() error {
+		defer a.wg.Done()
+		if err := a.container.SystemMonitoring.Start(); err != nil {
+			logger.Printf("Failed to start SystemMonitoring routine:\n\t%v", err)
+			return err
+		}
+		return nil
+	}
 
 	a.handleShutdown()
 
 	// 30일이 지난 로그 파일 정리
 	logger.StartCleaning()
 
-	//go startTCPServer()
+	go startTCPServer()
 
 	/**
 	 * If managing monitoring thread individually, use the function below, otherwise manage them in system monitoring.
@@ -84,7 +84,7 @@ func (a *Application) Start() {
 	// // 10초마다 DB 연결 상태를 확인, 연결이 끊겨있다면 재연결 시도
 	// a.container.Dao.StartDBHeartbeat()
 
-	//go startSystemMonitoring()
+	go startSystemMonitoring()
 
 	go startRestServer()
 

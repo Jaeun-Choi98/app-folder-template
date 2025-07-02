@@ -1,0 +1,28 @@
+2025/07/02 12:47:49 [Log Cleanup] Old log files deleted: log\2025_07_01 (Deleted date: 2025-07-01)
+2025/07/02 12:47:49 [Log Cleanup] Old log files deleted: log\2025_07_02 (Deleted date: 2025-07-02)
+2025/07/02 12:47:49 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_02: The process cannot access the file because it is being used by another process.
+2025/07/02 12:47:49 [Log Cleanup] Log cleanup completed: 1 files deleted in total
+2025/07/02 12:48:23 Shutting down...
+2025/07/02 12:48:23 [REST] REST goroutine terminated
+2025/07/02 12:48:23 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/02 12:48:23 [TCP] TCP goroutine terminated
+2025/07/02 12:48:47 [Log Cleanup] Old log files deleted: log\2025_07_02 (Deleted date: 2025-07-02)
+2025/07/02 12:48:47 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_02: The process cannot access the file because it is being used by another process.
+2025/07/02 12:48:47 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/02 12:49:38 Shutting down...
+2025/07/02 12:49:38 [System Monitoring] System Monitoring goroutine terminated
+2025/07/02 12:49:38 [REST] REST goroutine terminated
+2025/07/02 12:49:38 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/02 12:49:38 [TCP] TCP goroutine terminated
+2025/07/02 12:49:41 [Log Cleanup] Old log files deleted: log\2025_07_02 (Deleted date: 2025-07-02)
+2025/07/02 12:49:41 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_02: The process cannot access the file because it is being used by another process.
+2025/07/02 12:49:41 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/02 18:44:26 Shutting down...
+2025/07/02 18:44:26 [System Monitoring] System Monitoring goroutine terminated
+2025/07/02 18:44:26 [REST] REST goroutine terminated
+2025/07/02 18:44:26 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/02 18:44:26 [TCP] Parse error for client 75ed073d-c190-4666-b7db-791863b1f1c7: read tcp [::1]:5000->[::1]:52451: use of closed network connection
+2025/07/02 18:44:26 [TCP] TCP goroutine terminated

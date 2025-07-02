@@ -10,7 +10,7 @@ import (
 
 var (
 	errNotExistsMsgType = errors.New("not exists msg type")
-	//errInvalidLRC       = errors.New("invalid LRC value")
+	errInvalidLRC       = errors.New("invalid LRC value")
 	errInvalidAssertion = errors.New("invalid assertion struct")
 	//errBinaryRead       = errors.New("binary.Read failed")
 )

@@ -69,6 +69,7 @@ func (c *Client) MessageProcessingLoop() {
 
 			if err := c.handler.HandleMessage(msg); err != nil {
 				logger.Printf("[TCP] Handle error: %v", err)
+				c.SendMessage([]byte(err.Error()))
 			}
 		}
 	}
