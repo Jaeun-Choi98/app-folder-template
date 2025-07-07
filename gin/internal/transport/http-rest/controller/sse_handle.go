@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"pjt/internal/logger"
 	"pjt/internal/service/sse-service/sse"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
@@ -66,9 +68,19 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	}()
 
 	sendMessage := func(event *eventbus.Event) error {
-		msg := sse.Message{
-			Type:    event.Type,
-			Payload: event.Payload,
+		payloadByte, err := json.Marshal(event.Payload)
+		var msg sse.Message
+		if err != nil {
+			logger.Println("[SSE] failed to serialize event payload to json")
+			msg = sse.Message{
+				Type:    event.Type,
+				Payload: event.Payload,
+			}
+		} else {
+			msg = sse.Message{
+				Type:    event.Type,
+				Payload: string(payloadByte),
+			}
 		}
 		if err := client.SendMessage(msg); err != nil {
 			// 오류 발생 시 연결 종료
