@@ -22,17 +22,6 @@ type RTMSMessage struct {
 	LRC      byte
 }
 
-func (m *RTMSMessage) ToByte() []byte {
-	b := make([]byte, m.Length)
-	b = append(b, m.LRC)
-	b = append(b, m.Data...)
-	b = binary.LittleEndian.AppendUint16(b, m.OpCode)
-	b = append(b, m.UnitNo, m.Sequence)
-	b = binary.LittleEndian.AppendUint32(b, m.Length)
-	b = append(b, m.STX[1], m.STX[0])
-	return b
-}
-
 type RTMSParser struct{}
 
 func NewRTMSParser() *RTMSParser {
