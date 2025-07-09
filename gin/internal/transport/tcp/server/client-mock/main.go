@@ -73,7 +73,11 @@ func (t *TCPClient) Start() {
 	}
 }
 
-// 이후에 테스트용으로 필요할지도
+/**
+ * test: api -(eventbus)-> tcp server -(socket)-> client
+ * api 제어 테스트
+ */
+
 func (t *TCPClient) receiveMessage() {
 	defer t.wg.Done()
 
@@ -98,6 +102,11 @@ func (t *TCPClient) receiveMessage() {
 		}
 	}
 }
+
+/**
+ * test: client -> tcp server
+ * 프로토콜 테스트
+ */
 
 func sendMessage(conn net.Conn, msg string) error {
 

@@ -11,8 +11,6 @@ import (
 	"pjt/internal/transport/tcp/server/parser"
 	"sync"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type TCPServer struct {
@@ -133,12 +131,13 @@ func (t *TCPServer) WaitForAccept() error {
 
 func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 
-	c := client.NewClient(t.ctx, uuid.New().String(), conn, t.parser, t.handler)
+	//c := client.NewClient(t.ctx, uuid.New().String(), conn, t.parser, t.handler)
 
 	// sendWork Test
-	//c := client.NewClient(t.ctx, "1", conn, t.parser, t.handler)
+	c := client.NewClient(t.ctx, "1", conn, t.parser, t.handler)
 
 	defer func() {
+		//logger.Println(c.ClientId)
 		t.clients.Unregister(c.ClientId)
 		c.Close()
 		//logger.Printf("[TCP] Disconnected client: %s", c.Conn.RemoteAddr().String())

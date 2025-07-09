@@ -6,6 +6,7 @@ import (
 	"pjt/internal/logger"
 	"pjt/internal/transport/eventbus"
 	"sync"
+	"time"
 )
 
 type ClientManager struct {
@@ -87,7 +88,7 @@ func (cm *ClientManager) sendWorker(sendQueue chan *eventbus.Event) {
 				continue
 			}
 			go func() {
-				err := cm.sendToClientDirect(req.ClientId, req.Message)
+				err := cm.sendToClientDirect(req.ClientId, req.Message, req.Timeout)
 				if err != nil {
 					logger.Println(err)
 				}
@@ -97,7 +98,7 @@ func (cm *ClientManager) sendWorker(sendQueue chan *eventbus.Event) {
 	}
 }
 
-func (cm *ClientManager) sendToClientDirect(clientID string, message []byte) error {
+func (cm *ClientManager) sendToClientDirect(clientID string, message []byte, timeout time.Duration) error {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 	client, exists := cm.clients[clientID]
@@ -106,7 +107,7 @@ func (cm *ClientManager) sendToClientDirect(clientID string, message []byte) err
 		return fmt.Errorf("client not found: %s", clientID)
 	}
 
-	return client.SendMessage(message)
+	return client.SendMessage(message, timeout)
 }
 
 func (cm *ClientManager) Broadcast(msg []byte) {

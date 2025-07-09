@@ -92,6 +92,7 @@ func (c *Controller) RoutePath() {
 		c.EventBus.Publish(eventbus.TCPSendType, eventbus.NewEvent("tcp").Add(&eventbus.TCPClientSendPayload{
 			ClientId: "1",
 			Message:  []byte("dsfdsf"),
+			Timeout:  5 * time.Second,
 			Res:      res,
 		}))
 

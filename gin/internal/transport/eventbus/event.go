@@ -1,5 +1,7 @@
 package eventbus
 
+import "time"
+
 type EventType int
 
 const (
@@ -44,6 +46,7 @@ type SysSttPayload struct {
 type TCPClientSendPayload struct {
 	ClientId string
 	Message  []byte
+	Timeout  time.Duration
 	Res      chan error
 }
 

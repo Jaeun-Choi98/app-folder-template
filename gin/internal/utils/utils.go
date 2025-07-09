@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"time"
 
@@ -20,11 +21,7 @@ func NewKoreaLocation() *time.Location {
 	return local
 }
 
-type Number interface {
-	constraints.Integer
-}
-
-func ValToIdx[T interface{ Number }](v T) []int {
+func ValToIdx[T constraints.Integer](v T) []int {
 	var ret []int
 	i := 0
 	for v > 0 {
@@ -37,7 +34,7 @@ func ValToIdx[T interface{ Number }](v T) []int {
 	return ret
 }
 
-func IdxToVal[T Number](idxs []int) T {
+func IdxToVal[T constraints.Integer](idxs []int) T {
 	var result T = 0
 
 	for _, idx := range idxs {
@@ -87,6 +84,37 @@ func DeepCopyValue(src, dst reflect.Value) {
 	default:
 		dst.Set(src)
 	}
+}
+
+/**
+ * 정수값이나 실수값을 받아 Number(p,s), Decimal(p,s)에 맞게 파싱하는 함수.
+ */
+type Number interface {
+	constraints.Integer | constraints.Float
+}
+
+func ConvertDecimal[T Number](t T, p, s int) T {
+	val := float64(t)
+
+	// 스케일 팩터 계산 (10^s)
+	scaleFactor := math.Pow(10, float64(s))
+
+	// 소수점 s자리로 반올림
+	rounded := math.Round(val*scaleFactor) / scaleFactor
+
+	// 전체 자릿수 p를 초과하는지 확인
+	maxValue := math.Pow(10, float64(p-s)) - 1/scaleFactor
+	if math.Abs(rounded) > maxValue {
+		// 범위를 초과하면 최대값으로 클램핑하거나 패닉 처리
+		// 여기서는 클램핑으로 처리
+		if rounded > 0 {
+			rounded = maxValue
+		} else {
+			rounded = -maxValue
+		}
+	}
+
+	return T(rounded)
 }
 
 /**
