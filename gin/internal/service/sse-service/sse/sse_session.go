@@ -12,7 +12,7 @@ import (
 type Session struct {
 	sessionId string
 	userId    string
-	clients   map[string]*SSEClient
+	clients   map[uint32]*SSEClient
 	mu        *sync.RWMutex
 }
 
@@ -21,25 +21,25 @@ func NewUserSession(sessionId, userId string) *Session {
 	return &Session{
 		sessionId: sessionId,
 		userId:    userId,
-		clients:   make(map[string]*SSEClient),
+		clients:   make(map[uint32]*SSEClient),
 		mu:        &sync.RWMutex{},
 	}
 }
 
 // AddClient는 새 SSE 클라이언트를 세션에 추가
-func (s *Session) AddClient(clientId string, client *SSEClient) {
+func (s *Session) AddClient(clientId uint32, client *SSEClient) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.clients[clientId] = client
 }
 
 // RemoveClient는 세션에서 SSE 클라이언트를 제거
-func (s *Session) RemoveClient(clientId string) {
+func (s *Session) RemoveClient(clientId uint32) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if client, exists := s.clients[clientId]; exists {
 		client.Close()
-		logger.Printf("Closed client[userId: %s, clientId: %s]", s.userId, clientId)
+		logger.Printf("Closed client[userId: %s, clientId: %d]", s.userId, clientId)
 		delete(s.clients, clientId)
 	}
 }
@@ -70,5 +70,5 @@ func (s *Session) Close() {
 	for _, client := range s.clients {
 		client.Close()
 	}
-	s.clients = make(map[string]*SSEClient)
+	s.clients = make(map[uint32]*SSEClient)
 }

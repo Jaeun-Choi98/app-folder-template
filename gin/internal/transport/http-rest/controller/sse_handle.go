@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"pjt/internal/logger"
 	"pjt/internal/service/sse-service/sse"
@@ -25,10 +26,10 @@ import (
  */
 func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
-	clientId := uuid.New().String()
+	clientId := uuid.New().ID()
 	userId := ctx.GetString("id")
 	if userId == "" {
-		userId = clientId
+		userId = strconv.Itoa(int(clientId))
 	}
 
 	client, err := ctl.SseService.NewSSEClient(clientId, userId, ctx)
@@ -48,7 +49,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	// 연결 성공 이벤트 전송
 	connectMsg := sse.Message{
 		Type:    "connect",
-		Payload: map[string]string{"message": "Connected successfully", "client_id": clientId},
+		Payload: map[string]any{"message": "Connected successfully", "client_id": clientId},
 	}
 	client.SendMessage(connectMsg)
 
@@ -67,7 +68,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		}
 	}()
 
-	sendMessage := func(event *eventbus.Event) error {
+	sendMessage := func(event *eventbus.Message) error {
 		payloadByte, err := json.Marshal(event.Payload)
 		var msg sse.Message
 		if err != nil {
@@ -147,5 +148,5 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	session.Broadcast(msg)
 
 	// 성공 응답
-	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": fmt.Sprintf("Event sent to user %s", userId)})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": fmt.Sprintf("Message sent to user %s", userId)})
 }

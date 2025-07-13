@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"pjt/internal/logger"
 	"pjt/internal/transport/eventbus"
+	"pjt/internal/transport/tcp/server/handler"
 	"sync"
 	"time"
 )
 
 type ClientManager struct {
-	clients  map[string]*Client
+	clients  map[uint32]*Client
 	eventbus *eventbus.EventBus
 	mu       sync.RWMutex
 	ctx      context.Context
@@ -22,13 +23,14 @@ type ClientManager struct {
 func NewClientManager(pctx context.Context, eb *eventbus.EventBus) *ClientManager {
 	ctx, cancel := context.WithCancel(pctx)
 	cm := &ClientManager{
-		clients:  make(map[string]*Client),
+		clients:  make(map[uint32]*Client),
 		eventbus: eb,
 		ctx:      ctx,
 		cancel:   cancel,
 	}
-	sendQueue := eb.Subscribe(eventbus.TCPSendType)
-	go cm.sendWorker(sendQueue)
+	sendQueue1 := eb.Subscribe(eventbus.TCPNoReplyType)
+	sendQueue2 := eb.Subscribe(eventbus.TCPWithReplyType)
+	go cm.sendWorker(sendQueue1, sendQueue2)
 	return cm
 }
 
@@ -51,7 +53,7 @@ func (cm *ClientManager) Register(client *Client) {
 	}
 }
 
-func (cm *ClientManager) Unregister(clientId string) {
+func (cm *ClientManager) Unregister(clientId uint32) {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	if _, exists := cm.clients[clientId]; exists {
@@ -66,7 +68,7 @@ func (cm *ClientManager) GetClientCount() int {
 	return cm.count
 }
 
-func (cm *ClientManager) GetClient(clientId string) *Client {
+func (cm *ClientManager) GetClient(clientId uint32) *Client {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 	if client, exists := cm.clients[clientId]; exists {
@@ -75,39 +77,88 @@ func (cm *ClientManager) GetClient(clientId string) *Client {
 	return nil
 }
 
-// 수정 필요
-func (cm *ClientManager) sendWorker(sendQueue chan *eventbus.Event) {
+func (cm *ClientManager) sendWorker(sendQueue1, sendQueue2 chan *eventbus.Message) {
 	for {
 		select {
 		case <-cm.ctx.Done():
 			return
-		case event := <-sendQueue:
-			req, ok := event.Payload.(*eventbus.TCPClientSendPayload)
+		case msg := <-sendQueue1:
+			req, ok := msg.Payload.(*eventbus.TCPSendNoReplyPayload)
 			if !ok {
 				logger.Println("[TCP] ClientManager.sendWork failed to assert struct")
 				continue
 			}
 			go func() {
-				err := cm.sendToClientDirect(req.ClientId, req.Message, req.Timeout)
+				err := cm.sendToClientNoReply(req.ClientId, req.Message, req.SendTimeout)
 				if err != nil {
 					logger.Println(err)
 				}
-				req.Res <- err
+				req.Err <- err
+			}()
+		case msg := <-sendQueue2:
+			req, ok := msg.Payload.(*eventbus.TCPSendWithReplyPayload)
+			if !ok {
+				logger.Println("[TCP] ClientManager.sendWork failed to assert struct")
+				continue
+			}
+			go func() {
+				res, err := cm.sendToClientWithReply(req.ClientId, req.Message, req.SendTimeout, req.ReplyTimeout)
+				if err != nil {
+					logger.Println(err)
+				}
+				req.Err <- err
+				req.Response <- res
 			}()
 		}
 	}
 }
 
-func (cm *ClientManager) sendToClientDirect(clientID string, message []byte, timeout time.Duration) error {
+func (cm *ClientManager) sendToClientNoReply(clientId uint32, message []byte, sendTimeout time.Duration) error {
 	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-	client, exists := cm.clients[clientID]
+	client, exists := cm.clients[clientId]
+	cm.mu.RUnlock()
 
 	if !exists {
-		return fmt.Errorf("client not found: %s", clientID)
+		return fmt.Errorf("client not found: %d", clientId)
 	}
 
-	return client.SendMessage(message, timeout)
+	return client.SendMessage(message, sendTimeout)
+}
+
+func (cm *ClientManager) sendToClientWithReply(clientId uint32, message []byte,
+	sendTimeout time.Duration, replyTimeout time.Duration) (*handler.ReplyMessage, error) {
+	cm.mu.RLock()
+	client, exists := cm.clients[clientId]
+	cm.mu.RUnlock()
+
+	if !exists {
+		return nil, fmt.Errorf("client not found: %d", clientId)
+	}
+	replyCh := make(chan *handler.ReplyMessage, 1)
+
+	// Message의 OPCODE를 Key로 줄 생각.
+	if _, exists := client.ReplyCh[0x02]; exists {
+		return nil, fmt.Errorf("[TCP] already exists processing message: pending message")
+	}
+	client.ReplyCh[0x02] = replyCh
+	defer func() {
+		close(replyCh)
+		delete(client.ReplyCh, 0x02)
+	}()
+
+	if err := client.SendMessage(message, sendTimeout); err != nil {
+		return nil, err
+	}
+
+	select {
+	case <-time.After(replyTimeout):
+		return nil, fmt.Errorf("[TCP] reply timeout")
+	case reply := <-replyCh:
+		if reply.Err != nil {
+			return nil, reply.Err
+		}
+		return reply, nil
+	}
 }
 
 func (cm *ClientManager) Broadcast(msg []byte) {

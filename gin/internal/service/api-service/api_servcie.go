@@ -11,17 +11,18 @@ import (
 )
 
 /**
- * in service layer, varifing reference integrity and unique key.
- * also, doing default value injection about patch api.
- * e.g.
- * delete -> if parent table, verify referenced key
- * update, insert -> if child table, verify reference key, and verify unique key ( logical or physical )
+ * Service layer responsibilities:
+ * - Verifying referential integrity and unique key constraints
+ * - Performing default value injection for PATCH API operations
  *
+ * Examples:
+ * - DELETE: If parent table, verify no referenced keys exist
+ * - UPDATE/INSERT: If child table, verify reference keys exist and validate unique keys (logical or physical)
  *
- * service layer is role of view about db or ram.cache(im memory db)
- * it means processing pk and logical delete(column:DelYN) in db or ram.cache
+ * The service layer acts as a view abstraction over both database and ram.Ram (in-memory database).
  *
- * also, doing processing nil value about patch api. ( default value: using ram.cache or db )
+ * Additionally, it processes nil values for PATCH API operations by injecting default values
+ * retrieved from ram.Ram or database.
  */
 
 var (

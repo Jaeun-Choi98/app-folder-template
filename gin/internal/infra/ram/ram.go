@@ -12,10 +12,8 @@ import (
  * it needs reloading on start or modifing resource ( delete(both logical/physical), insert not update )
  *
  * when operating on get method. ram.cache -> service or other layer:
- * make new instance using mutex. it also convenient to set object
- * should serve pk filter, unique map
- * should except a logical deleted records.
- *
+ * make new instance using mutex. it also convenient to update object
+ * should provice pk filter, unique map / should except a logical deleted records. ( provide view data )
  */
 
 var (

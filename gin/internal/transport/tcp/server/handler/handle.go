@@ -3,8 +3,10 @@ package handler
 import (
 	"errors"
 	"log"
+	"pjt/internal/logger"
 	"pjt/internal/service"
 	"pjt/internal/transport/tcp/server/parser"
+
 	"sync"
 )
 
@@ -15,18 +17,23 @@ var (
 	//errBinaryRead       = errors.New("binary.Read failed")
 )
 
-type TypeHandlerInterface interface {
-	handle(msg *parser.BaseMessage) error
+type ReplyMessage struct {
+	Payload any
+	Err     error
 }
 
-type TypeHandlerFunc func(msg *parser.BaseMessage) error
+type TypeHandlerInterface interface {
+	handle(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error
+}
 
-func (f TypeHandlerFunc) handle(msg *parser.BaseMessage) error {
-	return f(msg)
+type TypeHandlerFunc func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error
+
+func (f TypeHandlerFunc) handle(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
+	return f(msg, replyCh)
 }
 
 type HandlerManagerInterface interface {
-	HandleMessage(msg *parser.BaseMessage) error
+	HandleMessage(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error
 	GetSupportedTypes() []string
 }
 
@@ -52,7 +59,7 @@ func (h *HandlerManager) GetSupportedTypes() []string {
 	return types
 }
 
-func (h *HandlerManager) HandleMessage(msg *parser.BaseMessage) error {
+func (h *HandlerManager) HandleMessage(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
 
 	h.mu.RLock()
 	handler, exists := h.handlers[msg.Type]
@@ -62,7 +69,13 @@ func (h *HandlerManager) HandleMessage(msg *parser.BaseMessage) error {
 		return errNotExistsMsgType
 	}
 
-	return handler.handle(msg)
+	go func() {
+		if err := handler.handle(msg, replyCh); err != nil {
+			logger.Printf("[TCP] handler error for %s (client %d): %v",
+				msg.Type, msg.ClientId, err)
+		}
+	}()
+	return nil
 }
 
 func NewHandlerManager(tcpServcie service.TCPServiceInterface) *HandlerManager {
@@ -71,18 +84,19 @@ func NewHandlerManager(tcpServcie service.TCPServiceInterface) *HandlerManager {
 		handlers:   make(map[string]TypeHandlerInterface),
 	}
 
-	handler.RegisterHandle("text", func(msg *parser.BaseMessage) error {
-		log.Printf("protocol: %v, msgType: %s, clientID: %s, Data: %v ", msg.Protocol, msg.Type, msg.ClientId, msg.Data)
+	handler.RegisterHandle("text", func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
+		log.Printf("protocol: %v, msgType: %s, clientID: %d, Data: %v ", msg.Protocol, msg.Type, msg.ClientId, msg.Data)
 		return nil
 	})
-	handler.RegisterHandle("json", func(msg *parser.BaseMessage) error {
+	handler.RegisterHandle("json", func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
 		return nil
 	})
 
-	// 연결 상태 확인
 	handler.RegisterHandle("rtms_0x010", handler.Handle0x010())
-	// 접속 상태 확인
-	handler.RegisterHandle("rmts_0x011", nil)
+	// 연결 상태 확인
+	handler.RegisterHandle("rmts_0x001", handler.Handle0x001())
+	// reply test
+	handler.RegisterHandle("rtms_0x002", handler.Handle0x002())
 
 	return handler
 }

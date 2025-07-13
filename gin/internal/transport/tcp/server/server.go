@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"context"
+	"encoding/binary"
 	"net"
 	"pjt/internal/logger"
 	"pjt/internal/service"
@@ -17,7 +18,6 @@ type TCPServer struct {
 	listener net.Listener
 	clients  *client.ClientManager
 
-	parser  parser.Parser
 	handler handler.HandlerManagerInterface
 
 	ctx    context.Context
@@ -35,11 +35,8 @@ type TCPServer struct {
 func NewTCPServer(eventBus *eventbus.EventBus, tcpServcie service.TCPServiceInterface, heartbeat time.Duration) (*TCPServer, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
-	parserFactory := parser.NewParserFactory()
-
 	return &TCPServer{
 		clients:       client.NewClientManager(ctx, eventBus),
-		parser:        parserFactory.CreateParser(parser.ProtocolRTMS),
 		handler:       handler.NewHandlerManager(tcpServcie),
 		ctx:           ctx,
 		cancel:        cancel,
@@ -131,10 +128,10 @@ func (t *TCPServer) WaitForAccept() error {
 
 func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
 
-	//c := client.NewClient(t.ctx, uuid.New().String(), conn, t.parser, t.handler)
+	//c := client.NewClient(t.ctx, uuid.New().ID(), conn, parser.NewRTMSParser(binary.LittleEndian, 4096), t.handler)
 
 	// sendWork Test
-	c := client.NewClient(t.ctx, "1", conn, t.parser, t.handler)
+	c := client.NewClient(t.ctx, 1, conn, parser.NewRTMSParser(binary.LittleEndian, 4096), t.handler)
 
 	defer func() {
 		//logger.Println(c.ClientId)

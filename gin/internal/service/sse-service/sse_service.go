@@ -26,7 +26,7 @@ func (s *SSEService) NewSession(userId string) *sse.Session {
 	return s.sessionManager.NewSession(userId)
 }
 
-func (s *SSEService) NewSSEClient(clientId, userId string, ctx *gin.Context) (*sse.SSEClient, error) {
+func (s *SSEService) NewSSEClient(clientId uint32, userId string, ctx *gin.Context) (*sse.SSEClient, error) {
 	return sse.NewSSEClient(clientId, userId, ctx)
 }
 

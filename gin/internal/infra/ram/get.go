@@ -5,7 +5,6 @@ import (
 	"pjt/internal/utils"
 )
 
-// 공유 자원 동기화를 위한 새로운 메모리 할당
 func (r *Ram) GetOprtModels(ids []int64, all bool) (map[int64]*object.Sample, map[int]struct{}, error) {
 	if len(r.SampleCache) == 0 {
 		return nil, nil, nil

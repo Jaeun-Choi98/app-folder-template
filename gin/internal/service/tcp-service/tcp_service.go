@@ -13,6 +13,6 @@ func NewTCPService(eb *eventbus.EventBus) *TCPService {
 }
 
 func (t *TCPService) Handle0x010() error {
-	t.EventBus.Publish(eventbus.EventAType, eventbus.NewEvent("EVENTA").Add(map[string]interface{}{"test": "sdfsd"}))
+	t.EventBus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": "sdfsd"}))
 	return nil
 }

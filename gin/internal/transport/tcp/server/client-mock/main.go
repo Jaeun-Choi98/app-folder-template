@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/binary"
 	"io"
 	"log"
 	"net"
@@ -82,7 +83,7 @@ func (t *TCPClient) receiveMessage() {
 	defer t.wg.Done()
 
 	for {
-		buf := make([]byte, 10)
+		buf := make([]byte, 1)
 		go func() {
 			_, err := io.ReadFull(t.conn, buf)
 			if err != nil {
@@ -98,7 +99,15 @@ func (t *TCPClient) receiveMessage() {
 		case <-t.ctx.Done():
 			return
 		case <-t.readFull:
-			log.Println(string(buf))
+			log.Printf("메시지 받음 OPCODE:0x%02X", buf[0])
+			if buf[0] == 0x02 {
+				sendMsg, err := serializer.SerializeRTMSResponse(binary.LittleEndian, 0x02, 1, nil)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				t.conn.Write(sendMsg)
+			}
 		}
 	}
 }
@@ -123,7 +132,7 @@ func sendMessage(conn net.Conn, msg string) error {
 			data2[idx] = byte(ch)
 		}
 		data1 = append(data1, data2...)
-		res, err := serializer.SerializeRTMSResponse(0x10, 1, data1)
+		res, err := serializer.SerializeRTMSResponse(binary.LittleEndian, 0x10, 1, data1)
 		if err != nil {
 			log.Println(err)
 			return err

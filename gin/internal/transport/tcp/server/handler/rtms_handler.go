@@ -1,13 +1,47 @@
 package handler
 
 import (
+	"encoding/binary"
 	"log"
 	"pjt/internal/transport/tcp/server/parser"
 	"pjt/internal/transport/tcp/server/serializer"
 )
 
+func (hm *HandlerManager) Handle0x001() TypeHandlerFunc {
+	return func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
+		rtmsMsg, ok := msg.Data.(*parser.RTMSMessage)
+		if !ok {
+			return errInvalidAssertion
+		}
+		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
+
+		if lrcVerifiy != rtmsMsg.LRC {
+			return errInvalidLRC
+		}
+		log.Println("연결 성공")
+		return nil
+	}
+}
+
+// reply test
+func (hm *HandlerManager) Handle0x002() TypeHandlerFunc {
+	return func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
+		rtmsMsg, ok := msg.Data.(*parser.RTMSMessage)
+		if !ok {
+			return errInvalidAssertion
+		}
+		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
+
+		if lrcVerifiy != rtmsMsg.LRC {
+			return errInvalidLRC
+		}
+		replyCh[0x02] <- &ReplyMessage{Err: nil, Payload: "success reply test"}
+		return nil
+	}
+}
+
 func (hm *HandlerManager) Handle0x010() TypeHandlerFunc {
-	return func(msg *parser.BaseMessage) error {
+	return func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
 		rtmsMsg, ok := msg.Data.(*parser.RTMSMessage)
 		if !ok {
 			return errInvalidAssertion
@@ -21,7 +55,7 @@ func (hm *HandlerManager) Handle0x010() TypeHandlerFunc {
 			}
 		}
 
-		lrcVerifiy := serializer.CalculateRTMSLRC(rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
+		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
 		log.Println("sdf")
 		if lrcVerifiy != rtmsMsg.LRC {
 			return errInvalidLRC

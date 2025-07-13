@@ -41,7 +41,7 @@ func (p *TextParser) GetMinHeaderSize() int {
 	return 1 // 최소 1바이트
 }
 
-func (p *TextParser) Parse(conn net.Conn) (*BaseMessage, error) {
+func (p *TextParser) Parse(conn net.Conn) (*ParseMessage, error) {
 	reader := bufio.NewReader(conn)
 	line, err := reader.ReadString('\n')
 	if err != nil {
@@ -59,7 +59,7 @@ func (p *TextParser) Parse(conn net.Conn) (*BaseMessage, error) {
 	}
 
 	// 단순 텍스트 메시지
-	msg := &BaseMessage{
+	msg := &ParseMessage{
 		Protocol: ProtocolText,
 		Type:     "text",
 		Data:     content,
@@ -67,11 +67,11 @@ func (p *TextParser) Parse(conn net.Conn) (*BaseMessage, error) {
 	return msg, nil
 }
 
-func (p *TextParser) parseJSONMessage(content string) (*BaseMessage, error) {
+func (p *TextParser) parseJSONMessage(content string) (*ParseMessage, error) {
 	var jsonMsg map[string]interface{}
 	if err := json.Unmarshal([]byte(content), &jsonMsg); err != nil {
 		// JSON 파싱 실패시 단순 텍스트로 처리
-		msg := &BaseMessage{
+		msg := &ParseMessage{
 			Protocol: ProtocolText,
 			Type:     "text",
 			Data:     content,
@@ -84,7 +84,7 @@ func (p *TextParser) parseJSONMessage(content string) (*BaseMessage, error) {
 		msgType = "json"
 	}
 
-	msg := &BaseMessage{
+	msg := &ParseMessage{
 		Protocol: ProtocolText,
 		Type:     msgType,
 		Data:     jsonMsg,

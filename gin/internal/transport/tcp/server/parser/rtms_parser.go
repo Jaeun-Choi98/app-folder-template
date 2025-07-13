@@ -3,8 +3,18 @@ package parser
 import (
 	"encoding/binary"
 	"fmt"
-	"io"
 	"net"
+)
+
+type ParseState int
+
+const (
+	StateWaitingSTX ParseState = iota
+	StateWaitingLength
+	StateWaitingHeader
+	StateWaitingData
+	StateComplete
+	StateError
 )
 
 /**
@@ -22,10 +32,39 @@ type RTMSMessage struct {
 	LRC      byte
 }
 
-type RTMSParser struct{}
+type RTMSParser struct {
+	byteOrder binary.ByteOrder
+	state     ParseState
 
-func NewRTMSParser() *RTMSParser {
-	return &RTMSParser{}
+	buffer         []byte
+	bufferOffset   int
+	initBufferSize int
+
+	messageQueue   []*ParseMessage
+	currentMessage *RTMSParsingContext
+}
+
+type RTMSParsingContext struct {
+	stx      [2]byte
+	length   uint32
+	sequence uint8
+	unitNo   uint8
+	opCode   uint16
+	data     []byte
+	lrc      byte
+
+	// 파싱 진행 상황
+	expectedBytes int
+	receivedBytes int
+}
+
+func NewRTMSParser(byteOrder binary.ByteOrder, bufferSize int) *RTMSParser {
+	return &RTMSParser{
+		byteOrder:      byteOrder,
+		buffer:         make([]byte, bufferSize),
+		initBufferSize: bufferSize,
+		messageQueue:   make([]*ParseMessage, 0, 10),
+	}
 }
 
 func (p *RTMSParser) GetProtocolType() ProtocolType {
@@ -42,73 +81,251 @@ func (p *RTMSParser) GetMinHeaderSize() int {
 }
 
 // lrc 체크의 경우, Data값이 OPCODE에 따라 다르기 때문에 핸들러에서 처리 ( data 값이 여러 개일 수도 있음 )
-func (p *RTMSParser) Parse(conn net.Conn) (*BaseMessage, error) {
+func (p *RTMSParser) Parse(conn net.Conn) (*ParseMessage, error) {
 
-	// STX 읽기
-	stx := make([]byte, 2)
-	if _, err := io.ReadFull(conn, stx); err != nil {
-		return nil, err //fmt.Errorf("failed to read STX: %w", err)
+	if len(p.messageQueue) > 0 {
+		msg := p.messageQueue[0]
+		p.messageQueue = p.messageQueue[1:] // 큐에서 제거
+		return msg, nil
 	}
 
-	if stx[0] != 0x7E || stx[1] != 0x7E {
-		return nil, fmt.Errorf("invalid STX: %02X %02X", stx[0], stx[1])
+	readBuffer := make([]byte, 1024)
+	p.OptimizeBuffer()
+
+	for {
+		n, err := conn.Read(readBuffer)
+		if err != nil {
+			return nil, err
+		}
+
+		messages, err := p.Feed(readBuffer[:n])
+		if err != nil {
+			return nil, err
+		}
+
+		if len(messages) > 0 {
+			firstMsg := messages[0]
+			if len(messages) > 1 {
+				p.messageQueue = append(p.messageQueue, messages[1:]...)
+			}
+
+			return firstMsg, nil
+		}
+	}
+}
+
+func (p *RTMSParser) Feed(data []byte) ([]*ParseMessage, error) {
+	var messages []*ParseMessage
+
+	if err := p.appendToBuffer(data); err != nil {
+		return nil, err
 	}
 
-	// Length 읽기
-	lengthBytes := make([]byte, 4)
-	if _, err := io.ReadFull(conn, lengthBytes); err != nil {
-		return nil, err //fmt.Errorf("failed to read length: %w", err)
+	for p.bufferOffset > 0 || p.state == StateComplete {
+		switch p.state {
+		case StateWaitingSTX:
+			if !p.tryParseSTX(2) {
+				return messages, nil
+			}
+
+		case StateWaitingLength:
+			// length(4)
+			if !p.tryParseLength(4) {
+				return messages, nil // 더 많은 데이터 필요
+			}
+
+		case StateWaitingHeader:
+			// Seq(1) + Unit(1) + OpCode(2)
+			if !p.tryParseHeader(4) {
+				return messages, nil // 더 많은 데이터 필요
+			}
+
+		case StateWaitingData:
+			if !p.tryParseData(p.currentMessage.expectedBytes) {
+				return messages, nil // 더 많은 데이터 필요
+			}
+
+		case StateComplete:
+			msg, err := p.completeMessage()
+			if err != nil {
+				p.resetParser()
+				return messages, err
+			}
+			messages = append(messages, msg)
+			p.resetForNextMessage()
+
+		case StateError:
+			p.resetParser()
+			return messages, fmt.Errorf("parser in error state")
+
+		default:
+			p.resetParser()
+			return messages, fmt.Errorf("unknown parser state: %d", p.state)
+		}
+	}
+	return messages, nil
+}
+
+func (p *RTMSParser) appendToBuffer(data []byte) error {
+	needed := p.bufferOffset + len(data)
+
+	// 버퍼 크기 reslice, 만약 데이터 크기를 제어하고 싶다면 아래 조건에서 필터.
+	if needed > len(p.buffer) {
+		newBuffer := make([]byte, needed*2)
+		copy(newBuffer, p.buffer[:p.bufferOffset])
+		p.buffer = newBuffer
 	}
 
-	length := binary.LittleEndian.Uint32(lengthBytes)
-	if length < 11 || length > 4096 {
-		return nil, fmt.Errorf("invalid length: %d", length)
+	copy(p.buffer[p.bufferOffset:], data)
+	p.bufferOffset += len(data)
+
+	return nil
+}
+
+func (p *RTMSParser) consumeBytes(count int) {
+	if count >= p.bufferOffset {
+		p.bufferOffset = 0
+	} else {
+		copy(p.buffer, p.buffer[count:p.bufferOffset])
+		p.bufferOffset -= count
+	}
+}
+
+func (p *RTMSParser) resetForNextMessage() {
+	p.state = StateWaitingSTX
+	p.currentMessage = nil
+}
+
+func (p *RTMSParser) resetParser() {
+	p.state = StateWaitingSTX
+	p.currentMessage = nil
+	p.bufferOffset = 0
+}
+
+func (p *RTMSParser) tryParseSTX(needed int) bool {
+	if p.bufferOffset < needed {
+		return false
 	}
 
-	// 나머지 헤더 읽기, Seq(1) + Unit(1) + OpCode(2) + Data1(1)
-	headerRest := make([]byte, 4)
-	if _, err := io.ReadFull(conn, headerRest); err != nil {
-		return nil, err //fmt.Errorf("failed to read header: %w", err)
+	if p.buffer[0] != 0x7E || p.buffer[1] != 0x7E {
+		p.consumeBytes(1)
+		return true
 	}
 
-	sequence := headerRest[0]
-	unitNo := headerRest[1]
-	opCode := binary.LittleEndian.Uint16(headerRest[2:4])
-
-	// Data2와 LRC 읽기, 전체 - STX(2) - Length(4) - Header(4)
-	remainingSize := int(length) - 10
-	remaining := make([]byte, remainingSize)
-	if _, err := io.ReadFull(conn, remaining); err != nil {
-		return nil, err //fmt.Errorf("failed to read remaining data: %w", err)
+	// 새 메시지 컨텍스트 생성
+	p.currentMessage = &RTMSParsingContext{
+		stx: [2]byte{p.buffer[0], p.buffer[1]},
 	}
 
-	// Data와 LRC 분리
-	var data []byte
-	var lrc byte
+	// 버퍼에서 STX 제거
+	p.consumeBytes(needed)
 
-	if remainingSize > 1 {
-		data = remaining[:remainingSize-1]
-		lrc = remaining[remainingSize-1]
-	} else if remainingSize == 1 {
-		lrc = remaining[0]
+	// 다음 상태로 전환
+	p.state = StateWaitingLength
+
+	return true
+}
+
+func (p *RTMSParser) tryParseLength(needed int) bool {
+	if p.bufferOffset < needed {
+		return false
+	}
+	length := p.byteOrder.Uint32(p.buffer[:needed])
+
+	if length < 11 {
+		p.state = StateError
+		return true
 	}
 
-	// 메시지 생성
-	msg := &BaseMessage{
+	p.currentMessage.length = length
+	p.consumeBytes(needed)
+	p.state = StateWaitingHeader
+	return true
+}
+
+func (p *RTMSParser) tryParseHeader(needed int) bool {
+	if p.bufferOffset < needed {
+		return false
+	}
+	p.currentMessage.sequence = p.buffer[0]
+	p.currentMessage.unitNo = p.buffer[1]
+	p.currentMessage.opCode = p.byteOrder.Uint16(p.buffer[2:4])
+
+	p.consumeBytes(needed)
+
+	remainSize := int(p.currentMessage.length) - 10
+	p.currentMessage.expectedBytes = remainSize
+	p.currentMessage.receivedBytes = 0
+
+	if remainSize > 0 {
+		p.state = StateWaitingData
+	} else {
+		p.state = StateComplete
+	}
+
+	return true
+}
+
+func (p *RTMSParser) tryParseData(needed int) bool {
+	if p.bufferOffset < needed {
+		return false
+	}
+
+	if needed > 1 {
+		p.currentMessage.data = make([]byte, needed-1)
+		copy(p.currentMessage.data, p.buffer[:needed-1])
+		p.currentMessage.lrc = p.buffer[needed-1]
+	} else if needed == 1 {
+		p.currentMessage.lrc = p.buffer[0]
+	}
+
+	p.consumeBytes(needed)
+
+	p.state = StateComplete
+	return true
+}
+
+func (p *RTMSParser) completeMessage() (*ParseMessage, error) {
+	if p.currentMessage == nil {
+		return nil, fmt.Errorf("[TCP] nil message")
+	}
+
+	msg := &ParseMessage{
 		Protocol: ProtocolRTMS,
-		Type:     fmt.Sprintf("rtms_0x%03X", opCode),
-		Data:     nil, // 나중에 설정
+		Type:     fmt.Sprintf("rtms_0x%03X", p.currentMessage.opCode),
+		Data:     nil,
 	}
 
 	msg.Add(&RTMSMessage{
-		STX:      [2]byte{stx[0], stx[1]},
-		Length:   length,
-		Sequence: sequence,
-		UnitNo:   unitNo,
-		OpCode:   opCode,
-		Data:     data,
-		LRC:      lrc,
+		STX:      p.currentMessage.stx,
+		Length:   p.currentMessage.length,
+		Sequence: p.currentMessage.sequence,
+		UnitNo:   p.currentMessage.unitNo,
+		OpCode:   p.currentMessage.opCode,
+		Data:     p.currentMessage.data,
+		LRC:      p.currentMessage.lrc,
 	})
 
 	return msg, nil
+}
+
+func (p *RTMSParser) OptimizeBuffer() {
+	if len(p.buffer) == p.initBufferSize {
+		return
+	}
+
+	if p.bufferOffset == 0 {
+		if len(p.buffer) > p.initBufferSize {
+			p.buffer = make([]byte, p.initBufferSize)
+		}
+	} else if len(p.buffer) >= p.initBufferSize*2 && p.bufferOffset < len(p.buffer)/4 {
+		newSize := len(p.buffer) / 2
+		if newSize < 8192 {
+			newSize = 8192
+		}
+
+		newBuffer := make([]byte, newSize)
+		copy(newBuffer, p.buffer[:p.bufferOffset])
+		p.buffer = newBuffer
+	}
 }

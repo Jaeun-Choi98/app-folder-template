@@ -54,13 +54,13 @@ func (w *BinaryWriter) Reset() {
 }
 
 // 이때, data 슬라이스는 크기는 프로토콜에 맞는 고정된 크기여야 함.
-func SerializeRTMSResponse(opCode uint16, sequence byte, data []byte) ([]byte, error) {
+func SerializeRTMSResponse(byteOrder binary.ByteOrder, opCode uint16, sequence byte, data []byte) ([]byte, error) {
 	length := uint32(11 + len(data))
 	unitNo := byte(1)
 
-	lrc := calculateRTMSLRC(length, sequence, unitNo, opCode, data)
+	lrc := CalculateRTMSLRC(byteOrder, length, sequence, unitNo, opCode, data)
 
-	return NewBinaryWriter(binary.LittleEndian).
+	return NewBinaryWriter(byteOrder).
 		WriteByteOne(0x7E).
 		WriteByteOne(0x7E).
 		WriteUint32(length).
@@ -72,11 +72,11 @@ func SerializeRTMSResponse(opCode uint16, sequence byte, data []byte) ([]byte, e
 		Bytes(), nil
 }
 
-func calculateRTMSLRC(length uint32, sequence byte, unitNo byte, opCode uint16, data []byte) byte {
+func CalculateRTMSLRC(byteOrder binary.ByteOrder, length uint32, sequence byte, unitNo byte, opCode uint16, data []byte) byte {
 	var sum byte
 
 	lengthBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(lengthBytes, length)
+	byteOrder.PutUint32(lengthBytes, length)
 	for _, b := range lengthBytes {
 		sum += b
 	}
@@ -84,7 +84,7 @@ func calculateRTMSLRC(length uint32, sequence byte, unitNo byte, opCode uint16, 
 	sum += sequence + unitNo
 
 	opcodeBytes := make([]byte, 2)
-	binary.LittleEndian.PutUint16(opcodeBytes, opCode)
+	byteOrder.PutUint16(opcodeBytes, opCode)
 	for _, b := range opcodeBytes {
 		sum += b
 	}

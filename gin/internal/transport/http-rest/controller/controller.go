@@ -9,6 +9,7 @@ import (
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
 	"pjt/internal/transport/http-rest/response"
+	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/utils"
 	"time"
 
@@ -88,22 +89,45 @@ func (c *Controller) RoutePath() {
 
 	// TCP 송신 테스트, 테스트 하려면 tcp/server.go 에서 클라이언트 ID를 임의로 설정해야함.
 	c.Router.GET("/send-work", func(ctx *gin.Context) {
-		res := make(chan error, 1)
-		c.EventBus.Publish(eventbus.TCPSendType, eventbus.NewEvent("tcp").Add(&eventbus.TCPClientSendPayload{
-			ClientId: "1",
-			Message:  []byte("dsfdsf"),
-			Timeout:  5 * time.Second,
-			Res:      res,
+		errCh := make(chan error, 1)
+		c.EventBus.Publish(eventbus.TCPNoReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendNoReplyPayload{
+			ClientId:    1,
+			Message:     []byte("dsfdsf"),
+			SendTimeout: 5 * time.Second,
+			Err:         errCh,
 		}))
 
 		select {
-		case err := <-res:
+		case err := <-errCh:
 			if err != nil {
 				ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 			}
-		case <-time.After(3 * time.Second):
-			ctx.Error(httperr.INNER_ERROR.Add(nil, response.TIMEOUT_SIG))
+			// // 아래 코드는 필요없음. tcp 송신에서 타임아웃이 걸려 res로 timeout err가 들어옴
+			// case <-time.After(3 * time.Second):
+			// 	ctx.Error(httperr.INNER_ERROR.Add(nil, response.TIMEOUT_SIG))
 		}
+	})
+
+	c.Router.GET("/send-work-reply", func(ctx *gin.Context) {
+		errCh := make(chan error, 1)
+		resCh := make(chan any, 1)
+		c.EventBus.Publish(eventbus.TCPWithReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendWithReplyPayload{
+			ClientId:     1,
+			Message:      []byte{0x02},
+			SendTimeout:  5 * time.Second,
+			ReplyTimeout: 10 * time.Second,
+			Err:          errCh,
+			Response:     resCh,
+		}))
+
+		err := <-errCh
+		if err != nil {
+			ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
+			return
+		}
+		res := <-resCh
+		ctx.String(http.StatusOK, res.(*handler.ReplyMessage).Payload.(string))
+
 	})
 
 	c.Router.Use(middleware.SpaHandlerOther("/spatest", "spa-test"))

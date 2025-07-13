@@ -14,7 +14,7 @@ import (
  * 각 클라이언트는 고유 ID와 응답 Writer를 가짐
  */
 type SSEClient struct {
-	ClientId string
+	ClientId uint32
 	UserId   string
 	Writer   http.ResponseWriter
 	Flusher  http.Flusher
@@ -22,7 +22,7 @@ type SSEClient struct {
 	Cancel   context.CancelFunc
 }
 
-func NewSSEClient(clientId, userId string, ctx *gin.Context) (*SSEClient, error) {
+func NewSSEClient(clientId uint32, userId string, ctx *gin.Context) (*SSEClient, error) {
 	flusher, ok := ctx.Writer.(http.Flusher)
 	if !ok {
 		return nil, fmt.Errorf("streaming not supported")

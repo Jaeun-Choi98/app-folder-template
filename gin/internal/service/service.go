@@ -14,7 +14,7 @@ type APIServcieInterface interface {
 type SSEServiceInterface interface {
 	Close()
 	NewSession(userId string) *sse.Session
-	NewSSEClient(clientId, userId string, ctx *gin.Context) (*sse.SSEClient, error)
+	NewSSEClient(clientId uint32, userId string, ctx *gin.Context) (*sse.SSEClient, error)
 	GetSessionById(sessionId string) *sse.Session
 	GetSessionByUserId(userId string) *sse.Session
 	Broadcast(msg sse.Message)
