@@ -3,6 +3,7 @@ package container
 import (
 	"pjt/internal/config"
 	dbhandler "pjt/internal/db/db-handler"
+	dblogmanager "pjt/internal/db/db-log-manager"
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
 	"pjt/internal/service"
@@ -75,6 +76,9 @@ func NewContainer() (*Container, error) {
 	}
 
 	monitoring := monitoring.NewSystemMonitoring(dao, tcp, eventbus, 1*time.Second)
+
+	dbManager, _ := dblogmanager.NewDBLogManager(dao, ram, eventbus)
+	dblogmanager.SetEventManger(dbManager)
 
 	return &Container{
 		Config:           config,

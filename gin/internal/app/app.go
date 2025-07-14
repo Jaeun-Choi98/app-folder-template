@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"pjt/internal/container"
+	dblogmanager "pjt/internal/db/db-log-manager"
 	"pjt/internal/logger"
 	rest "pjt/internal/transport/http-rest"
 	tcp "pjt/internal/transport/tcp/server"
@@ -74,6 +75,9 @@ func (a *Application) Start() {
 	// 30일이 지난 로그 파일 정리
 	logger.StartCleaning()
 
+	// DB 로그 루틴 실행
+	dblogmanager.StartLogManager()
+
 	go startTCPServer()
 
 	/**
@@ -118,6 +122,9 @@ func (a *Application) Shutdown() {
 
 	// shutdown log routine
 	logger.Shutdown()
+
+	// shutdown db log manager
+	dblogmanager.Shutdown()
 
 	// shutdown tcp routine and tcp heartbeat routine
 	a.tcpServer.Shutdown()
