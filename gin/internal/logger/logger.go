@@ -16,7 +16,9 @@ var customLogger *CustomLogger
 var maxAgeDays = 0
 
 type CustomLogger struct {
-	wg      *sync.WaitGroup
+	prefix  string
+	curDay  int
+	wg      sync.WaitGroup
 	ctx     context.Context
 	cancel  context.CancelFunc
 	ticker  *time.Ticker
@@ -25,31 +27,37 @@ type CustomLogger struct {
 }
 
 func NewCustomLogger(prefix string) (*CustomLogger, error) {
+	ctx, cancel := context.WithCancel(context.Background())
 
-	filepath := getFilepath()
+	l := &CustomLogger{
+		prefix: prefix,
+		ctx:    ctx,
+		cancel: cancel,
+		ticker: time.NewTicker(1 * time.Minute),
+	}
+	if err := l.setLogfileAndLogger(l.prefix); err != nil {
+		return nil, err
+	}
+	return l, nil
+}
+
+func (l *CustomLogger) setLogfileAndLogger(prefix string) error {
+	now := time.Now()
+	filepath := getFilepath(now)
 	file, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return err
 	}
 
 	logger := log.New(io.MultiWriter(os.Stderr, file), prefix, log.Ldate|log.Ltime)
-
-	wg := &sync.WaitGroup{}
-	ctx, cancel := context.WithCancel(context.Background())
-
-	return &CustomLogger{
-		wg:      wg,
-		ctx:     ctx,
-		cancel:  cancel,
-		ticker:  time.NewTicker(24 * time.Hour),
-		logger:  logger,
-		logFile: file,
-	}, nil
+	l.logFile = file
+	l.logger = logger
+	l.curDay = now.Day()
+	return nil
 }
 
-func getFilepath() string {
-	now := time.Now()
+func getFilepath(now time.Time) string {
 	dir := filepath.Base("log")
 	fileName := fmt.Sprintf("%d_%02d_%02d", now.Year(), now.Month(), now.Day())
 	return filepath.Join(dir, fileName)
@@ -84,24 +92,30 @@ func Close() error {
  */
 func StartCleaning() {
 	customLogger.wg.Add(1)
-	go func() {
-		defer customLogger.wg.Done()
-		cleanOldLogs()
+	defer customLogger.wg.Done()
+	cleanOldLogs()
 
-		for {
-			select {
-			case <-customLogger.ctx.Done():
-				Println("[Log Cleanup] Log cleanup goroutine terminated")
-				return
-			case <-customLogger.ticker.C:
+	for {
+		select {
+		case <-customLogger.ctx.Done():
+			Println("[Log Cleanup] Log cleanup goroutine terminated")
+			return
+		case <-customLogger.ticker.C:
+			now := time.Now()
+			if customLogger.curDay != now.Day() {
+				Close()
+				customLogger.setLogfileAndLogger(customLogger.prefix)
 				cleanOldLogs()
+				customLogger.curDay = now.Day()
 			}
+
 		}
-	}()
+	}
 }
 
 func cleanOldLogs() {
 	cutoffTime := time.Now().AddDate(0, 0, maxAgeDays)
+
 	dir := filepath.Base("log")
 
 	files, err := os.ReadDir(dir)
@@ -124,6 +138,7 @@ func cleanOldLogs() {
 		}
 
 		if info.ModTime().Before(cutoffTime) {
+
 			filePath := filepath.Join(dir, file.Name())
 			Printf("[Log Cleanup] Old log files deleted: %s (Deleted date: %s)",
 				filePath, info.ModTime().Format("2006-01-02"))
@@ -143,4 +158,5 @@ func Shutdown() {
 	customLogger.cancel()
 	customLogger.ticker.Stop()
 	customLogger.wg.Wait()
+	Close()
 }

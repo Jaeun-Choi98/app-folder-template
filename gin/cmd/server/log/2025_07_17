@@ -1,0 +1,52 @@
+2025/07/17 09:37:22 [Log Cleanup] Old log files deleted: log\2025_07_13 (Deleted date: 2025-07-14)
+2025/07/17 09:38:24 [Log Cleanup] Old log files deleted: log\2025_07_17 (Deleted date: 2025-07-17)
+2025/07/17 09:38:24 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_17: The process cannot access the file because it is being used by another process.
+2025/07/17 09:38:24 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/17 09:38:25 here sync DB
+2025/07/17 09:38:26 here sync DB
+2025/07/17 09:38:27 here sync DB
+2025/07/17 09:38:28 here sync DB
+2025/07/17 09:38:29 here sync DB
+2025/07/17 09:38:30 here sync DB
+2025/07/17 09:38:31 here sync DB
+2025/07/17 09:38:32 here sync DB
+2025/07/17 09:38:33 here sync DB
+2025/07/17 09:38:34 here sync DB
+2025/07/17 09:38:35 here sync DB
+2025/07/17 09:38:36 here sync DB
+2025/07/17 09:38:37 Shutting down...
+2025/07/17 09:38:37 [REST] REST goroutine terminated
+2025/07/17 09:38:37 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/17 09:38:37 [DB] DB Log Manager goroutine terminated
+2025/07/17 09:38:37 [Cache] SyncDB goroutine is terminated
+2025/07/17 09:38:37 [TCP] TCP goroutine terminated
+2025/07/17 10:02:40 [Log Cleanup] Old log files deleted: log\2025_07_17 (Deleted date: 2025-07-17)
+2025/07/17 10:02:40 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_17: The process cannot access the file because it is being used by another process.
+2025/07/17 10:02:40 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/17 10:02:41 here sync DB
+2025/07/17 10:02:42 here sync DB
+2025/07/17 10:02:43 here sync DB
+2025/07/17 10:02:44 Shutting down...
+2025/07/17 10:02:44 [REST] REST goroutine terminated
+2025/07/17 10:02:44 [DB] DB Log Manager goroutine terminated
+2025/07/17 10:02:44 [Cache] SyncDB goroutine is terminated
+2025/07/17 10:02:44 [TCP] TCP goroutine terminated
+2025/07/17 10:02:44 Application terminated
+2025/07/17 10:02:44 [Log Cleanup] Log cleanup goroutine terminated
+2025/07/17 10:32:47 [Log Cleanup] Old log files deleted: log\2025_07_17 (Deleted date: 2025-07-17)
+2025/07/17 10:32:47 [Log Cleanup] Failed to delete file:
+	 remove log\2025_07_17: The process cannot access the file because it is being used by another process.
+2025/07/17 10:32:47 [Log Cleanup] Log cleanup completed: 0 files deleted in total
+2025/07/17 10:32:48 here sync DB
+2025/07/17 10:32:49 here sync DB
+2025/07/17 10:32:50 here sync DB
+2025/07/17 10:32:51 here sync DB
+2025/07/17 10:32:52 Shutting down...
+2025/07/17 10:32:52 [REST] REST goroutine terminated
+2025/07/17 10:32:52 [DB] DB Log Manager goroutine terminated
+2025/07/17 10:32:52 [RAM] SyncDB goroutine is terminated
+2025/07/17 10:32:52 [TCP] TCP goroutine terminated
+2025/07/17 10:32:52 Application terminated
+2025/07/17 10:32:52 [Log Cleanup] Log cleanup goroutine terminated

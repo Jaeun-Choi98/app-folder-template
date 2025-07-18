@@ -49,7 +49,7 @@ func Shutdown() {
 
 func StartLogManager() {
 	dbLogManager.wg.Add(1)
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(10 * time.Second)
 	defer func() {
 		dbLogManager.wg.Done()
 		ticker.Stop()

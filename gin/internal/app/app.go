@@ -73,10 +73,17 @@ func (a *Application) Start() {
 	a.handleShutdown()
 
 	// 30일이 지난 로그 파일 정리
-	logger.StartCleaning()
+	go logger.StartCleaning()
 
-	// DB 로그 루틴 실행
-	dblogmanager.StartLogManager()
+	/**
+	 * DB 로그 루틴 실행
+	 * DB 로그 매니저에서 루틴을 또 분기해야할 수도
+	 */
+	go dblogmanager.StartLogManager()
+
+	go a.container.Ram.StartSyncDB()
+
+	go a.container.Cron.StartCron()
 
 	go startTCPServer()
 
@@ -120,11 +127,14 @@ func (a *Application) Shutdown() {
 		logger.Printf("Error during shutdown: %v", err)
 	}
 
-	// shutdown log routine
-	logger.Shutdown()
-
 	// shutdown db log manager
 	dblogmanager.Shutdown()
+
+	// shutdown sync db routine
+	a.container.Ram.ShutdownSyncDB()
+
+	// shutdown cron job routine
+	a.container.Cron.Shutdown()
 
 	// shutdown tcp routine and tcp heartbeat routine
 	a.tcpServer.Shutdown()
@@ -136,14 +146,14 @@ func (a *Application) Shutdown() {
 	}
 	a.container.SseService.Close()
 
-	// 로그 파일 닫음
-	logger.Close()
-
 	// EventBus 채널 닫음
 	a.container.EventBus.Close()
 
 	a.wg.Wait()
 	logger.Println("Application terminated")
+
+	// shutdown log routine
+	logger.Shutdown()
 
 	// shutdwon main routine
 	a.mainCtxCancel()

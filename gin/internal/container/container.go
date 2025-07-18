@@ -2,6 +2,7 @@ package container
 
 import (
 	"pjt/internal/config"
+	"pjt/internal/cron"
 	dbhandler "pjt/internal/db/db-handler"
 	dblogmanager "pjt/internal/db/db-log-manager"
 	"pjt/internal/infra/ram"
@@ -25,6 +26,7 @@ var container *Container
 type Container struct {
 	Config           *config.Configuration
 	Dao              dbhandler.DBHandlerInterface
+	Ram              *ram.Ram
 	ApiService       service.APIServcieInterface
 	SseService       service.SSEServiceInterface
 	TcpServcie       service.TCPServiceInterface
@@ -32,6 +34,7 @@ type Container struct {
 	RESTServer       *rest.RESTServer
 	TCPServer        *tcp.TCPServer
 	EventBus         *eventbus.EventBus
+	Cron             *cron.Cron
 	SystemMonitoring *monitoring.SystemMonitoring
 }
 
@@ -79,10 +82,12 @@ func NewContainer() (*Container, error) {
 
 	dbManager, _ := dblogmanager.NewDBLogManager(dao, ram, eventbus)
 	dblogmanager.SetEventManger(dbManager)
+	cron := cron.NewCron(config, dao, eventbus)
 
 	return &Container{
 		Config:           config,
 		Dao:              dao,
+		Ram:              ram,
 		ApiService:       apiService,
 		SseService:       sseService,
 		TcpServcie:       tcpService,
@@ -90,6 +95,7 @@ func NewContainer() (*Container, error) {
 		RESTServer:       rest,
 		TCPServer:        tcp,
 		EventBus:         eventbus,
+		Cron:             cron,
 		SystemMonitoring: monitoring,
 	}, nil
 }
