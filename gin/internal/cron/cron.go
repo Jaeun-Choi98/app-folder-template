@@ -14,15 +14,15 @@ import (
 )
 
 const (
-	maxAgeDays = -1
+	maxAgeDays       = -1
+	partitionAgeDays = -1
 )
 
 var DynamicDeviceLogTableName string
+var CreateDeviceLog time.Time
 var cronMu sync.Mutex
 
 type Cron struct {
-	checkTime time.Time
-
 	config   *config.Configuration
 	dao      dbhandler.DBHandlerInterface
 	eventBus *eventbus.EventBus
@@ -35,19 +35,27 @@ type Cron struct {
 
 func NewCron(config *config.Configuration, dao dbhandler.DBHandlerInterface, eventbus *eventbus.EventBus) *Cron {
 	ctx, cancel := context.WithCancel(context.Background())
-	now := time.Now()
 	c := &Cron{
-		checkTime: now,
-		config:    config,
-		dao:       dao,
-		eventBus:  eventbus,
-		ctx:       ctx,
-		cancel:    cancel,
+		config:   config,
+		dao:      dao,
+		eventBus: eventbus,
+		ctx:      ctx,
+		cancel:   cancel,
 	}
 
-	c.renewTableName()
-	c.DynamicDBLogTableJob()
+	c.LoadLogTableInfo()
+	c.CleanDBLogTableJob()
+	c.DynamicDBLogTableJob(true)
 	return c
+}
+
+func (c *Cron) LoadLogTableInfo() error {
+
+	if DynamicDeviceLogTableName == "" {
+		c.renewTableName()
+	}
+
+	return nil
 }
 
 func (c *Cron) Shutdown() {
@@ -68,20 +76,24 @@ func (c *Cron) StartCron() error {
 		case <-c.ctx.Done():
 			return nil
 		case <-tickerCheck.C:
-			now := time.Now()
-			if c.checkTime.Day() != now.Day() {
-				c.checkTime = now
+			now := time.Now().In(utils.LocalKorea)
+			var update1 bool
+			if CreateDeviceLog.Before(now.AddDate(0, 0, partitionAgeDays)) {
 				c.renewTableName()
-				c.DynamicDBLogTableJob()
-				c.CleanDBLogTableJob()
+				update1 = true
 			}
+			c.DynamicDBLogTableJob(update1)
 		}
 	}
 }
 
 func (c *Cron) renewTableName() {
+	t := time.Now().In(utils.LocalKorea)
+	year, month, day := t.Date()
+	t = time.Date(year, month, day, 0, 0, 0, 0, utils.LocalKorea)
 	cronMu.Lock()
-	DynamicDeviceLogTableName = fmt.Sprintf("dvc_log_%d%02d%02d", c.checkTime.Year(), c.checkTime.Month(), c.checkTime.Day())
+	DynamicDeviceLogTableName = fmt.Sprintf("dvc_log_%d%02d%02d", t.Year(), t.Month(), t.Day())
+	CreateDeviceLog = t
 	cronMu.Unlock()
 }
 
@@ -92,12 +104,14 @@ func GetDeviceLogTableName() string {
 	return DynamicDeviceLogTableName
 }
 
-func (c *Cron) DynamicDBLogTableJob() {
+func (c *Cron) DynamicDBLogTableJob(updateDevice bool) {
 	switch c.config.DBType {
 	case "oracle":
-		// if err := c.dao.CreateTable(strings.ToUpper(DynamicDeviceLogTableName), GetOraQuery()); err != nil {
-		// 	logger.Println("[Cron] Failed to create log table")
-		// }
+		if updateDevice {
+			// if err := c.dao.CreateTable(strings.ToUpper(DynamicDeviceLogTableName), GetOraQuery()); err != nil {
+			// 	logger.Println("[Cron] Failed to create log table")
+			// }
+		}
 	case "maria":
 	default:
 		logger.Println("[Cron] Failed to create log table, invalid config.DBType")

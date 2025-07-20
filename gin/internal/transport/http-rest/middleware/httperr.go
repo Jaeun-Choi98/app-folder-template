@@ -18,7 +18,9 @@ func ErrorMiddleware() gin.HandlerFunc {
 				if err.ErrMsg != "" {
 					logger.Printf("[REST] error message: %s", err.ErrMsg)
 				}
-				logger.Printf("[REST] result code: %d", err.BaseResponse.Result)
+				if err.BaseResponse != nil {
+					logger.Printf("[REST] result code: %d", err.BaseResponse.Result)
+				}
 				ctx.JSON(err.Code, err.BaseResponse)
 			}
 		}
