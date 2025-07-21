@@ -3,7 +3,6 @@ package logger
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,7 +21,8 @@ type CustomLogger struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
 	ticker  *time.Ticker
-	logger  *log.Logger
+	logger1 *log.Logger
+	logger2 *log.Logger
 	logFile *os.File
 }
 
@@ -50,9 +50,12 @@ func (l *CustomLogger) setLogfileAndLogger(prefix string) error {
 		return err
 	}
 
-	logger := log.New(io.MultiWriter(os.Stderr, file), prefix, log.Ldate|log.Ltime)
+	//logger := log.New(io.MultiWriter(os.Stderr, file), prefix, log.Ldate|log.Ltime)
+	logger1 := log.New(os.Stderr, prefix, log.Ldate|log.Ltime)
+	logger2 := log.New(file, prefix, log.Ldate|log.Ltime)
 	l.logFile = file
-	l.logger = logger
+	l.logger1 = logger1
+	l.logger2 = logger2
 	l.curDay = now.Day()
 	return nil
 }
@@ -75,11 +78,13 @@ func SetLogger(l *CustomLogger) {
 // }
 
 func Println(v ...any) {
-	customLogger.logger.Println(v...)
+	customLogger.logger1.Println(v...)
+	customLogger.logger2.Println(v...)
 }
 
 func Printf(format string, v ...any) {
-	customLogger.logger.Printf(format, v...)
+	customLogger.logger1.Printf(format, v...)
+	customLogger.logger2.Printf(format, v...)
 }
 
 func Close() error {
