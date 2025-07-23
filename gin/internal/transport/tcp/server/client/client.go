@@ -26,6 +26,8 @@ type Client struct {
 	ReplyCh map[byte]chan *handler.ReplyMessage // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
+	parsingErrCnt int
+
 	Ctx    context.Context
 	Cancel context.CancelFunc
 }
@@ -63,10 +65,11 @@ func (c *Client) MessageProcessingLoop() {
 
 			if err != nil {
 				// if EOF, normally exit
-				if err == io.EOF {
+				if err == io.EOF || c.parsingErrCnt > 4 {
 					return
 				}
 				logger.Printf("[TCP] Parse error for client %d: %v", c.ClientId, err)
+				c.parsingErrCnt++
 				continue
 			}
 
