@@ -5,11 +5,16 @@ import (
 	"io"
 	"net"
 	"pjt/internal/logger"
+	"sync"
 
 	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/parser"
 
 	"time"
+)
+
+const (
+	SequenceMode = 65535
 )
 
 /**
@@ -19,6 +24,7 @@ import (
 type Client struct {
 	ClientId uint32
 	Conn     net.Conn
+	SeqNum   uint16
 
 	parser  parser.Parser
 	handler handler.HandlerManagerInterface
@@ -30,6 +36,8 @@ type Client struct {
 
 	Ctx    context.Context
 	Cancel context.CancelFunc
+
+	mu sync.Mutex
 }
 
 func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps parser.Parser,
@@ -97,4 +105,16 @@ func (c *Client) SendMessage(msg []byte, timeout time.Duration) error {
 
 func (c *Client) ReadMessage() error {
 	return nil
+}
+
+func (c *Client) SetSequenceNum(seq uint16) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.SeqNum = seq
+}
+
+func (c *Client) GetSequenceNum() uint16 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.SeqNum
 }

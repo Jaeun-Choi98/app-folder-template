@@ -13,6 +13,7 @@ const (
 	SysSttType
 	TCPNoReplyType   // 응답 없음
 	TCPWithReplyType // 응답 있음
+	UpdateClientType
 	EventAType
 	EventBType
 )
@@ -52,14 +53,16 @@ type SysSttPayload struct {
 // TCPClientSend
 type TCPSendNoReplyPayload struct {
 	ClientId    uint32
-	Message     []byte
+	OpCode      byte
+	Data        []byte
 	SendTimeout time.Duration
 	Err         chan error
 }
 
 type TCPSendWithReplyPayload struct {
 	ClientId     uint32
-	Message      []byte
+	OpCode       byte
+	Data         []byte
 	SendTimeout  time.Duration
 	ReplyTimeout time.Duration
 	Response     chan any

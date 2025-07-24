@@ -92,7 +92,7 @@ func (c *Controller) RoutePath() {
 		errCh := make(chan error, 1)
 		c.EventBus.Publish(eventbus.TCPNoReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendNoReplyPayload{
 			ClientId:    1,
-			Message:     []byte("dsfdsf"),
+			Data:        []byte("dsfdsf"),
 			SendTimeout: 5 * time.Second,
 			Err:         errCh,
 		}))
@@ -113,7 +113,7 @@ func (c *Controller) RoutePath() {
 		resCh := make(chan any, 1)
 		c.EventBus.Publish(eventbus.TCPWithReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendWithReplyPayload{
 			ClientId:     1,
-			Message:      []byte{0x02},
+			Data:         []byte{0x02},
 			SendTimeout:  5 * time.Second,
 			ReplyTimeout: 10 * time.Second,
 			Err:          errCh,

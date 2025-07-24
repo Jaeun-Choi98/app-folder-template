@@ -30,7 +30,8 @@ func NewClientManager(pctx context.Context, eb *eventbus.EventBus) *ClientManage
 	}
 	sendQueue1 := eb.Subscribe(eventbus.TCPNoReplyType)
 	sendQueue2 := eb.Subscribe(eventbus.TCPWithReplyType)
-	go cm.sendWorker(sendQueue1, sendQueue2)
+	updateQueue := eb.Subscribe(eventbus.UpdateClientType)
+	go cm.Worker(sendQueue1, sendQueue2, updateQueue)
 	return cm
 }
 
@@ -77,7 +78,7 @@ func (cm *ClientManager) GetClient(clientId uint32) *Client {
 	return nil
 }
 
-func (cm *ClientManager) sendWorker(sendQueue1, sendQueue2 chan *eventbus.Message) {
+func (cm *ClientManager) Worker(sendQueue1, sendQueue2, updateQueue chan *eventbus.Message) {
 	for {
 		select {
 		case <-cm.ctx.Done():
@@ -85,11 +86,11 @@ func (cm *ClientManager) sendWorker(sendQueue1, sendQueue2 chan *eventbus.Messag
 		case msg := <-sendQueue1:
 			req, ok := msg.Payload.(*eventbus.TCPSendNoReplyPayload)
 			if !ok {
-				logger.Println("[TCP] ClientManager.sendWork failed to assert struct")
+				logger.Println("[TCP] ClientManager.worker failed to assert struct")
 				continue
 			}
 			go func() {
-				err := cm.sendToClientNoReply(req.ClientId, req.Message, req.SendTimeout)
+				err := cm.sendToClientNoReply(req.ClientId, req.Data, req.SendTimeout)
 				if err != nil {
 					logger.Println(err)
 				}
@@ -98,17 +99,19 @@ func (cm *ClientManager) sendWorker(sendQueue1, sendQueue2 chan *eventbus.Messag
 		case msg := <-sendQueue2:
 			req, ok := msg.Payload.(*eventbus.TCPSendWithReplyPayload)
 			if !ok {
-				logger.Println("[TCP] ClientManager.sendWork failed to assert struct")
+				logger.Println("[TCP] ClientManager.worker failed to assert struct")
 				continue
 			}
 			go func() {
-				res, err := cm.sendToClientWithReply(req.ClientId, req.Message, req.SendTimeout, req.ReplyTimeout)
+				res, err := cm.sendToClientWithReply(req.ClientId, req.Data, req.SendTimeout, req.ReplyTimeout)
 				if err != nil {
 					logger.Println(err)
 				}
 				req.Err <- err
 				req.Response <- res
 			}()
+		case msg := <-updateQueue:
+			logger.Printf("%v ", msg)
 		}
 	}
 }
