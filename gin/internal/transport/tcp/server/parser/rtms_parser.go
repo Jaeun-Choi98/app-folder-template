@@ -22,7 +22,7 @@ const (
  * LRC: Length ~ Data XOR value
  */
 
-type RTMSMessage struct {
+type Packet struct {
 	STX      [2]byte
 	Length   uint32
 	Sequence byte
@@ -293,10 +293,10 @@ func (p *RTMSParser) completeMessage() (*ParseMessage, error) {
 	msg := &ParseMessage{
 		Protocol: ProtocolRTMS,
 		Type:     fmt.Sprintf("rtms_0x%03X", p.currentMessage.opCode),
-		Data:     nil,
+		Packet:   nil,
 	}
 
-	msg.Add(&RTMSMessage{
+	msg.Add(&Packet{
 		STX:      p.currentMessage.stx,
 		Length:   p.currentMessage.length,
 		Sequence: p.currentMessage.sequence,

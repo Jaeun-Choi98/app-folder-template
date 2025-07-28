@@ -69,6 +69,11 @@ type TCPSendWithReplyPayload struct {
 	Err          chan error
 }
 
+type UpdateClientPayload struct {
+	OldClientId uint32
+	NewClientId uint32
+}
+
 // Base
 type BasePayload struct {
 	Type string `json:"type"`

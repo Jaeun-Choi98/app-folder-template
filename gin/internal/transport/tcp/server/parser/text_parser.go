@@ -60,9 +60,9 @@ func (p *TextParser) Parse(conn net.Conn) (*ParseMessage, error) {
 
 	// 단순 텍스트 메시지
 	msg := &ParseMessage{
-		Protocol: ProtocolText,
-		Type:     "text",
-		Data:     content,
+		Protocol:   ProtocolText,
+		Type:       "text",
+		TextPacket: content,
 	}
 	return msg, nil
 }
@@ -72,9 +72,9 @@ func (p *TextParser) parseJSONMessage(content string) (*ParseMessage, error) {
 	if err := json.Unmarshal([]byte(content), &jsonMsg); err != nil {
 		// JSON 파싱 실패시 단순 텍스트로 처리
 		msg := &ParseMessage{
-			Protocol: ProtocolText,
-			Type:     "text",
-			Data:     content,
+			Protocol:   ProtocolText,
+			Type:       "text",
+			TextPacket: content,
 		}
 		return msg, nil
 	}
@@ -83,11 +83,11 @@ func (p *TextParser) parseJSONMessage(content string) (*ParseMessage, error) {
 	if msgType == "" {
 		msgType = "json"
 	}
-
+	jsonStr, _ := json.Marshal(jsonMsg)
 	msg := &ParseMessage{
-		Protocol: ProtocolText,
-		Type:     msgType,
-		Data:     jsonMsg,
+		Protocol:   ProtocolText,
+		Type:       msgType,
+		TextPacket: string(jsonStr),
 	}
 	return msg, nil
 }

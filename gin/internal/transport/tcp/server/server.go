@@ -6,7 +6,6 @@ import (
 	"net"
 	"pjt/internal/logger"
 	"pjt/internal/service"
-	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/tcp/server/client"
 	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/parser"
@@ -32,11 +31,11 @@ type TCPServer struct {
 	maxTimeOutCnt int
 }
 
-func NewTCPServer(eventBus *eventbus.EventBus, tcpServcie service.TCPServiceInterface, heartbeat time.Duration) (*TCPServer, error) {
+func NewTCPServer(clientManager *client.ClientManager, tcpServcie service.TCPServiceInterface, heartbeat time.Duration) (*TCPServer, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TCPServer{
-		clients:       client.NewClientManager(ctx, eventBus),
+		clients:       clientManager,
 		handler:       handler.NewHandlerManager(tcpServcie),
 		ctx:           ctx,
 		cancel:        cancel,

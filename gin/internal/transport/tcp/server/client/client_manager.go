@@ -2,36 +2,31 @@ package client
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/tcp/server/handler"
+	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
 	"time"
 )
 
 type ClientManager struct {
-	clients  map[uint32]*Client
-	eventbus *eventbus.EventBus
-	mu       sync.RWMutex
-	ctx      context.Context
-	cancel   context.CancelFunc
+	clients map[uint32]*Client
+	mu      sync.RWMutex
+	ctx     context.Context
+	cancel  context.CancelFunc
 
 	count int
 }
 
-func NewClientManager(pctx context.Context, eb *eventbus.EventBus) *ClientManager {
-	ctx, cancel := context.WithCancel(pctx)
+func NewClientManager() *ClientManager {
+	ctx, cancel := context.WithCancel(context.Background())
 	cm := &ClientManager{
-		clients:  make(map[uint32]*Client),
-		eventbus: eb,
-		ctx:      ctx,
-		cancel:   cancel,
+		clients: make(map[uint32]*Client),
+		ctx:     ctx,
+		cancel:  cancel,
 	}
-	sendQueue1 := eb.Subscribe(eventbus.TCPNoReplyType)
-	sendQueue2 := eb.Subscribe(eventbus.TCPWithReplyType)
-	updateQueue := eb.Subscribe(eventbus.UpdateClientType)
-	go cm.Worker(sendQueue1, sendQueue2, updateQueue)
 	return cm
 }
 
@@ -78,57 +73,35 @@ func (cm *ClientManager) GetClient(clientId uint32) *Client {
 	return nil
 }
 
-func (cm *ClientManager) Worker(sendQueue1, sendQueue2, updateQueue chan *eventbus.Message) {
-	for {
-		select {
-		case <-cm.ctx.Done():
-			return
-		case msg := <-sendQueue1:
-			req, ok := msg.Payload.(*eventbus.TCPSendNoReplyPayload)
-			if !ok {
-				logger.Println("[TCP] ClientManager.worker failed to assert struct")
-				continue
-			}
-			go func() {
-				err := cm.sendToClientNoReply(req.ClientId, req.Data, req.SendTimeout)
-				if err != nil {
-					logger.Println(err)
-				}
-				req.Err <- err
-			}()
-		case msg := <-sendQueue2:
-			req, ok := msg.Payload.(*eventbus.TCPSendWithReplyPayload)
-			if !ok {
-				logger.Println("[TCP] ClientManager.worker failed to assert struct")
-				continue
-			}
-			go func() {
-				res, err := cm.sendToClientWithReply(req.ClientId, req.Data, req.SendTimeout, req.ReplyTimeout)
-				if err != nil {
-					logger.Println(err)
-				}
-				req.Err <- err
-				req.Response <- res
-			}()
-		case msg := <-updateQueue:
-			logger.Printf("%v ", msg)
-		}
+func (cm *ClientManager) UpdateClient(old, new uint32) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	if client, exists := cm.clients[old]; exists {
+		client.ClientId = new
+		cm.clients[new] = client
+		delete(cm.clients, old)
+		logger.Printf("[TCP] Success ClientManager.UpdateClient, cilentId: %d -> %d", old, new)
+	} else {
+		logger.Println("[TCP] Failed to ClientManager.UpdateClient")
 	}
 }
 
-func (cm *ClientManager) sendToClientNoReply(clientId uint32, message []byte, sendTimeout time.Duration) error {
+func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) error {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
 	cm.mu.RUnlock()
-
 	if !exists {
 		return fmt.Errorf("client not found: %d", clientId)
 	}
 
+	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
+	defer client.SetSequenceNum(seqNum)
+
+	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	return client.SendMessage(message, sendTimeout)
 }
 
-func (cm *ClientManager) sendToClientWithReply(clientId uint32, message []byte,
+func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, data []byte,
 	sendTimeout time.Duration, replyTimeout time.Duration) (*handler.ReplyMessage, error) {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
@@ -137,18 +110,20 @@ func (cm *ClientManager) sendToClientWithReply(clientId uint32, message []byte,
 	if !exists {
 		return nil, fmt.Errorf("client not found: %d", clientId)
 	}
-	replyCh := make(chan *handler.ReplyMessage, 1)
 
-	// Message의 OPCODE를 Key로 줄 생각.
-	if _, exists := client.ReplyCh[0x02]; exists {
-		return nil, fmt.Errorf("[TCP] already exists processing message: pending message")
+	replyCh := make(chan *handler.ReplyMessage, 1)
+	if _, exists := client.ReplyCh[opCode]; exists {
+		return nil, fmt.Errorf("[TCP] already exists processing message: pending reply")
 	}
-	client.ReplyCh[0x02] = replyCh
+	client.ReplyCh[opCode] = replyCh
 	defer func() {
 		close(replyCh)
-		delete(client.ReplyCh, 0x02)
+		delete(client.ReplyCh, opCode)
 	}()
 
+	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
+	defer client.SetSequenceNum(seqNum)
+	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err := client.SendMessage(message, sendTimeout); err != nil {
 		return nil, err
 	}

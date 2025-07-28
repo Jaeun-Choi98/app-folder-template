@@ -146,6 +146,9 @@ func (a *Application) Shutdown() {
 	}
 	a.container.SseService.Close()
 
+	// shutdown worker routine
+	a.container.TcpService.Close()
+
 	// EventBus 채널 닫음
 	a.container.EventBus.Close()
 

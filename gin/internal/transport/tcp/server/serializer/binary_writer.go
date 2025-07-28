@@ -54,21 +54,14 @@ func (w *BinaryWriter) Reset() {
 }
 
 // 이때, data 슬라이스는 크기는 프로토콜에 맞는 고정된 크기여야 함.
-func SerializeRTMSResponse(byteOrder binary.ByteOrder, opCode uint16, sequence byte, data []byte) ([]byte, error) {
-	length := uint32(11 + len(data))
-	unitNo := byte(1)
-
-	lrc := CalculateRTMSLRC(byteOrder, length, sequence, unitNo, opCode, data)
+func SerializeResponse(byteOrder binary.ByteOrder, flowControl byte, opCode byte, sequence uint16, data []byte) ([]byte, error) {
 
 	return NewBinaryWriter(byteOrder).
-		WriteByteOne(0x7E).
-		WriteByteOne(0x7E).
-		WriteUint32(length).
-		WriteByteOne(sequence).
-		WriteByteOne(unitNo).
-		WriteUint16(opCode).
+		WriteByteOne(flowControl).
+		WriteByteOne(opCode).
+		WriteUint16(sequence).
+		WriteUint16(uint16(len(data))).
 		WriteBytes(data).
-		WriteByteOne(lrc).
 		Bytes(), nil
 }
 

@@ -56,6 +56,9 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps par
 }
 
 func (c *Client) Close() {
+	if c.ClientId < 65536 {
+		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
+	}
 	if c.Conn != nil {
 		c.Conn.Close()
 	}

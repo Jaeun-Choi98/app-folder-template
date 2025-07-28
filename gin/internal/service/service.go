@@ -23,4 +23,5 @@ type SSEServiceInterface interface {
 
 type TCPServiceInterface interface {
 	Handle0x010() error
+	Close()
 }

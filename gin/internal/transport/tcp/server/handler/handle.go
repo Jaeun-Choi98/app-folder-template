@@ -85,7 +85,7 @@ func NewHandlerManager(tcpServcie service.TCPServiceInterface) *HandlerManager {
 	}
 
 	handler.RegisterHandle("text", func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
-		log.Printf("protocol: %v, msgType: %s, clientID: %d, Data: %v ", msg.Protocol, msg.Type, msg.ClientId, msg.Data)
+		log.Printf("protocol: %v, msgType: %s, clientID: %d, Data: %v ", msg.Protocol, msg.Type, msg.ClientId, msg.TextPacket)
 		return nil
 	})
 	handler.RegisterHandle("json", func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {

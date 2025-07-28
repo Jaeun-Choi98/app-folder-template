@@ -19,14 +19,15 @@ var (
 
 // 이후에 parse한 후에 msg를 handler에게 위임할 때, 필요한 context가 있다면 추가.
 type ParseMessage struct {
-	Protocol ProtocolType
-	Type     string
-	ClientId uint32
-	Data     any
+	Protocol   ProtocolType
+	Type       string
+	ClientId   uint32
+	Packet     *Packet
+	TextPacket string
 }
 
-func (m *ParseMessage) Add(data any) *ParseMessage {
-	m.Data = data
+func (m *ParseMessage) Add(data *Packet) *ParseMessage {
+	m.Packet = data
 	return m
 }
 

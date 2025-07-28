@@ -16,6 +16,7 @@ import (
 	"pjt/internal/transport/http-rest/controller"
 	"pjt/internal/transport/monitoring"
 	tcp "pjt/internal/transport/tcp/server"
+	"pjt/internal/transport/tcp/server/client"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,7 @@ type Container struct {
 	Ram              *ram.Ram
 	ApiService       service.APIServcieInterface
 	SseService       service.SSEServiceInterface
-	TcpServcie       service.TCPServiceInterface
+	TcpService       service.TCPServiceInterface
 	Controller       *controller.Controller
 	RESTServer       *rest.RESTServer
 	TCPServer        *tcp.TCPServer
@@ -69,11 +70,12 @@ func NewContainer() (*Container, error) {
 
 	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
 	sseService := sseservice.NewSSEService()
-	tcpService := tcpservice.NewTCPService(eventbus)
 	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
 
-	tcp, err := tcp.NewTCPServer(eventbus, tcpService, 5*time.Second)
+	tcpClientManager := client.NewClientManager()
+	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, ram, eventbus)
+	tcp, err := tcp.NewTCPServer(tcpClientManager, tcpService, 5*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +92,7 @@ func NewContainer() (*Container, error) {
 		Ram:              ram,
 		ApiService:       apiService,
 		SseService:       sseService,
-		TcpServcie:       tcpService,
+		TcpService:       tcpService,
 		Controller:       controller,
 		RESTServer:       rest,
 		TCPServer:        tcp,
