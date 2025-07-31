@@ -98,5 +98,7 @@ func NewHandlerManager(tcpServcie service.TCPServiceInterface) *HandlerManager {
 	// reply test
 	handler.RegisterHandle("rtms_0x002", handler.Handle0x002())
 
+	// close client
+	handler.RegisterHandle("rtms_0x0AA", handler.Handle0xAA())
 	return handler
 }

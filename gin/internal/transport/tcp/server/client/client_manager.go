@@ -103,6 +103,13 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 
 func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, data []byte,
 	sendTimeout time.Duration, replyTimeout time.Duration) (*handler.ReplyMessage, error) {
+	defer func() (*handler.ReplyMessage, error) {
+		if r := recover(); r != nil {
+			return nil, fmt.Errorf("[TCP] client wsarecv( panic ), client id: %d", clientId)
+		}
+		return nil, nil
+	}()
+
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
 	cm.mu.RUnlock()
@@ -131,6 +138,8 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	select {
 	case <-time.After(replyTimeout):
 		return nil, fmt.Errorf("[TCP] reply timeout")
+	// 클라이언트가 패닉이 발생하면 해당 replyCh은 닫히게 됨 -> reply가 nil이 될 수도 있음 or close of closed channel 발생
+	// panic 회복 처리 필요
 	case reply := <-replyCh:
 		if reply.Err != nil {
 			return nil, reply.Err

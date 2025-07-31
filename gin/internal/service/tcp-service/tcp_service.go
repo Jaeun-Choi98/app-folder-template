@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
@@ -120,7 +121,10 @@ func (t *TCPService) Worker() {
 	}
 }
 
-func (t *TCPService) Handle0x010() error {
-	t.Eventbus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": "sdfsd"}))
+func (t *TCPService) Handle0x010(clientId uint32) error {
+	t.Eventbus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
 	return nil
+}
+func (t *TCPService) Handle0xAA(clientId uint32) {
+	t.Eventbus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
 }

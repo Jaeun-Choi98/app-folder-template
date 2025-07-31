@@ -62,6 +62,11 @@ func (c *Client) Close() {
 	if c.Conn != nil {
 		c.Conn.Close()
 	}
+	for _, v := range c.ReplyCh {
+		// 클라이언트가 패닉이 발생했을 때, 해당 replyCh를 갑자기 닫으면 해당 채널을 수신하고 있는 곳에서 close of closed channel panic 발생. -> 수신하는 곳에서 recover 처리 필요.
+		// client_manager.go_191
+		close(v)
+	}
 	//close(c.TimeoutChannel)
 	c.Cancel()
 }

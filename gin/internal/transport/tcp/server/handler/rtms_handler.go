@@ -41,7 +41,15 @@ func (hm *HandlerManager) Handle0x010() TypeHandlerFunc {
 		/**
 		 * EventBus로 전파하거나  tcpService로 처리
 		 */
-		hm.TCPService.Handle0x010()
+		hm.TCPService.Handle0x010(msg.ClientId)
+		return nil
+	}
+}
+
+// 클라이언트 종료 시에 TCP 세션 정보를 삭제하기 위한 핸들러
+func (hm *HandlerManager) Handle0xAA() TypeHandlerFunc {
+	return func(msg *parser.ParseMessage, replyCh map[byte]chan *ReplyMessage) error {
+		hm.TCPService.Handle0xAA(msg.ClientId)
 		return nil
 	}
 }
