@@ -102,13 +102,22 @@ func (c *Client) MessageProcessingLoop() {
 }
 
 func (c *Client) SendMessage(msg []byte, timeout time.Duration) error {
-	// 타임아웃 설정
 	if timeout == 0 {
 		timeout = 5 * time.Second
 	}
+
 	c.Conn.SetWriteDeadline(time.Now().Add(timeout))
-	_, err := c.Conn.Write(msg)
-	return err
+	defer c.Conn.SetWriteDeadline(time.Time{})
+
+	written := 0
+	for written < len(msg) {
+		n, err := c.Conn.Write(msg[written:])
+		if err != nil {
+			return err
+		}
+		written += n
+	}
+	return nil
 }
 
 func (c *Client) ReadMessage() error {
