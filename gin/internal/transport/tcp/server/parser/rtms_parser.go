@@ -81,7 +81,14 @@ func (p *RTMSParser) GetMinHeaderSize() int {
 }
 
 // lrc 체크의 경우, Data값이 OPCODE에 따라 다르기 때문에 핸들러에서 처리 ( data 값이 여러 개일 수도 있음 )
-func (p *RTMSParser) Parse(conn net.Conn) (*ParseMessage, error) {
+func (p *RTMSParser) Parse(conn net.Conn) (result *ParseMessage, err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			result = nil
+			err = fmt.Errorf("[TCP] client unnormal exit( panic ), panic: %v", r)
+		}
+	}()
 
 	if len(p.messageQueue) > 0 {
 		msg := p.messageQueue[0]
