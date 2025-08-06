@@ -21,6 +21,7 @@ type TCPService struct {
 	NoReplyCh     chan *eventbus.Message
 	WithReplyCh   chan *eventbus.Message
 	UpdateCh      chan *eventbus.Message
+	DisconnectCh  chan *eventbus.Message
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -47,6 +48,7 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 	noReplyCh := eb.Subscribe(eventbus.TCPNoReplyType)
 	withReplyCh := eb.Subscribe(eventbus.TCPWithReplyType)
 	updateCh := eb.Subscribe(eventbus.UpdateClientType)
+	disconnectCh := eb.Subscribe(eventbus.DisconnectClientType)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	tcpService := &TCPService{
@@ -59,6 +61,7 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 		NoReplyCh:     noReplyCh,
 		WithReplyCh:   withReplyCh,
 		UpdateCh:      updateCh,
+		DisconnectCh:  disconnectCh,
 
 		ctx:    ctx,
 		cancel: cancel,
@@ -117,6 +120,13 @@ func (t *TCPService) Worker() {
 				continue
 			}
 			t.ClientManager.UpdateClient(req.OldClientId, req.NewClientId)
+		case msg := <-t.DisconnectCh:
+			req, ok := msg.Payload.(*eventbus.DisconnectClientPayload)
+			if !ok {
+				logger.Println("[TCP Service] Worker: failed to assert struct")
+				continue
+			}
+			t.ClientManager.DisconnectClient(req.ClientId)
 		}
 	}
 }

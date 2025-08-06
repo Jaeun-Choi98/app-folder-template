@@ -11,9 +11,10 @@ type MessageType int
 const (
 	Invalid MessageType = iota
 	SysSttType
-	TCPNoReplyType   // 응답 없음
-	TCPWithReplyType // 응답 있음
-	UpdateClientType
+	TCPNoReplyType       // 응답 없음
+	TCPWithReplyType     // 응답 있음
+	UpdateClientType     // 클라이언트 식별자 변경 ( 프로토콜에서 정의한 )
+	DisconnectClientType // 클라이언트 세션 끊기
 	EventAType
 	EventBType
 )
@@ -72,6 +73,10 @@ type TCPSendWithReplyPayload struct {
 type UpdateClientPayload struct {
 	OldClientId uint32
 	NewClientId uint32
+}
+
+type DisconnectClientPayload struct {
+	ClientId uint32
 }
 
 // Base

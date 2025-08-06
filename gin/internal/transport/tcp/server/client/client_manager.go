@@ -86,6 +86,15 @@ func (cm *ClientManager) UpdateClient(old, new uint32) {
 	}
 }
 
+func (cm *ClientManager) DisconnectClient(clientId uint32) {
+	cm.mu.RLock()
+	defer cm.mu.RUnlock()
+	if client, exists := cm.clients[clientId]; exists {
+		client.Close()
+		cm.Unregister(clientId)
+	}
+}
+
 func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) error {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
