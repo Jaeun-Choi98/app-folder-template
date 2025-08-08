@@ -70,6 +70,11 @@ func (h *HandlerManager) HandleMessage(msg *parser.ParseMessage, replyCh map[byt
 	}
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Println("[TCP] Panic in handling message")
+			}
+		}()
 		if err := handler.handle(msg, replyCh); err != nil {
 			logger.Printf("[TCP] handler error for %s (client %d): %v",
 				msg.Type, msg.ClientId, err)
