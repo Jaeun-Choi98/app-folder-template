@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"pjt/internal/logger"
+	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
@@ -95,37 +96,38 @@ func (cm *ClientManager) DisconnectClient(clientId uint32) {
 	}
 }
 
-func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) error {
+func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) (response eventbus.TCPResponse) {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
 	cm.mu.RUnlock()
 
 	if !exists {
-		return fmt.Errorf("[TCP] client not found: %d", clientId)
+		response.Err = fmt.Errorf("[TCP] client not found: %d", clientId)
+		return
 	}
 
 	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
 
 	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err != nil {
-		return fmt.Errorf("[TCP] failed to serialize message: %w", err)
+		response.Err = fmt.Errorf("[TCP] failed to serialize message: %w", err)
+		return
 	}
 
 	if err := client.SendMessage(message, sendTimeout); err != nil {
-		return err
+		response.Err = err
+		return
 	}
 	client.SetSequenceNum(seqNum)
-	return nil
+	return
 }
 
 func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, data []byte,
-	sendTimeout time.Duration, replyTimeout time.Duration) (result *handler.ReplyMessage, err error) {
+	sendTimeout time.Duration, replyTimeout time.Duration) (response eventbus.TCPResponse) {
 
-	// panic 복구를 위한 defer - named return 사용
 	defer func() {
 		if r := recover(); r != nil {
-			result = nil
-			err = fmt.Errorf("[TCP] client wsarecv( panic ), client id: %d, panic: %v", clientId, r)
+			response.Err = fmt.Errorf("[TCP] client wsarecv( panic ), client id: %d, panic: %v", clientId, r)
 		}
 	}()
 
@@ -134,16 +136,20 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	cm.mu.RUnlock()
 
 	if !exists {
-		return nil, fmt.Errorf("client not found: %d", clientId)
+		response.Err = fmt.Errorf("[TCP] client not found: %d", clientId)
+		return
 	}
 
-	// 이미 처리 중인 요청이 있는지 확인
+	cm.mu.Lock()
 	if _, exists := client.ReplyCh[opCode]; exists {
-		return nil, fmt.Errorf("[TCP] already exists processing message: pending reply")
+		cm.mu.Unlock()
+		response.Err = fmt.Errorf("[TCP] already exists processing message: pending reply")
+		return
 	}
 
 	replyCh := make(chan *handler.ReplyMessage, 1)
 	client.ReplyCh[opCode] = replyCh
+	cm.mu.Unlock()
 
 	// 리소스 정리를 위한 defer
 	defer func() {
@@ -158,7 +164,8 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 
 	if err := client.SendMessage(message, sendTimeout); err != nil {
-		return nil, err
+		response.Err = err
+		return
 	}
 
 	// 성공적으로 메시지를 보낸 경우에만 sequence number 업데이트
@@ -170,16 +177,16 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 
 	select {
 	case <-time.After(replyTimeout):
-		return nil, fmt.Errorf("[TCP] reply timeout")
+		response.Err = fmt.Errorf("[TCP] reply timeout")
+		return
 	case reply, ok := <-replyCh:
 		if !ok {
-			// 채널이 닫힌 경우 (클라이언트 연결 끊김 등)
-			return nil, fmt.Errorf("[TCP] reply channel closed")
+			response.Err = fmt.Errorf("[TCP] reply channel closed")
+			return
 		}
-		if reply == nil {
-			return nil, fmt.Errorf("[TCP] received nil reply")
-		}
-		return reply, reply.Err
+		response.Data = reply.Payload
+		response.Err = reply.Err
+		return
 	}
 }
 

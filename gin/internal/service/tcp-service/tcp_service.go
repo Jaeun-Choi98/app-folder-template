@@ -87,30 +87,29 @@ func (t *TCPService) Worker() {
 		case <-t.ctx.Done():
 			return
 		case msg := <-t.NoReplyCh:
-			req, ok := msg.Payload.(*eventbus.TCPSendNoReplyPayload)
+			req, ok := msg.Payload.(*eventbus.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Service] Worker: failed to assert struct")
+				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendNoReplyPayload )")
 				continue
 			}
 			go func() {
-				err := t.ClientManager.SendToClientNoReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout)
-				if err != nil {
-					logger.Println(err)
+				res := t.ClientManager.SendToClientNoReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout)
+				if res.Err != nil {
+					logger.Printf("[TCP Service] Worker: failed to SendToClientNoReply: \n%v, station num: %d", res.Err, req.ClientId)
 				}
-				req.Err <- err
+				req.Response <- res
 			}()
 		case msg := <-t.WithReplyCh:
-			req, ok := msg.Payload.(*eventbus.TCPSendWithReplyPayload)
+			req, ok := msg.Payload.(*eventbus.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Service] Worker: failed to assert struct")
+				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendWithReplyPayload )")
 				continue
 			}
 			go func() {
-				res, err := t.ClientManager.SendToClientWithReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout, req.ReplyTimeout)
-				if err != nil {
-					logger.Printf("[TCP Service] Worker: failed to sendToClientWithReply: \n\t%v", err)
+				res := t.ClientManager.SendToClientWithReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout, req.ReplyTimeout)
+				if res.Err != nil {
+					logger.Printf("[TCP Service] Worker: failed to sendToClientWithReply: \n%v, station num: %d", res.Err, req.ClientId)
 				}
-				req.Err <- err
 				req.Response <- res
 			}()
 		case msg := <-t.UpdateCh:

@@ -52,22 +52,38 @@ type SysSttPayload struct {
 }
 
 // TCPClientSend
-type TCPSendNoReplyPayload struct {
-	ClientId    uint32
-	OpCode      byte
-	Data        []byte
-	SendTimeout time.Duration
-	Err         chan error
-}
+// type TCPSendNoReplyPayload struct {
+// 	ClientId    uint32
+// 	OpCode      byte
+// 	Data        []byte
+// 	SendTimeout time.Duration
+// 	Err         chan error
+// }
 
-type TCPSendWithReplyPayload struct {
+// type TCPSendWithReplyPayload struct {
+// 	ClientId     uint32
+// 	OpCode       byte
+// 	Data         []byte
+// 	SendTimeout  time.Duration
+// 	ReplyTimeout time.Duration
+// 	Response     chan any
+// 	Err          chan error
+// }
+
+type TCPSendPayload struct {
 	ClientId     uint32
 	OpCode       byte
 	Data         []byte
 	SendTimeout  time.Duration
 	ReplyTimeout time.Duration
-	Response     chan any
-	Err          chan error
+	Response     chan TCPResponse
+	// Response     chan any
+	// Err          chan error
+}
+
+type TCPResponse struct {
+	Data any
+	Err  error
 }
 
 type UpdateClientPayload struct {

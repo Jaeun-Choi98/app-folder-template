@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"time"
 )
 
 type ParseState int
@@ -100,6 +101,11 @@ func (p *RTMSParser) Parse(conn net.Conn) (result *ParseMessage, err error) {
 	p.OptimizeBuffer()
 
 	for {
+		err := conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+		if err != nil {
+			return nil, fmt.Errorf("[TCP] Failed to set read deadline: %v", err)
+		}
+
 		n, err := conn.Read(readBuffer)
 		if err != nil {
 			return nil, err

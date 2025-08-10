@@ -80,6 +80,9 @@ func (c *Client) MessageProcessingLoop() {
 			msg, err := c.parser.Parse(c.Conn)
 
 			if err != nil {
+				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+					continue
+				}
 				// if EOF, normally exit
 				if err == io.EOF || c.parsingErrCnt > 4 {
 					return

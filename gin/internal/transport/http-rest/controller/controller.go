@@ -9,7 +9,6 @@ import (
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
 	"pjt/internal/transport/http-rest/response"
-	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/utils"
 	"time"
 
@@ -89,44 +88,39 @@ func (c *Controller) RoutePath() {
 
 	// TCP 송신 테스트, 테스트 하려면 tcp/server.go 에서 클라이언트 ID를 임의로 설정해야함.
 	c.Router.GET("/send-work", func(ctx *gin.Context) {
-		errCh := make(chan error, 1)
-		c.EventBus.Publish(eventbus.TCPNoReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendNoReplyPayload{
+		resCh := make(chan eventbus.TCPResponse, 1)
+		defer close(resCh)
+		c.EventBus.Publish(eventbus.TCPNoReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
 			ClientId:    1,
 			Data:        []byte("dsfdsf"),
 			SendTimeout: 5 * time.Second,
-			Err:         errCh,
+			Response:    resCh,
 		}))
 
-		select {
-		case err := <-errCh:
-			if err != nil {
-				ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
-			}
-			// // 아래 코드는 필요없음. tcp 송신에서 타임아웃이 걸려 res로 timeout err가 들어옴
-			// case <-time.After(3 * time.Second):
-			// 	ctx.Error(httperr.INNER_ERROR.Add(nil, response.TIMEOUT_SIG))
+		res := <-resCh
+		if res.Err != nil {
+			ctx.Error(httperr.INNER_ERROR.Add(res.Err, response.FAIL))
 		}
 	})
 
 	c.Router.GET("/send-work-reply", func(ctx *gin.Context) {
-		errCh := make(chan error, 1)
-		resCh := make(chan any, 1)
-		c.EventBus.Publish(eventbus.TCPWithReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendWithReplyPayload{
+		resCh := make(chan eventbus.TCPResponse, 1)
+		defer close(resCh)
+		c.EventBus.Publish(eventbus.TCPWithReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
 			ClientId:     1,
+			OpCode:       0x02,
 			Data:         []byte{0x02},
 			SendTimeout:  5 * time.Second,
 			ReplyTimeout: 10 * time.Second,
-			Err:          errCh,
 			Response:     resCh,
 		}))
 
-		err := <-errCh
-		if err != nil {
-			ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
+		res := <-resCh
+		if res.Err != nil {
+			ctx.Error(httperr.INNER_ERROR.Add(res.Err, response.FAIL))
 			return
 		}
-		res := <-resCh
-		ctx.String(http.StatusOK, res.(*handler.ReplyMessage).Payload.(string))
+		ctx.String(http.StatusOK, res.Data.(string))
 
 	})
 
