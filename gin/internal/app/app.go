@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"pjt/internal/container"
-	dblogmanager "pjt/internal/db/db-log-manager"
 	"pjt/internal/logger"
+	eventlog "pjt/internal/logger/event-logger"
 	rest "pjt/internal/transport/http-rest"
 	tcp "pjt/internal/transport/tcp/server"
 	"sync"
@@ -79,7 +79,7 @@ func (a *Application) Start() {
 	 * DB 로그 루틴 실행
 	 * DB 로그 매니저에서 루틴을 또 분기해야할 수도
 	 */
-	go dblogmanager.StartLogManager()
+	go eventlog.StartLogManager()
 
 	go a.container.Ram.StartSyncDB()
 
@@ -128,7 +128,7 @@ func (a *Application) Shutdown() {
 	}
 
 	// shutdown db log manager
-	dblogmanager.Shutdown()
+	eventlog.Shutdown()
 
 	// shutdown sync db routine
 	a.container.Ram.ShutdownSyncDB()

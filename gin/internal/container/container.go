@@ -4,9 +4,10 @@ import (
 	"pjt/internal/config"
 	"pjt/internal/cron"
 	dbhandler "pjt/internal/db/db-handler"
-	dblogmanager "pjt/internal/db/db-log-manager"
+
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
+	eventlog "pjt/internal/logger/event-logger"
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
 	sseservice "pjt/internal/service/sse-service"
@@ -82,8 +83,8 @@ func NewContainer() (*Container, error) {
 
 	monitoring := monitoring.NewSystemMonitoring(dao, tcp, eventbus, 1*time.Second)
 
-	dbManager, _ := dblogmanager.NewDBLogManager(dao, ram, eventbus)
-	dblogmanager.SetEventManger(dbManager)
+	dbLogger, _ := eventlog.NewDBLogger(dao, ram, eventbus)
+	eventlog.SetEventLogger(dbLogger)
 	cron := cron.NewCron(config, dao, eventbus)
 
 	return &Container{

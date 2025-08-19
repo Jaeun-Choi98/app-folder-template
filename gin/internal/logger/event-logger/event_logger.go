@@ -1,4 +1,4 @@
-package dblogmanager
+package evtlogger
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-var dbLogManager *DBLogManager
+var evetLogger *EventLogger
 
 var sampleLogMu sync.RWMutex
 
-type DBLogManager struct {
+type EventLogger struct {
 	dao      dbhandler.DBHandlerInterface
 	ram      *ram.Ram
 	eventBus *eventbus.EventBus
@@ -29,9 +29,9 @@ type DBLogManager struct {
 	wg sync.WaitGroup
 }
 
-func NewDBLogManager(dao dbhandler.DBHandlerInterface, ram *ram.Ram, eventBus *eventbus.EventBus) (*DBLogManager, error) {
+func NewDBLogger(dao dbhandler.DBHandlerInterface, ram *ram.Ram, eventBus *eventbus.EventBus) (*EventLogger, error) {
 	context, cancel := context.WithCancel(context.Background())
-	return &DBLogManager{
+	return &EventLogger{
 		dao:            dao,
 		ram:            ram,
 		eventBus:       eventBus,
@@ -42,30 +42,30 @@ func NewDBLogManager(dao dbhandler.DBHandlerInterface, ram *ram.Ram, eventBus *e
 }
 
 func Shutdown() {
-	dbLogManager.cancel()
-	dbLogManager.wg.Wait()
+	evetLogger.cancel()
+	evetLogger.wg.Wait()
 	logger.Println("[DB] DB Log Manager goroutine terminated")
 }
 
 func StartLogManager() {
-	dbLogManager.wg.Add(1)
+	evetLogger.wg.Add(1)
 	ticker := time.NewTicker(10 * time.Second)
 	defer func() {
-		dbLogManager.wg.Done()
+		evetLogger.wg.Done()
 		ticker.Stop()
 	}()
 
 	for {
 		select {
-		case <-dbLogManager.ctx.Done():
+		case <-evetLogger.ctx.Done():
 			return
 		case <-ticker.C:
 			sampleLogMu.Lock()
-			if dbLogManager.sampleLogCnt > 0 {
-				for i := 0; i < dbLogManager.sampleLogCnt; i++ {
+			if evetLogger.sampleLogCnt > 0 {
+				for i := 0; i < evetLogger.sampleLogCnt; i++ {
 
 				}
-				dbLogManager.sampleLogCnt = 0
+				evetLogger.sampleLogCnt = 0
 				go func() {
 
 				}()
@@ -75,20 +75,20 @@ func StartLogManager() {
 	}
 }
 
-func SetEventManger(em *DBLogManager) {
-	if dbLogManager != nil {
+func SetEventLogger(em *EventLogger) {
+	if evetLogger != nil {
 		return
 	}
-	dbLogManager = em
+	evetLogger = em
 }
 
 func PushSampleLog(log *entity.SampleLog) {
 	sampleLogMu.Lock()
 	defer sampleLogMu.Unlock()
-	if dbLogManager.sampleLogCnt < len(dbLogManager.sampleLogQueue) {
-		dbLogManager.sampleLogQueue[dbLogManager.sampleLogCnt] = log
+	if evetLogger.sampleLogCnt < len(evetLogger.sampleLogQueue) {
+		evetLogger.sampleLogQueue[evetLogger.sampleLogCnt] = log
 	} else {
-		dbLogManager.sampleLogQueue = append(dbLogManager.sampleLogQueue, log)
+		evetLogger.sampleLogQueue = append(evetLogger.sampleLogQueue, log)
 	}
-	dbLogManager.sampleLogCnt++
+	evetLogger.sampleLogCnt++
 }
