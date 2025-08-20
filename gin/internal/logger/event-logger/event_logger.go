@@ -82,13 +82,13 @@ func SetEventLogger(em *EventLogger) {
 	evetLogger = em
 }
 
-func PushSampleLog(log *entity.SampleLog) {
+func PushSampleLog(eventLog *entity.SampleLog, eventLevel int) {
 	sampleLogMu.Lock()
 	defer sampleLogMu.Unlock()
 	if evetLogger.sampleLogCnt < len(evetLogger.sampleLogQueue) {
-		evetLogger.sampleLogQueue[evetLogger.sampleLogCnt] = log
+		evetLogger.sampleLogQueue[evetLogger.sampleLogCnt] = eventLog
 	} else {
-		evetLogger.sampleLogQueue = append(evetLogger.sampleLogQueue, log)
+		evetLogger.sampleLogQueue = append(evetLogger.sampleLogQueue, eventLog)
 	}
 	evetLogger.sampleLogCnt++
 }
