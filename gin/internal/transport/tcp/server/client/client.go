@@ -32,6 +32,8 @@ type Client struct {
 	ReplyCh map[byte]chan *handler.ReplyMessage // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
+	IsAuth bool
+
 	parsingErrCnt int
 
 	Ctx    context.Context
@@ -56,6 +58,9 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps par
 }
 
 func (c *Client) Close() {
+	// if c.IsAuth {
+	// 	logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
+	// }
 	if c.ClientId < 65536 {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
 	}

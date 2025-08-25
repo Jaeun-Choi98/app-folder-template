@@ -4,12 +4,20 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"net"
 	"pjt/internal/logger"
 	"pjt/internal/transport/eventbus"
 	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
 	"time"
+)
+
+// for distingush
+var (
+	ErrNormal       = fmt.Errorf("normal error")
+	ErrTimeoutSend  = fmt.Errorf("tcp send timeout")
+	ErrTimeoutReply = fmt.Errorf("tcp reply timeout")
 )
 
 type ClientManager struct {
@@ -102,7 +110,8 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 	cm.mu.RUnlock()
 
 	if !exists {
-		response.Err = fmt.Errorf("[TCP] client not found: %d", clientId)
+		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
+		response.Err = ErrNormal
 		return
 	}
 
@@ -110,12 +119,18 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 
 	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err != nil {
-		response.Err = fmt.Errorf("[TCP] failed to serialize message: %w", err)
+		logger.Println("[TCP] failed to serialize message")
+		response.Err = ErrNormal
 		return
 	}
 
 	if err := client.SendMessage(message, sendTimeout); err != nil {
-		response.Err = err
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			response.Err = ErrTimeoutSend
+		} else {
+			response.Err = err
+		}
+		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
 	client.SetSequenceNum(seqNum)
@@ -136,14 +151,16 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	cm.mu.RUnlock()
 
 	if !exists {
-		response.Err = fmt.Errorf("[TCP] client not found: %d", clientId)
+		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
+		response.Err = ErrNormal
 		return
 	}
 
 	cm.mu.Lock()
 	if _, exists := client.ReplyCh[opCode]; exists {
 		cm.mu.Unlock()
-		response.Err = fmt.Errorf("[TCP] already exists processing message: pending reply")
+		logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
+		response.Err = ErrNormal
 		return
 	}
 
@@ -151,9 +168,7 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	client.ReplyCh[opCode] = replyCh
 	cm.mu.Unlock()
 
-	// 리소스 정리를 위한 defer
 	defer func() {
-		// replyCh가 nil이 아닌 경우에만 정리
 		if replyCh != nil {
 			close(replyCh)
 			delete(client.ReplyCh, opCode)
@@ -164,11 +179,15 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 
 	if err := client.SendMessage(message, sendTimeout); err != nil {
-		response.Err = err
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			response.Err = ErrTimeoutSend
+		} else {
+			response.Err = err
+		}
+		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
 
-	// 성공적으로 메시지를 보낸 경우에만 sequence number 업데이트
 	client.SetSequenceNum(seqNum)
 
 	if replyTimeout == 0 {
@@ -177,11 +196,13 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 
 	select {
 	case <-time.After(replyTimeout):
-		response.Err = fmt.Errorf("[TCP] reply timeout")
+		logger.Printf("[TCP] %+v reply timeout, client id: %+v", opCode, clientId)
+		response.Err = ErrTimeoutReply
 		return
 	case reply, ok := <-replyCh:
 		if !ok {
-			response.Err = fmt.Errorf("[TCP] reply channel closed")
+			logger.Printf("[TCP] %+v reply channel closed, client id: %+v", opCode, clientId)
+			response.Err = ErrNormal
 			return
 		}
 		response.Data = reply.Payload
