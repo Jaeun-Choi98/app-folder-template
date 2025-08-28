@@ -68,8 +68,9 @@ func (o *Ram) StartSyncDB() error {
 		case <-o.ctx.Done():
 			return nil
 		case <-ticker.C:
-			_, _, err := o.GetOprtModels(nil, true)
-			if err != nil {
+			models, _ := o.GetOprtModels(nil, true)
+			if len(models) == 0 {
+
 			}
 
 			logger.Println("here sync DB")

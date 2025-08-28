@@ -2,6 +2,8 @@ package ram
 
 /**
  * using mapper ( db layer )
+ *
+ *
  */
 
 func (r *Ram) LoadSampleCache() error {
