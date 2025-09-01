@@ -131,7 +131,7 @@ func (s *SystemMonitoring) Start() error {
 		}
 
 		// 이벤트 버스에 데이터 publish
-		s.EventBus.Publish(eventbus.SysSttType, eventbus.SysStt.Add(eventbus.SysSttPayload{
+		s.EventBus.Publish(eventbus.NewTopic(eventbus.SysSttType), eventbus.SysStt.Add(eventbus.SysSttPayload{
 			ServerTime:  time.Now().Format(time.DateTime),
 			DBState:     dbComm,
 			TCPListener: tcpListener,

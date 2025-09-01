@@ -90,7 +90,7 @@ func (c *Controller) RoutePath() {
 	c.Router.GET("/send-work", func(ctx *gin.Context) {
 		resCh := make(chan eventbus.TCPResponse, 1)
 		defer close(resCh)
-		c.EventBus.Publish(eventbus.TCPNoReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
+		c.EventBus.Publish(eventbus.NewTopic(eventbus.TCPNoReplyType), eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
 			ClientId:    1,
 			Data:        []byte("dsfdsf"),
 			SendTimeout: 5 * time.Second,
@@ -106,7 +106,7 @@ func (c *Controller) RoutePath() {
 	c.Router.GET("/send-work-reply", func(ctx *gin.Context) {
 		resCh := make(chan eventbus.TCPResponse, 1)
 		defer close(resCh)
-		c.EventBus.Publish(eventbus.TCPWithReplyType, eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
+		c.EventBus.Publish(eventbus.NewTopic(eventbus.TCPWithReplyType), eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
 			ClientId:     1,
 			OpCode:       0x02,
 			Data:         []byte{0x02},

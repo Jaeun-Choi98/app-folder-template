@@ -1,6 +1,7 @@
 package container
 
 import (
+	"context"
 	"pjt/internal/config"
 	"pjt/internal/cron"
 	dbhandler "pjt/internal/db/db-handler"
@@ -67,7 +68,7 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	eventbus := eventbus.NewEventBus()
+	eventbus := eventbus.NewEventBus(context.Background(), 30*time.Minute)
 
 	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
 	sseService := sseservice.NewSSEService()

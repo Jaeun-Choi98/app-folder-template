@@ -10,11 +10,20 @@ import (
  * EventBus provides a communication mechanism between different parts of the application.
  * It implements a publish-subscribe pattern.
  */
-type EventBus struct {
-	subscribers map[MessageType][]chan *Message // key: MessageType -> value: []chan Message
 
-	processedMsgs map[uint32]time.Time // processed message ID -> processed time
-	cleanupTicker *time.Ticker         // to remove processed message id
+type Topic interface {
+	GetEventType() any
+}
+
+type Event interface {
+	GetEventId() uint32
+}
+
+type EventBus struct {
+	subscribers map[any][]chan Event
+
+	processedMsgs   map[uint32]time.Time
+	cleanupDuration time.Duration
 
 	mu sync.RWMutex
 
@@ -23,14 +32,14 @@ type EventBus struct {
 	wg     sync.WaitGroup
 }
 
-func NewEventBus() *EventBus {
-	ctx, cancel := context.WithCancel(context.Background())
+func NewEventBus(pctx context.Context, duration time.Duration) *EventBus {
+	ctx, cancel := context.WithCancel(pctx)
 	eb := &EventBus{
-		subscribers:   make(map[MessageType][]chan *Message),
-		processedMsgs: make(map[uint32]time.Time),
-		cleanupTicker: time.NewTicker(time.Hour),
-		ctx:           ctx,
-		cancel:        cancel,
+		subscribers:     make(map[any][]chan Event),
+		processedMsgs:   make(map[uint32]time.Time),
+		cleanupDuration: duration,
+		ctx:             ctx,
+		cancel:          cancel,
 	}
 
 	eb.wg.Add(1)
@@ -40,16 +49,19 @@ func NewEventBus() *EventBus {
 }
 
 func (b *EventBus) cleanupOldMessages() {
+
+	cleanupTicker := time.NewTicker(b.cleanupDuration)
+
 	defer func() {
 		b.wg.Done()
-		b.cleanupTicker.Stop()
+		cleanupTicker.Stop()
 	}()
 
 	for {
 		select {
-		case <-b.cleanupTicker.C:
+		case <-cleanupTicker.C:
 			b.mu.Lock()
-			cutoff := time.Now().Add(-1 * time.Hour)
+			cutoff := time.Now().Add(-b.cleanupDuration)
 			for id, timestamp := range b.processedMsgs {
 				if timestamp.Before(cutoff) {
 					delete(b.processedMsgs, id)
@@ -63,43 +75,42 @@ func (b *EventBus) cleanupOldMessages() {
 	}
 }
 
-func (b *EventBus) Subscribe(topic MessageType) chan *Message {
+func (b *EventBus) Subscribe(topic Topic, cap int) chan Event {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-
-	ch := make(chan *Message, 10)
-	b.subscribers[topic] = append(b.subscribers[topic], ch)
+	ch := make(chan Event, cap)
+	b.subscribers[topic.GetEventType()] = append(b.subscribers[topic.GetEventType()], ch)
 	return ch
 }
 
-func (b *EventBus) Unsubscribe(topic MessageType, ch chan *Message) {
+func (b *EventBus) Unsubscribe(topic Topic, ch chan Event) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if subs, exsits := b.subscribers[topic]; exsits {
+	if subs, exsits := b.subscribers[topic.GetEventType()]; exsits {
 		for i, sub := range subs {
 			if sub == ch {
 				close(ch)
-				b.subscribers[topic] = append(subs[:i], subs[i+1:]...)
+				b.subscribers[topic.GetEventType()] = append(subs[:i], subs[i+1:]...)
 				break
 			}
 		}
 	}
 }
 
-func (b *EventBus) Publish(topic MessageType, event *Message) {
+func (b *EventBus) Publish(topic Topic, event Event) {
 	b.mu.RLock()
-	defer b.mu.RUnlock()
-
-	// duplicate check
-	if _, exists := b.processedMsgs[event.Id]; exists {
+	if _, exists := b.processedMsgs[event.GetEventId()]; exists {
 		return
 	}
+	b.mu.RUnlock()
 
-	// record processed message
-	b.processedMsgs[event.Id] = time.Now()
+	b.mu.Lock()
+	b.processedMsgs[event.GetEventId()] = time.Now()
+	b.mu.Unlock()
 
-	if subs, found := b.subscribers[topic]; found {
+	b.mu.RLock()
+	if subs, found := b.subscribers[topic.GetEventType()]; found {
 		for _, ch := range subs {
 			select {
 			case ch <- event:
@@ -108,6 +119,7 @@ func (b *EventBus) Publish(topic MessageType, event *Message) {
 			}
 		}
 	}
+	b.mu.RUnlock()
 }
 
 func (b *EventBus) Close() {
@@ -117,13 +129,13 @@ func (b *EventBus) Close() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	for topic, subs := range b.subscribers {
+	for topicType, subs := range b.subscribers {
 		for _, ch := range subs {
 			for len(ch) > 0 {
 				<-ch
 			}
 			close(ch)
 		}
-		delete(b.subscribers, topic)
+		delete(b.subscribers, topicType)
 	}
 }

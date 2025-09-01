@@ -19,16 +19,39 @@ const (
 	EventBType
 )
 
+const (
+	ChannelMore    = 200
+	ChannelDefault = 50
+)
+
 var (
 	SysStt = NewMessage("sysstt")
 	EventA = NewMessage("eventA")
 	EventB = NewMessage("eventB")
 )
 
+type CustomTopic struct {
+	messageType MessageType
+}
+
+func (m *CustomTopic) GetEventType() any {
+	return m.messageType
+}
+
+func NewTopic(mt MessageType) *CustomTopic {
+	return &CustomTopic{
+		messageType: mt,
+	}
+}
+
 type Message struct {
 	Id      uint32
 	Type    string
 	Payload any
+}
+
+func (msg *Message) GetEventId() uint32 {
+	return msg.Id
 }
 
 func NewMessage(t string) *Message {

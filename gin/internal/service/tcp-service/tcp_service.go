@@ -18,10 +18,10 @@ type TCPService struct {
 	TCPSessionInfo *TCPSessionInfo
 
 	ClientManager *client.ClientManager
-	NoReplyCh     chan *eventbus.Message
-	WithReplyCh   chan *eventbus.Message
-	UpdateCh      chan *eventbus.Message
-	DisconnectCh  chan *eventbus.Message
+	NoReplyCh     chan eventbus.Event
+	WithReplyCh   chan eventbus.Event
+	UpdateCh      chan eventbus.Event
+	DisconnectCh  chan eventbus.Event
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -45,10 +45,10 @@ func NewTCPSessionInfo() *TCPSessionInfo {
 func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerInterface, ram *ram.Ram, eb *eventbus.EventBus) *TCPService {
 	tcpSessionInfo := NewTCPSessionInfo()
 
-	noReplyCh := eb.Subscribe(eventbus.TCPNoReplyType)
-	withReplyCh := eb.Subscribe(eventbus.TCPWithReplyType)
-	updateCh := eb.Subscribe(eventbus.UpdateClientType)
-	disconnectCh := eb.Subscribe(eventbus.DisconnectClientType)
+	noReplyCh := eb.Subscribe(eventbus.NewTopic(eventbus.TCPNoReplyType), eventbus.ChannelMore)
+	withReplyCh := eb.Subscribe(eventbus.NewTopic(eventbus.TCPWithReplyType), eventbus.ChannelMore)
+	updateCh := eb.Subscribe(eventbus.NewTopic(eventbus.UpdateClientType), eventbus.ChannelMore)
+	disconnectCh := eb.Subscribe(eventbus.NewTopic(eventbus.DisconnectClientType), eventbus.ChannelMore)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	tcpService := &TCPService{
@@ -73,9 +73,10 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 
 func (t *TCPService) Close() {
 	t.cancel()
-	t.Eventbus.Unsubscribe(eventbus.TCPNoReplyType, t.NoReplyCh)
-	t.Eventbus.Unsubscribe(eventbus.TCPWithReplyType, t.WithReplyCh)
-	t.Eventbus.Unsubscribe(eventbus.UpdateClientType, t.UpdateCh)
+	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.TCPNoReplyType), t.NoReplyCh)
+	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.TCPWithReplyType), t.WithReplyCh)
+	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.UpdateClientType), t.UpdateCh)
+	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.DisconnectClientType), t.DisconnectCh)
 	t.wg.Wait()
 	logger.Println("[TCP Service] TCP Service worker goroutine is terminated")
 }
@@ -87,7 +88,7 @@ func (t *TCPService) Worker() {
 		case <-t.ctx.Done():
 			return
 		case msg := <-t.NoReplyCh:
-			req, ok := msg.Payload.(*eventbus.TCPSendPayload)
+			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.TCPSendPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendNoReplyPayload )")
 				continue
@@ -100,7 +101,7 @@ func (t *TCPService) Worker() {
 				req.Response <- res
 			}()
 		case msg := <-t.WithReplyCh:
-			req, ok := msg.Payload.(*eventbus.TCPSendPayload)
+			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.TCPSendPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendWithReplyPayload )")
 				continue
@@ -113,14 +114,14 @@ func (t *TCPService) Worker() {
 				req.Response <- res
 			}()
 		case msg := <-t.UpdateCh:
-			req, ok := msg.Payload.(*eventbus.UpdateClientPayload)
+			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.UpdateClientPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct")
 				continue
 			}
 			t.ClientManager.UpdateClient(req.OldClientId, req.NewClientId)
 		case msg := <-t.DisconnectCh:
-			req, ok := msg.Payload.(*eventbus.DisconnectClientPayload)
+			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.DisconnectClientPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct")
 				continue
@@ -131,9 +132,9 @@ func (t *TCPService) Worker() {
 }
 
 func (t *TCPService) Handle0x010(clientId uint32) error {
-	t.Eventbus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
+	t.Eventbus.Publish(eventbus.NewTopic(eventbus.EventAType), eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
 	return nil
 }
 func (t *TCPService) Handle0xAA(clientId uint32) {
-	t.Eventbus.Publish(eventbus.EventAType, eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
+	t.Eventbus.Publish(eventbus.NewTopic(eventbus.EventAType), eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
 }
