@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"reflect"
 	"time"
@@ -47,10 +48,10 @@ func IdxToVal[T constraints.Integer](idxs []int) T {
 }
 
 /**
-* 깊은 복사
-* @param src interface{} - 복사할 구조체 (포인터)
-* @param dst는 interface{} - 목적지 구조체 (포인터)
-**/
+ * 깊은 복사
+ * @param src interface{} - 복사할 구조체 (포인터)
+ * @param dst는 interface{} - 목적지 구조체 (포인터)
+ */
 func DeepCopy(src, dst interface{}) {
 	s := reflect.ValueOf(src)
 	d := reflect.ValueOf(dst)
@@ -79,6 +80,22 @@ func DeepCopyValue(src, dst reflect.Value) {
 			dst.Set(reflect.MakeSlice(src.Type(), src.Len(), src.Cap()))
 			for i := 0; i < src.Len(); i++ {
 				DeepCopyValue(src.Index(i), dst.Index(i))
+			}
+		}
+	case reflect.Map:
+		if !src.IsNil() {
+			dst.Set(reflect.MakeMap(src.Type()))
+			keys := src.MapKeys()
+			for _, key := range keys {
+
+				if src.MapIndex(key).Kind() == reflect.Pointer {
+					dst.SetMapIndex(key, reflect.New(src.MapIndex(key).Elem().Type()).Addr())
+				} else {
+					dst.SetMapIndex(key, reflect.Zero(src.MapIndex(key).Type()))
+				}
+
+				log.Println(key, dst.MapIndex(key), dst.Type())
+				DeepCopyValue(src.MapIndex(key), dst.MapIndex(key))
 			}
 		}
 	default:
@@ -118,12 +135,12 @@ func ConvertDecimal[T Number](t T, p, s int) T {
 }
 
 /**
-* 구조체 필드를 순차적으로 수정하는 표준 함수
-* @param s interface{} - 수정할 구조체 (포인터)
-* @param startIdx int - 시작 필드 인덱스
-* @param endIdx int - 종료 필드 인덱스 (-1이면 마지막까지)
-* @param params ...interface{} - 순차적으로 적용할 값들
-**/
+ * 구조체 필드를 순차적으로 수정하는 표준 함수
+ * @param s interface{} - 수정할 구조체 (포인터)
+ * @param startIdx int - 시작 필드 인덱스
+ * @param endIdx int - 종료 필드 인덱스 (-1이면 마지막까지)
+ * @param params ...interface{} - 순차적으로 적용할 값들
+ */
 func ModifyStructByIndex(s interface{}, startIdx int, endIdx int, params ...interface{}) error {
 	v := reflect.ValueOf(s)
 
