@@ -5,8 +5,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
+
 	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
@@ -104,7 +105,7 @@ func (cm *ClientManager) DisconnectClient(clientId uint32) {
 	}
 }
 
-func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) (response eventbus.TCPResponse) {
+func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) (response customEvent.TCPResponse) {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
 	cm.mu.RUnlock()
@@ -138,7 +139,7 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 }
 
 func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, data []byte,
-	sendTimeout time.Duration, replyTimeout time.Duration) (response eventbus.TCPResponse) {
+	sendTimeout time.Duration, replyTimeout time.Duration) (response customEvent.TCPResponse) {
 
 	defer func() {
 		if r := recover(); r != nil {

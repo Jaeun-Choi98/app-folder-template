@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	dbhandler "pjt/internal/db/db-handler"
+	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
+
 	"pjt/internal/transport/tcp/server/client"
 	"sync"
+
+	"github.com/Jaeun-Choi98/eventbus"
 )
 
 type TCPService struct {
@@ -45,10 +48,10 @@ func NewTCPSessionInfo() *TCPSessionInfo {
 func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerInterface, ram *ram.Ram, eb *eventbus.EventBus) *TCPService {
 	tcpSessionInfo := NewTCPSessionInfo()
 
-	noReplyCh := eb.Subscribe(eventbus.NewTopic(eventbus.TCPNoReplyType), eventbus.ChannelMore)
-	withReplyCh := eb.Subscribe(eventbus.NewTopic(eventbus.TCPWithReplyType), eventbus.ChannelMore)
-	updateCh := eb.Subscribe(eventbus.NewTopic(eventbus.UpdateClientType), eventbus.ChannelMore)
-	disconnectCh := eb.Subscribe(eventbus.NewTopic(eventbus.DisconnectClientType), eventbus.ChannelMore)
+	noReplyCh := eb.Subscribe(customEvent.NewTopic(customEvent.TCPNoReplyType), customEvent.ChannelMore)
+	withReplyCh := eb.Subscribe(customEvent.NewTopic(customEvent.TCPWithReplyType), customEvent.ChannelMore)
+	updateCh := eb.Subscribe(customEvent.NewTopic(customEvent.UpdateClientType), customEvent.ChannelMore)
+	disconnectCh := eb.Subscribe(customEvent.NewTopic(customEvent.DisconnectClientType), customEvent.ChannelMore)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	tcpService := &TCPService{
@@ -73,10 +76,10 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 
 func (t *TCPService) Close() {
 	t.cancel()
-	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.TCPNoReplyType), t.NoReplyCh)
-	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.TCPWithReplyType), t.WithReplyCh)
-	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.UpdateClientType), t.UpdateCh)
-	t.Eventbus.Unsubscribe(eventbus.NewTopic(eventbus.DisconnectClientType), t.DisconnectCh)
+	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.TCPNoReplyType), t.NoReplyCh)
+	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.TCPWithReplyType), t.WithReplyCh)
+	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.UpdateClientType), t.UpdateCh)
+	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.DisconnectClientType), t.DisconnectCh)
 	t.wg.Wait()
 	logger.Println("[TCP Service] TCP Service worker goroutine is terminated")
 }
@@ -88,9 +91,9 @@ func (t *TCPService) Worker() {
 		case <-t.ctx.Done():
 			return
 		case msg := <-t.NoReplyCh:
-			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.TCPSendPayload)
+			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendNoReplyPayload )")
+				logger.Println("[TCP Service] Worker: failed to assert struct( *customEvent.TCPSendNoReplyPayload )")
 				continue
 			}
 			go func() {
@@ -101,9 +104,9 @@ func (t *TCPService) Worker() {
 				req.Response <- res
 			}()
 		case msg := <-t.WithReplyCh:
-			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.TCPSendPayload)
+			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Service] Worker: failed to assert struct( *eventbus.TCPSendWithReplyPayload )")
+				logger.Println("[TCP Service] Worker: failed to assert struct( *customEvent.TCPSendWithReplyPayload )")
 				continue
 			}
 			go func() {
@@ -114,14 +117,14 @@ func (t *TCPService) Worker() {
 				req.Response <- res
 			}()
 		case msg := <-t.UpdateCh:
-			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.UpdateClientPayload)
+			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.UpdateClientPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct")
 				continue
 			}
 			t.ClientManager.UpdateClient(req.OldClientId, req.NewClientId)
 		case msg := <-t.DisconnectCh:
-			req, ok := msg.(*eventbus.Message).Payload.(*eventbus.DisconnectClientPayload)
+			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.DisconnectClientPayload)
 			if !ok {
 				logger.Println("[TCP Service] Worker: failed to assert struct")
 				continue
@@ -132,9 +135,9 @@ func (t *TCPService) Worker() {
 }
 
 func (t *TCPService) Handle0x010(clientId uint32) error {
-	t.Eventbus.Publish(eventbus.NewTopic(eventbus.EventAType), eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
+	t.Eventbus.Publish(customEvent.NewTopic(customEvent.EventAType), customEvent.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
 	return nil
 }
 func (t *TCPService) Handle0xAA(clientId uint32) {
-	t.Eventbus.Publish(eventbus.NewTopic(eventbus.EventAType), eventbus.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
+	t.Eventbus.Publish(customEvent.NewTopic(customEvent.EventAType), customEvent.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
 }

@@ -6,11 +6,13 @@ import (
 	"pjt/internal/config"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
+
 	"pjt/internal/utils"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/eventbus"
 )
 
 const (

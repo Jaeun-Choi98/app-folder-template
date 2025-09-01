@@ -13,14 +13,15 @@ import (
 	apiservice "pjt/internal/service/api-service"
 	sseservice "pjt/internal/service/sse-service"
 	tcpservice "pjt/internal/service/tcp-service"
-	"pjt/internal/transport/eventbus"
+
+	monitoring "pjt/internal/healthcheck"
 	rest "pjt/internal/transport/http-rest"
 	"pjt/internal/transport/http-rest/controller"
-	"pjt/internal/transport/monitoring"
 	tcp "pjt/internal/transport/tcp/server"
 	"pjt/internal/transport/tcp/server/client"
 	"time"
 
+	"github.com/Jaeun-Choi98/eventbus"
 	"github.com/gin-gonic/gin"
 )
 

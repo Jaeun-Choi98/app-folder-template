@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
 	"pjt/internal/service/sse-service/sse"
-	"pjt/internal/transport/eventbus"
+
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/response"
 
@@ -53,22 +54,22 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 	}
 	client.SendMessage(connectMsg)
 
-	eventChA := ctl.EventBus.Subscribe(eventbus.NewTopic(eventbus.EventAType), eventbus.ChannelDefault)
+	eventChA := ctl.EventBus.Subscribe(customEvent.NewTopic(customEvent.EventAType), customEvent.ChannelDefault)
 	//eventChB := ctl.EventBus.Subscribe(modelevent.EVENTB)
-	eventSysSttCh := ctl.EventBus.Subscribe(eventbus.NewTopic(eventbus.SysSttType), eventbus.ChannelDefault)
+	eventSysSttCh := ctl.EventBus.Subscribe(customEvent.NewTopic(customEvent.SysSttType), customEvent.ChannelDefault)
 
 	// 클라이언트 요청이 종료되면 정리
 	// ctx.Request.Context()는 클라이언트가 연결을 끊으면 취소됩니다
 	go func() {
 		<-client.Ctx.Done()
 		session.RemoveClient(clientId)
-		ctl.EventBus.Unsubscribe(eventbus.NewTopic(eventbus.EventAType), eventChA)
+		ctl.EventBus.Unsubscribe(customEvent.NewTopic(customEvent.EventAType), eventChA)
 		if session.Count() == 0 {
 			ctl.SseService.RemoveSession(userId)
 		}
 	}()
 
-	sendMessage := func(event *eventbus.Message) error {
+	sendMessage := func(event *customEvent.Message) error {
 		payloadByte, err := json.Marshal(event.Payload)
 		var msg sse.Message
 		if err != nil {
@@ -98,11 +99,11 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 			// 클라이언트 또는 서버에서 연결을 닫았음
 			return
 		case event := <-eventChA:
-			if err := sendMessage(event.(*eventbus.Message)); err != nil {
+			if err := sendMessage(event.(*customEvent.Message)); err != nil {
 				return
 			}
 		case event := <-eventSysSttCh:
-			if err := sendMessage(event.(*eventbus.Message)); err != nil {
+			if err := sendMessage(event.(*customEvent.Message)); err != nil {
 				return
 			}
 		}

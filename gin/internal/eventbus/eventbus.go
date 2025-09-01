@@ -9,6 +9,8 @@ import (
 /**
  * EventBus provides a communication mechanism between different parts of the application.
  * It implements a publish-subscribe pattern.
+ *
+ * -> deprecated this package. use github.com/Jaeun-Choi98/eventbus (same source code).
  */
 
 type Topic interface {

@@ -3,8 +3,9 @@ package controller
 import (
 	"net/http"
 	"pjt/internal/config"
+	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/service"
-	"pjt/internal/transport/eventbus"
+
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
@@ -12,6 +13,7 @@ import (
 	"pjt/internal/utils"
 	"time"
 
+	"github.com/Jaeun-Choi98/eventbus"
 	"github.com/gin-gonic/gin"
 )
 
@@ -88,9 +90,9 @@ func (c *Controller) RoutePath() {
 
 	// TCP 송신 테스트, 테스트 하려면 tcp/server.go 에서 클라이언트 ID를 임의로 설정해야함.
 	c.Router.GET("/send-work", func(ctx *gin.Context) {
-		resCh := make(chan eventbus.TCPResponse, 1)
+		resCh := make(chan customEvent.TCPResponse, 1)
 		defer close(resCh)
-		c.EventBus.Publish(eventbus.NewTopic(eventbus.TCPNoReplyType), eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
+		c.EventBus.Publish(customEvent.NewTopic(customEvent.TCPNoReplyType), customEvent.NewMessage("tcp").Add(&customEvent.TCPSendPayload{
 			ClientId:    1,
 			Data:        []byte("dsfdsf"),
 			SendTimeout: 5 * time.Second,
@@ -104,9 +106,9 @@ func (c *Controller) RoutePath() {
 	})
 
 	c.Router.GET("/send-work-reply", func(ctx *gin.Context) {
-		resCh := make(chan eventbus.TCPResponse, 1)
+		resCh := make(chan customEvent.TCPResponse, 1)
 		defer close(resCh)
-		c.EventBus.Publish(eventbus.NewTopic(eventbus.TCPWithReplyType), eventbus.NewMessage("tcp").Add(&eventbus.TCPSendPayload{
+		c.EventBus.Publish(customEvent.NewTopic(customEvent.TCPWithReplyType), customEvent.NewMessage("tcp").Add(&customEvent.TCPSendPayload{
 			ClientId:     1,
 			OpCode:       0x02,
 			Data:         []byte{0x02},

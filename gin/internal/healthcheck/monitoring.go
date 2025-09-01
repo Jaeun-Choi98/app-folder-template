@@ -3,11 +3,14 @@ package monitoring
 import (
 	"context"
 	dbhandler "pjt/internal/db/db-handler"
+	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
+
 	tcp "pjt/internal/transport/tcp/server"
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/eventbus"
 )
 
 type SystemMonitoring struct {
@@ -131,7 +134,7 @@ func (s *SystemMonitoring) Start() error {
 		}
 
 		// 이벤트 버스에 데이터 publish
-		s.EventBus.Publish(eventbus.NewTopic(eventbus.SysSttType), eventbus.SysStt.Add(eventbus.SysSttPayload{
+		s.EventBus.Publish(customEvent.NewTopic(customEvent.SysSttType), customEvent.SysStt.Add(customEvent.SysSttPayload{
 			ServerTime:  time.Now().Format(time.DateTime),
 			DBState:     dbComm,
 			TCPListener: tcpListener,

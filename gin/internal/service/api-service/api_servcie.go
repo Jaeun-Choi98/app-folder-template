@@ -6,8 +6,10 @@ import (
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/ram"
 	"pjt/internal/service"
-	"pjt/internal/transport/eventbus"
+
 	"sync"
+
+	"github.com/Jaeun-Choi98/eventbus"
 )
 
 /**

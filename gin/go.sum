@@ -1,3 +1,5 @@
+github.com/Jaeun-Choi98/eventbus v1.0.0 h1:WfVrosRdOUa8Dxl6ZKvqLGqa3X+LgPEaRDaKqMYhn2E=
+github.com/Jaeun-Choi98/eventbus v1.0.0/go.mod h1:Gj8DfH0ukSXax9Gp2+WFFlKAGJ/WcoIr71kjsRVoZ8o=
 github.com/UNO-SOFT/zlog v0.8.1 h1:TEFkGJHtUfTRgMkLZiAjLSHALjwSBdw6/zByMC5GJt4=
 github.com/UNO-SOFT/zlog v0.8.1/go.mod h1:yqFOjn3OhvJ4j7ArJqQNA+9V+u6t9zSAyIZdWdMweWc=
 github.com/VictoriaMetrics/easyproto v0.1.4 h1:r8cNvo8o6sR4QShBXQd1bKw/VVLSQma/V2KhTBPf+Sc=

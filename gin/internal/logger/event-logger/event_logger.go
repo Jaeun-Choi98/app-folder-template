@@ -4,11 +4,13 @@ import (
 	"context"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/db/entity"
+
 	"pjt/internal/infra/ram"
 	"pjt/internal/logger"
-	"pjt/internal/transport/eventbus"
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/eventbus"
 )
 
 var evetLogger *EventLogger
