@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"reflect"
 	"time"
@@ -87,15 +86,20 @@ func DeepCopyValue(src, dst reflect.Value) {
 			dst.Set(reflect.MakeMap(src.Type()))
 			keys := src.MapKeys()
 			for _, key := range keys {
-
-				if src.MapIndex(key).Kind() == reflect.Pointer {
-					dst.SetMapIndex(key, reflect.New(src.MapIndex(key).Elem().Type()).Addr())
+				srcValue := src.MapIndex(key)
+				var dstValue reflect.Value
+				if srcValue.Kind() == reflect.Pointer {
+					if !srcValue.IsNil() {
+						dstValue = reflect.New(srcValue.Elem().Type())
+						DeepCopyValue(srcValue.Elem(), dstValue.Elem())
+					} else {
+						dstValue = reflect.Zero(srcValue.Type())
+					}
 				} else {
-					dst.SetMapIndex(key, reflect.Zero(src.MapIndex(key).Type()))
+					dstValue = reflect.New(srcValue.Type()).Elem()
+					DeepCopyValue(srcValue, dstValue)
 				}
-
-				log.Println(key, dst.MapIndex(key), dst.Type())
-				DeepCopyValue(src.MapIndex(key), dst.MapIndex(key))
+				dst.SetMapIndex(key, dstValue)
 			}
 		}
 	default:
