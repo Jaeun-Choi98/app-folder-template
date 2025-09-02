@@ -11,7 +11,7 @@ import (
 	"pjt/internal/transport/tcp/server/client"
 	"sync"
 
-	"github.com/Jaeun-Choi98/eventbus"
+	"github.com/Jaeun-Choi98/modules/eventbus"
 )
 
 type TCPService struct {

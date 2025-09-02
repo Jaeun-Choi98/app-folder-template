@@ -2,7 +2,8 @@ package ram
 
 import (
 	"pjt/internal/infra/object"
-	"pjt/internal/utils"
+
+	"github.com/Jaeun-Choi98/modules/utils"
 )
 
 func (r *Ram) GetOprtModels(ids []int64, all bool) (map[int64]*object.Sample, map[int]struct{}) {

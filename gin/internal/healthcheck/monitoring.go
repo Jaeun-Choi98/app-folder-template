@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Jaeun-Choi98/eventbus"
+	"github.com/Jaeun-Choi98/modules/eventbus"
 )
 
 type SystemMonitoring struct {

@@ -10,10 +10,11 @@ import (
 	"pjt/internal/transport/http-rest/http-utils/jwt"
 	"pjt/internal/transport/http-rest/middleware"
 	"pjt/internal/transport/http-rest/response"
-	"pjt/internal/utils"
 	"time"
 
-	"github.com/Jaeun-Choi98/eventbus"
+	"github.com/Jaeun-Choi98/modules/utils"
+
+	"github.com/Jaeun-Choi98/modules/eventbus"
 	"github.com/gin-gonic/gin"
 )
 

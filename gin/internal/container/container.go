@@ -21,7 +21,7 @@ import (
 	"pjt/internal/transport/tcp/server/client"
 	"time"
 
-	"github.com/Jaeun-Choi98/eventbus"
+	"github.com/Jaeun-Choi98/modules/eventbus"
 	"github.com/gin-gonic/gin"
 )
 
