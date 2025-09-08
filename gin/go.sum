@@ -1,5 +1,9 @@
 github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62 h1:rzEAodOkVPsX5+rLE3uR3g9vX8c/+ENSnWDg+euWljY=
 github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62/go.mod h1:ATBPLafHqWfSiswmlUVW9ioSOG8Uc2wdp/GvPwTBeCQ=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250908051222-8a6b3b1265d2 h1:5q9gEcYhNHgxaahLVfU3LINWKjbPfhbg+wWzEdTaucI=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250908051222-8a6b3b1265d2/go.mod h1:5X5ZIKumzSNbT0PzAe5lBrFkPF6BzMUTtsZIEljXQvY=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250908060754-e72833587e8a h1:5EOP8iKpw053w2TNLgi9vTlW/A19XDHEgwDUXNYCzoc=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250908060754-e72833587e8a/go.mod h1:5X5ZIKumzSNbT0PzAe5lBrFkPF6BzMUTtsZIEljXQvY=
 github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62 h1:YC9LjLntJzcI8/0JEjXb0czNKZCKbalR+JP85t0uHU4=
 github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62/go.mod h1:E4NW117eON+xHMNHC7owaBlgUWAc6I8fXszuVPqgw1s=
 github.com/UNO-SOFT/zlog v0.8.1 h1:TEFkGJHtUfTRgMkLZiAjLSHALjwSBdw6/zByMC5GJt4=

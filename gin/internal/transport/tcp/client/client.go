@@ -7,9 +7,53 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/tcpnet/client"
 )
 
-// Configuration 객체 주입 필요 ( ip, port )
+/**
+ * client 패키지를 사용한 예시 구현 템플릿
+ */
+type CustomClient struct {
+	BaseClient   *client.ClientBase
+	firstRequest bool
+}
+
+func NewCustomClient(parentCtx context.Context, timeout, reconnect time.Duration) *CustomClient {
+	c, _ := client.NewClientBase(parentCtx, timeout, reconnect)
+	c.SetIpAndPort("localhost", "5000")
+	c.SetRxAndParsingFunc(func(conn net.Conn) (any, error) {
+		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		defer conn.SetReadDeadline(time.Time{})
+		return bufio.NewReader(conn).ReadString('\n')
+	})
+	c.SetHandlePacket(func(a any) error {
+		log.Print(a.(string))
+		return nil
+	})
+	return &CustomClient{
+		BaseClient:   c,
+		firstRequest: true,
+	}
+}
+
+func (c *CustomClient) Start() error {
+	go c.BaseClient.Start()
+	return nil
+}
+
+func (c *CustomClient) Shutdown() {
+	c.BaseClient.Shutdown()
+}
+
+func (c *CustomClient) StartTCPClientHeartbeat() {
+	c.BaseClient.StartTCPClientHeartbeat()
+}
+
+/**
+ * 아래는 구현된 client 패키지 이전에 사용된 코드. 현재 사용 및 수정 (x)
+ * deprecated
+ */
 type TCPClient struct {
 	conn           net.Conn
 	reader         *bufio.Reader

@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250908060754-e72833587e8a // indirect
 	github.com/VictoriaMetrics/easyproto v0.1.4 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
