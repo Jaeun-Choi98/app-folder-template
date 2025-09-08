@@ -121,11 +121,11 @@ func (t *TCPServer) WaitForAccept() error {
 			continue
 		}
 		t.wg.Add(1)
-		go t.HandleConnection(t.ctx, conn)
+		go t.HandleConnection(conn)
 	}
 }
 
-func (t *TCPServer) HandleConnection(ctx context.Context, conn net.Conn) {
+func (t *TCPServer) HandleConnection(conn net.Conn) {
 
 	//c := client.NewClient(t.ctx, uuid.New().ID(), conn, parser.NewRTMSParser(binary.LittleEndian, 4096), t.handler)
 
