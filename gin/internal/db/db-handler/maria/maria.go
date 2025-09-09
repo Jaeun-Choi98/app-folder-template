@@ -43,11 +43,11 @@ func (m *Maria) Connect() error {
 		return err
 	}
 
-	if err := db.Ping(); err != nil {
-		logger.Println(err)
-		db.Close()
-		return err
-	}
+	// if err := db.Ping(); err != nil {
+	// 	logger.Println(err)
+	// 	db.Close()
+	// 	return err
+	// }
 
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)

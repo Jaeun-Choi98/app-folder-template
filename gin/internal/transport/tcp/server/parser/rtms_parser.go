@@ -1,10 +1,12 @@
-package parser
+package implparser
 
 import (
 	"encoding/binary"
 	"fmt"
 	"net"
 	"time"
+
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
 )
 
 type ParseState int
@@ -22,6 +24,36 @@ const (
  * Byte Order: littleEndian 방식
  * LRC: Length ~ Data XOR value
  */
+
+type ParseMessage struct {
+	Type     string
+	ClientId uint32
+	Packet   *Packet
+}
+
+func (m *ParseMessage) Add(data *Packet) *ParseMessage {
+	m.Packet = data
+	return m
+}
+
+/**
+ * tcpnet.model.parseMsg를 구현하기 위한 메서드
+ */
+func (m *ParseMessage) GetPacket() any {
+	return m.Packet
+}
+
+func (m *ParseMessage) GetPacketId() any {
+	return m.Type
+}
+
+func (m *ParseMessage) SetClientId(clientId uint32) {
+	m.ClientId = clientId
+}
+
+func (m *ParseMessage) GetClientId() uint32 {
+	return m.ClientId
+}
 
 type Packet struct {
 	STX      [2]byte
@@ -68,25 +100,15 @@ func NewRTMSParser(byteOrder binary.ByteOrder, bufferSize int) *RTMSParser {
 	}
 }
 
-func (p *RTMSParser) GetProtocolType() ProtocolType {
-	return ProtocolRTMS
-}
-
-func (p *RTMSParser) CanParse(data []byte) bool {
-	return len(data) >= 2 && data[0] == 0x7E && data[1] == 0x7E
-}
-
 // STX(2) + Length(4) + Seq(1) + Unit(1) + OpCode(2) + Data1(1)
 func (p *RTMSParser) GetMinHeaderSize() int {
 	return 11
 }
 
-// lrc 체크의 경우, Data값이 OPCODE에 따라 다르기 때문에 핸들러에서 처리 ( data 값이 여러 개일 수도 있음 )
-func (p *RTMSParser) Parse(conn net.Conn) (result *ParseMessage, err error) {
-
+func (p *RTMSParser) Parse(conn net.Conn) (packet tcpmd.ParseMsg, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			result = nil
+			packet = nil
 			err = fmt.Errorf("[TCP] client unnormal exit( panic ), panic: %v", r)
 		}
 	}()
@@ -304,9 +326,8 @@ func (p *RTMSParser) completeMessage() (*ParseMessage, error) {
 	}
 
 	msg := &ParseMessage{
-		Protocol: ProtocolRTMS,
-		Type:     fmt.Sprintf("rtms_0x%03X", p.currentMessage.opCode),
-		Packet:   nil,
+		Type:   fmt.Sprintf("rtms_0x%03X", p.currentMessage.opCode),
+		Packet: nil,
 	}
 
 	msg.Add(&Packet{

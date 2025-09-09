@@ -8,10 +8,11 @@ import (
 	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
 
-	"pjt/internal/transport/tcp/server/handler"
 	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
 	"time"
+
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
 )
 
 // for distingush
@@ -88,6 +89,7 @@ func (cm *ClientManager) UpdateClient(old, new uint32) {
 	defer cm.mu.RUnlock()
 	if client, exists := cm.clients[old]; exists {
 		client.ClientId = new
+		client.IsAuth = true
 		cm.clients[new] = client
 		delete(cm.clients, old)
 		logger.Printf("[TCP] Success ClientManager.UpdateClient, cilentId: %d -> %d", old, new)
@@ -156,23 +158,23 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 		response.Err = ErrNormal
 		return
 	}
-
+	replyCode := tcpmd.NewReplyCode[byte](opCode)
 	cm.mu.Lock()
-	if _, exists := client.ReplyCh[opCode]; exists {
+	if _, exists := client.ReplyCh[replyCode]; exists {
 		cm.mu.Unlock()
 		logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
 		response.Err = ErrNormal
 		return
 	}
 
-	replyCh := make(chan *handler.ReplyMessage, 1)
-	client.ReplyCh[opCode] = replyCh
+	replyCh := make(chan tcpmd.Reply, 1)
+	client.ReplyCh[replyCode] = replyCh
 	cm.mu.Unlock()
 
 	defer func() {
 		if replyCh != nil {
 			close(replyCh)
-			delete(client.ReplyCh, opCode)
+			delete(client.ReplyCh, replyCode)
 		}
 	}()
 
@@ -206,8 +208,8 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 			response.Err = ErrNormal
 			return
 		}
-		response.Data = reply.Payload
-		response.Err = reply.Err
+		response.Data = reply.GetPayload()
+		response.Err = reply.GetErr()
 		return
 	}
 }

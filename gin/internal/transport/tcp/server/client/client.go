@@ -7,8 +7,11 @@ import (
 	"pjt/internal/logger"
 	"sync"
 
-	"pjt/internal/transport/tcp/server/handler"
-	"pjt/internal/transport/tcp/server/parser"
+	implparser "pjt/internal/transport/tcp/server/parser"
+
+	"github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
+	"github.com/Jaeun-Choi98/modules/tcpnet/server/parser"
 
 	"time"
 )
@@ -26,15 +29,17 @@ type Client struct {
 	Conn     net.Conn
 	SeqNum   uint16
 
-	parser  parser.Parser
 	handler handler.HandlerManagerInterface
 
-	ReplyCh map[byte]chan *handler.ReplyMessage // OPCODE -> Reply Channel
+	ReplyCh map[tcpmd.ReplyCode]chan tcpmd.Reply // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
 	IsAuth bool
 
 	parsingErrCnt int
+
+	// 아래 필드는 패키지를 사용한 예시
+	parser parser.Parser
 
 	Ctx    context.Context
 	Cancel context.CancelFunc
@@ -42,15 +47,16 @@ type Client struct {
 	mu sync.Mutex
 }
 
-func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps parser.Parser,
+func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *implparser.RTMSParser,
 	hd handler.HandlerManagerInterface) *Client {
 	ctx, cancel := context.WithCancel(parentCtx)
 	return &Client{
 		ClientId: clinetId,
 		Conn:     conn,
-		parser:   ps,
-		handler:  hd,
-		ReplyCh:  make(map[byte]chan *handler.ReplyMessage),
+		//parser:   ps,
+		parser:  ps,
+		handler: hd,
+		ReplyCh: make(map[tcpmd.ReplyCode]chan tcpmd.Reply),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,
@@ -58,12 +64,11 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps par
 }
 
 func (c *Client) Close() {
-	// if c.IsAuth {
-	// 	logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
-	// }
-	if c.ClientId < 65536 {
+	if c.IsAuth {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
+		c.handler.HandleMessage(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId}, nil)
 	}
+
 	if c.Conn != nil {
 		c.Conn.Close()
 	}
@@ -97,7 +102,7 @@ func (c *Client) MessageProcessingLoop() {
 				continue
 			}
 
-			msg.ClientId = c.ClientId
+			msg.SetClientId(c.ClientId)
 
 			if err := c.handler.HandleMessage(msg, c.ReplyCh); err != nil {
 				logger.Printf("[TCP] Handle error: %v", err)
@@ -125,10 +130,6 @@ func (c *Client) SendMessage(msg []byte, timeout time.Duration) error {
 		}
 		written += n
 	}
-	return nil
-}
-
-func (c *Client) ReadMessage() error {
 	return nil
 }
 

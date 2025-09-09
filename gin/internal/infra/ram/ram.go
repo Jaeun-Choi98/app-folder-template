@@ -72,8 +72,8 @@ func (o *Ram) StartSyncDB() error {
 			if len(models) == 0 {
 
 			}
-
-			logger.Println("here sync DB")
+			// debug
+			// logger.Println("here sync DB")
 
 			go func() {
 				if err := o.dao.Ping(); err != nil {

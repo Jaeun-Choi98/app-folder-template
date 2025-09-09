@@ -138,6 +138,8 @@ func sendMessage(conn net.Conn, msg string) error {
 			return err
 		}
 		testMsg = res
+	} else {
+		testMsg = []byte(msg)
 	}
 
 	sendBytes, err := conn.Write(testMsg)

@@ -1,4 +1,4 @@
-package parser
+package implparser
 
 import (
 	"bufio"
@@ -7,41 +7,47 @@ import (
 	"io"
 	"net"
 	"strings"
+
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
 )
 
 /**
 * 텍스트 프로토콜 파서
 **/
+
+type ParseMessageText struct {
+	Type     string
+	ClientId uint32
+	Packet   string
+}
+
+func (m *ParseMessageText) GetPacketId() any {
+	return m.Type
+}
+
+func (m *ParseMessageText) GetPacket() any {
+	return m.Packet
+}
+
+func (m *ParseMessageText) SetClientId(clientId uint32) {
+	m.ClientId = clientId
+}
+
+func (m *ParseMessageText) GetClientId() uint32 {
+	return m.ClientId
+}
+
 type TextParser struct{}
 
 func NewTextParser() *TextParser {
 	return &TextParser{}
 }
 
-func (p *TextParser) GetProtocolType() ProtocolType {
-	return ProtocolText
-}
-
-func (p *TextParser) CanParse(data []byte) bool {
-	// 첫 몇 바이트가 ASCII 텍스트인지 확인
-	if len(data) < 1 {
-		return false
-	}
-
-	// 인쇄 가능한 ASCII 문자인지 확인
-	for i := 0; i < len(data) && i < 4; i++ {
-		if data[i] < 32 || data[i] > 126 {
-			return false
-		}
-	}
-	return true
-}
-
 func (p *TextParser) GetMinHeaderSize() int {
-	return 1 // 최소 1바이트
+	return 1
 }
 
-func (p *TextParser) Parse(conn net.Conn) (*ParseMessage, error) {
+func (p *TextParser) Parse(conn net.Conn) (tcpmd.ParseMsg, error) {
 	reader := bufio.NewReader(conn)
 	line, err := reader.ReadString('\n')
 	if err != nil {
@@ -59,22 +65,20 @@ func (p *TextParser) Parse(conn net.Conn) (*ParseMessage, error) {
 	}
 
 	// 단순 텍스트 메시지
-	msg := &ParseMessage{
-		Protocol:   ProtocolText,
-		Type:       "text",
-		TextPacket: content,
+	msg := &ParseMessageText{
+		Type:   "text",
+		Packet: content,
 	}
 	return msg, nil
 }
 
-func (p *TextParser) parseJSONMessage(content string) (*ParseMessage, error) {
+func (p *TextParser) parseJSONMessage(content string) (*ParseMessageText, error) {
 	var jsonMsg map[string]interface{}
 	if err := json.Unmarshal([]byte(content), &jsonMsg); err != nil {
 		// JSON 파싱 실패시 단순 텍스트로 처리
-		msg := &ParseMessage{
-			Protocol:   ProtocolText,
-			Type:       "text",
-			TextPacket: content,
+		msg := &ParseMessageText{
+			Type:   "text",
+			Packet: content,
 		}
 		return msg, nil
 	}
@@ -84,10 +88,9 @@ func (p *TextParser) parseJSONMessage(content string) (*ParseMessage, error) {
 		msgType = "json"
 	}
 	jsonStr, _ := json.Marshal(jsonMsg)
-	msg := &ParseMessage{
-		Protocol:   ProtocolText,
-		Type:       msgType,
-		TextPacket: string(jsonStr),
+	msg := &ParseMessageText{
+		Type:   msgType,
+		Packet: string(jsonStr),
 	}
 	return msg, nil
 }

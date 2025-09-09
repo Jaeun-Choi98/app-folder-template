@@ -19,9 +19,11 @@ import (
 	"pjt/internal/transport/http-rest/controller"
 	tcp "pjt/internal/transport/tcp/server"
 	"pjt/internal/transport/tcp/server/client"
+	tcpcontroller "pjt/internal/transport/tcp/server/controller"
 	"time"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
+	"github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -78,7 +80,8 @@ func NewContainer() (*Container, error) {
 
 	tcpClientManager := client.NewClientManager()
 	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, ram, eventbus)
-	tcp, err := tcp.NewTCPServer(tcpClientManager, tcpService, 5*time.Second)
+	tcpController := tcpcontroller.NewTCPController(handler.New(), tcpService)
+	tcp, err := tcp.NewTCPServer(tcpController, tcpClientManager, config, 5*time.Second, 5)
 	if err != nil {
 		return nil, err
 	}

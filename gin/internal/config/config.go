@@ -16,6 +16,10 @@ type Configuration struct {
 	RestIp   string
 	RestPort string
 
+	// tcp
+	TcpIp   string
+	TcpPort string
+
 	DatabaseConfig
 }
 
@@ -62,6 +66,9 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
+
+	config.TcpIp = cfgFile.Section("TCP").Key("IP").MustString("")
+	config.TcpPort = cfgFile.Section("TCP").Key("PORT").MustString("")
 
 	config.DBType = cfgFile.Section("DB").Key("TYPE").MustString("")
 	config.DBHost = cfgFile.Section("DB").Key("HOST").MustString("")

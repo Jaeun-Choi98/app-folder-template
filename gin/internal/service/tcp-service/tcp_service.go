@@ -136,6 +136,8 @@ func (t *TCPService) Worker() {
 
 func (t *TCPService) Handle0x010(clientId uint32) error {
 	t.Eventbus.Publish(customEvent.NewTopic(customEvent.EventAType), customEvent.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("connected client:%d", clientId)}))
+	t.Eventbus.Publish(customEvent.NewTopic(customEvent.UpdateClientType),
+		customEvent.NewMessage("tcp").Add(&customEvent.UpdateClientPayload{OldClientId: clientId, NewClientId: 1}))
 	return nil
 }
 func (t *TCPService) Handle0xAA(clientId uint32) {
