@@ -9,11 +9,11 @@ import (
 )
 
 type TCPController struct {
-	Router     *handler.HandlerManager
+	Router     *handler.HandlerManager[string]
 	TcpService service.TCPServiceInterface
 }
 
-func NewTCPController(router *handler.HandlerManager, tcpService service.TCPServiceInterface) *TCPController {
+func NewTCPController(router *handler.HandlerManager[string], tcpService service.TCPServiceInterface) *TCPController {
 	controller := &TCPController{
 		Router:     router,
 		TcpService: tcpService,

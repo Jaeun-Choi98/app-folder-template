@@ -20,6 +20,8 @@ github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909051732-17d2e4be3b05 h1:HJW
 github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909051732-17d2e4be3b05/go.mod h1:5X5ZIKumzSNbT0PzAe5lBrFkPF6BzMUTtsZIEljXQvY=
 github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909054155-1d54fd8e2e22 h1:T1n8FfmMrDAUjbNMhnQP/B960uuY1hFi1514YvoQlyk=
 github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909054155-1d54fd8e2e22/go.mod h1:5X5ZIKumzSNbT0PzAe5lBrFkPF6BzMUTtsZIEljXQvY=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909085043-22f7df9b3cbd h1:AUMGPfD8DWkubASWHFBt6674tSg+CSj36UEUUmL/gQk=
+github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250909085043-22f7df9b3cbd/go.mod h1:5X5ZIKumzSNbT0PzAe5lBrFkPF6BzMUTtsZIEljXQvY=
 github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62 h1:YC9LjLntJzcI8/0JEjXb0czNKZCKbalR+JP85t0uHU4=
 github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62/go.mod h1:E4NW117eON+xHMNHC7owaBlgUWAc6I8fXszuVPqgw1s=
 github.com/UNO-SOFT/zlog v0.8.1 h1:TEFkGJHtUfTRgMkLZiAjLSHALjwSBdw6/zByMC5GJt4=
