@@ -31,7 +31,8 @@ func (r *RESTServer) Start() error {
 	return r.server.ListenAndServe()
 }
 
-func (r *RESTServer) Shutdown(ctx context.Context) error {
+func (r *RESTServer) Shutdown(ctx context.Context) (err error) {
+	err = r.server.Shutdown(ctx)
 	logger.Println("[REST] REST goroutine terminated")
-	return r.server.Shutdown(ctx)
+	return err
 }

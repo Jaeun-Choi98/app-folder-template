@@ -158,9 +158,9 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 		response.Err = ErrNormal
 		return
 	}
-	replyCode := tcpmd.NewReplyCode[byte](opCode)
+
 	cm.mu.Lock()
-	if _, exists := client.ReplyCh[replyCode]; exists {
+	if _, exists := client.ReplyCh[opCode]; exists {
 		cm.mu.Unlock()
 		logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
 		response.Err = ErrNormal
@@ -168,13 +168,13 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	}
 
 	replyCh := make(chan tcpmd.Reply, 1)
-	client.ReplyCh[replyCode] = replyCh
+	client.ReplyCh[opCode] = replyCh
 	cm.mu.Unlock()
 
 	defer func() {
 		if replyCh != nil {
 			close(replyCh)
-			delete(client.ReplyCh, replyCode)
+			delete(client.ReplyCh, opCode)
 		}
 	}()
 

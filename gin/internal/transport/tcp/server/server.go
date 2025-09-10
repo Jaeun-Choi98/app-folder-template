@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"net"
 	"pjt/internal/config"
+	"pjt/internal/logger"
 	"pjt/internal/transport/tcp/server/client"
 	tcpcontroller "pjt/internal/transport/tcp/server/controller"
 
@@ -67,4 +68,5 @@ func (s *TCPServer) Start() error {
 
 func (s *TCPServer) Shutdown() {
 	s.ServerBase.Shutdown()
+	logger.Println("[TCP] TCP goroutine terminated")
 }

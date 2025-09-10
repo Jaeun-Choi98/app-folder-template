@@ -23,12 +23,12 @@ func NewTCPController(router *handler.HandlerManager[string], tcpService service
 }
 
 func (c *TCPController) RoutePath() {
-	c.Router.RegisterHandle("text", func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	c.Router.RegisterHandle("text", func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 		log.Printf("msgType: %s, clientID: %d, Data: %v ", msg.GetPacketId(), msg.GetClientId(), msg.GetPacket())
 		return nil
 	})
 
-	c.Router.RegisterHandle("json", func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	c.Router.RegisterHandle("json", func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 		return nil
 	})
 

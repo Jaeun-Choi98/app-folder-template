@@ -31,7 +31,7 @@ type Client struct {
 
 	handler handler.HandlerManagerInterface
 
-	ReplyCh map[tcpmd.ReplyCode]chan tcpmd.Reply // OPCODE -> Reply Channel
+	ReplyCh map[any]chan tcpmd.Reply // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
 	IsAuth bool
@@ -56,7 +56,7 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 		//parser:   ps,
 		parser:  ps,
 		handler: hd,
-		ReplyCh: make(map[tcpmd.ReplyCode]chan tcpmd.Reply),
+		ReplyCh: make(map[any]chan tcpmd.Reply),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,

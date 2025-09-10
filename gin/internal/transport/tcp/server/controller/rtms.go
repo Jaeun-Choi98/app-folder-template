@@ -12,7 +12,7 @@ import (
 )
 
 func (c *TCPController) Handle0x001() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 		rtmsMsg := msg.GetPacket().(*implparser.Packet)
 		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
 
@@ -26,7 +26,7 @@ func (c *TCPController) Handle0x001() handler.TypeHandlerFunc {
 
 // reply test
 func (hm *TCPController) Handle0x002() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 		rtmsMsg := msg.GetPacket().(*implparser.Packet)
 
 		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
@@ -34,13 +34,13 @@ func (hm *TCPController) Handle0x002() handler.TypeHandlerFunc {
 		if lrcVerifiy != rtmsMsg.LRC {
 			return fmt.Errorf("invaild LRC")
 		}
-		replyCh[tcpmd.NewReplyCode[byte](0x02)] <- &tcpmd.GenericReply[string]{Err: nil, Payload: "success reply test"}
+		replyCh[0x02] <- &tcpmd.GenericReply[string]{Err: nil, Payload: "success reply test"}
 		return nil
 	}
 }
 
 func (c *TCPController) Handle0x010() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 
 		/**
 		 * EventBus로 전파하거나  tcpService로 처리
@@ -52,7 +52,7 @@ func (c *TCPController) Handle0x010() handler.TypeHandlerFunc {
 
 // 클라이언트 종료 시에 TCP 세션 정보를 삭제하기 위한 핸들러
 func (c *TCPController) Handle0xAA() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[tcpmd.ReplyCode]chan tcpmd.Reply) error {
+	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
 		c.TcpService.Handle0xAA(msg.GetClientId())
 		return nil
 	}
