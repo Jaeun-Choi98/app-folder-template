@@ -11,7 +11,7 @@ import (
 	eventlog "pjt/internal/logger/event-logger"
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
-	sseservice "pjt/internal/service/sse-service"
+
 	tcpservice "pjt/internal/service/tcp-service"
 
 	monitoring "pjt/internal/healthcheck"
@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
+	"github.com/Jaeun-Choi98/modules/sse"
 	"github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
 	"github.com/gin-gonic/gin"
 )
@@ -34,7 +35,7 @@ type Container struct {
 	Dao              dbhandler.DBHandlerInterface
 	Ram              *ram.Ram
 	ApiService       service.APIServcieInterface
-	SseService       service.SSEServiceInterface
+	SseManager       *sse.SessionManager[uint32, uint32]
 	TcpService       service.TCPServiceInterface
 	Controller       *controller.Controller
 	RESTServer       *rest.RESTServer
@@ -74,8 +75,8 @@ func NewContainer() (*Container, error) {
 	eventbus := eventbus.NewEventBus(context.Background(), 30*time.Minute)
 
 	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
-	sseService := sseservice.NewSSEService()
-	controller := controller.NewController(gin.New(), apiService, sseService, eventbus, config)
+	sseManager := sse.NewSessionManager[uint32, uint32]()
+	controller := controller.NewController(gin.New(), apiService, sseManager, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
 
 	tcpClientManager := client.NewClientManager()
@@ -97,7 +98,7 @@ func NewContainer() (*Container, error) {
 		Dao:              dao,
 		Ram:              ram,
 		ApiService:       apiService,
-		SseService:       sseService,
+		SseManager:       sseManager,
 		TcpService:       tcpService,
 		Controller:       controller,
 		RESTServer:       rest,

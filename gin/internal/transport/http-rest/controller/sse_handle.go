@@ -8,14 +8,35 @@ import (
 
 	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
-	"pjt/internal/service/sse-service/sse"
 
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/response"
 
+	"github.com/Jaeun-Choi98/modules/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+type CustomSSEMsg struct {
+	Type    string
+	Payload any
+}
+
+func (m *CustomSSEMsg) GetEvent() any {
+	return m.Type
+}
+
+func (m *CustomSSEMsg) GetData() any {
+	return m.Payload
+}
+
+func (m *CustomSSEMsg) GetId() any {
+	return nil
+}
+
+func (m *CustomSSEMsg) GetRetry() any {
+	return nil
+}
 
 /**
  * 클라이언트의 SSE 연결 요청을 처리 하기 위한 핸들러
@@ -28,27 +49,27 @@ import (
 func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 
 	clientId := uuid.New().ID()
-	userId := ctx.GetString("id")
-	if userId == "" {
-		userId = strconv.Itoa(int(clientId))
+	userId := uint32(ctx.GetInt("id"))
+	if userId == 0 {
+		userId = clientId
 	}
 
-	client, err := ctl.SseService.NewSSEClient(clientId, userId, ctx)
+	client, err := sse.NewSSEClient[uint32, uint32](clientId, userId, ctx)
 	if err != nil {
 		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 
-	session := ctl.SseService.GetSessionByUserId(userId)
+	session := ctl.SseManager.GetSessionByUserId(userId)
 	if session == nil {
-		session = ctl.SseService.NewSession(userId)
+		session = ctl.SseManager.NewSession(userId)
 	}
 
 	// 세션에 클라이언트 추가
 	session.AddClient(clientId, client)
 
 	// 연결 성공 이벤트 전송
-	connectMsg := sse.Message{
+	connectMsg := &CustomSSEMsg{
 		Type:    "connect",
 		Payload: map[string]any{"message": "Connected successfully", "client_id": clientId},
 	}
@@ -65,21 +86,21 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		session.RemoveClient(clientId)
 		ctl.EventBus.Unsubscribe(customEvent.NewTopic(customEvent.EventAType), eventChA)
 		if session.Count() == 0 {
-			ctl.SseService.RemoveSession(userId)
+			ctl.SseManager.RemoveSession(userId)
 		}
 	}()
 
 	sendMessage := func(event *customEvent.Message) error {
 		payloadByte, err := json.Marshal(event.Payload)
-		var msg sse.Message
+		var msg *CustomSSEMsg
 		if err != nil {
 			logger.Println("[SSE] failed to serialize event payload to json")
-			msg = sse.Message{
+			msg = &CustomSSEMsg{
 				Type:    event.Type,
 				Payload: event.Payload,
 			}
 		} else {
-			msg = sse.Message{
+			msg = &CustomSSEMsg{
 				Type:    event.Type,
 				Payload: string(payloadByte),
 			}
@@ -114,13 +135,13 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 
 	// POST 요청 본문에서 이벤트 데이터 파싱
-	var msg sse.Message
+	var msg *CustomSSEMsg
 	if err := ctx.ShouldBindJSON(&msg); err != nil {
 		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return
 	}
 	// 이벤트 브로드캐스트
-	ctl.SseService.Broadcast(msg)
+	ctl.SseManager.Broadcast(msg)
 
 	// 성공 응답
 	ctx.JSON(http.StatusOK, map[string]interface{}{"success": true, "message": "Msg sent to all user"})
@@ -129,9 +150,10 @@ func (ctl *Controller) SendSSEMessageAll(ctx *gin.Context) {
 // SendEventToUser는 특정 사용자에게 이벤트를 전송합니다.
 func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	userId := ctx.Param("id")
+	id, _ := strconv.Atoi(userId)
 
 	// POST 요청 본문에서 이벤트 데이터 파싱
-	var msg sse.Message
+	var msg *CustomSSEMsg
 	err := ctx.ShouldBindJSON(&msg)
 	if err != nil {
 		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
@@ -139,7 +161,7 @@ func (ctl *Controller) SendSSEMessageToUser(ctx *gin.Context) {
 	}
 
 	// 사용자 세션 조회
-	session := ctl.SseService.GetSessionByUserId(userId)
+	session := ctl.SseManager.GetSessionByUserId(uint32(id))
 	if session == nil {
 		ctx.Error(httperr.INNER_ERROR.Add(err, response.FAIL))
 		return

@@ -144,7 +144,7 @@ func (a *Application) Shutdown() {
 	if err != nil {
 		logger.Printf("Failed to close APIService instance:\n\t%v", err)
 	}
-	a.container.SseService.Close()
+	a.container.SseManager.Close()
 
 	// shutdown worker routine
 	a.container.TcpService.Close()

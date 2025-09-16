@@ -12,6 +12,7 @@ import (
 	"pjt/internal/transport/http-rest/response"
 	"time"
 
+	"github.com/Jaeun-Choi98/modules/sse"
 	"github.com/Jaeun-Choi98/modules/utils"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
@@ -21,17 +22,17 @@ import (
 type Controller struct {
 	Router     *gin.Engine
 	ApiService service.APIServcieInterface
-	SseService service.SSEServiceInterface
+	SseManager *sse.SessionManager[uint32, uint32]
 	EventBus   *eventbus.EventBus
 	Config     *config.Configuration
 }
 
-func NewController(router *gin.Engine, apiService service.APIServcieInterface, sseService service.SSEServiceInterface, eventBus *eventbus.EventBus, config *config.Configuration) *Controller {
+func NewController(router *gin.Engine, apiService service.APIServcieInterface, sseManager *sse.SessionManager[uint32, uint32], eventBus *eventbus.EventBus, config *config.Configuration) *Controller {
 
 	controller := &Controller{
 		Router:     router,
 		ApiService: apiService,
-		SseService: sseService,
+		SseManager: sseManager,
 		EventBus:   eventBus,
 		Config:     config,
 	}

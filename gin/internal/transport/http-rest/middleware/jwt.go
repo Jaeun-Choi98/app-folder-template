@@ -3,7 +3,6 @@ package middleware
 import (
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/http-utils/jwt"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +50,7 @@ func StoreIdToContext() gin.HandlerFunc {
 			if token = cookie.Value; token != "" {
 				token, _ = strings.CutPrefix(token, "Bearer ")
 				if claims, err := jwt.VaildJwtHS256(token); err == nil {
-					ctx.Set("id", strconv.Itoa(claims.SampleModelId))
+					ctx.Set("id", claims.SampleModelId)
 				}
 			}
 		}
