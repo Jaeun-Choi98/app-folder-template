@@ -1,4 +1,4 @@
-package ram
+package cache
 
 import (
 	"context"
@@ -23,7 +23,7 @@ var (
 	errNotExistId = errors.New("not exists id ( some or one )")
 )
 
-type Ram struct {
+type Cache struct {
 	mu          sync.RWMutex
 	dao         dbhandler.DBHandlerInterface
 	SampleCache map[int64]*object.Sample
@@ -34,11 +34,11 @@ type Ram struct {
 	wg     sync.WaitGroup
 }
 
-func NewRam(dao dbhandler.DBHandlerInterface) (*Ram, error) {
+func NewCacheMem(dao dbhandler.DBHandlerInterface) (*Cache, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	ram := &Ram{
+	ram := &Cache{
 		dao:    dao,
 		ctx:    ctx,
 		cancel: cancel,
@@ -50,13 +50,13 @@ func NewRam(dao dbhandler.DBHandlerInterface) (*Ram, error) {
 	return ram, nil
 }
 
-func (o *Ram) ShutdownSyncDB() {
+func (o *Cache) ShutdownSyncDB() {
 	o.cancel()
 	o.wg.Wait()
 	logger.Println("[RAM] SyncDB goroutine is terminated")
 }
 
-func (o *Ram) StartSyncDB() error {
+func (o *Cache) StartSyncDB() error {
 	o.wg.Add(1)
 	ticker := time.NewTicker(1 * time.Second)
 	defer func() {

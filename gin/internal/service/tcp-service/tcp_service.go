@@ -5,7 +5,7 @@ import (
 	"fmt"
 	dbhandler "pjt/internal/db/db-handler"
 	customEvent "pjt/internal/eventbus/event-define"
-	"pjt/internal/infra/ram"
+	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
 
 	"pjt/internal/transport/tcp/server/client"
@@ -17,7 +17,7 @@ import (
 type TCPService struct {
 	Eventbus       *eventbus.EventBus
 	Dao            dbhandler.DBHandlerInterface
-	Ram            *ram.Ram
+	Cache          *cache.Cache
 	TCPSessionInfo *TCPSessionInfo
 
 	ClientManager *client.ClientManager
@@ -45,7 +45,7 @@ func NewTCPSessionInfo() *TCPSessionInfo {
 	}
 }
 
-func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerInterface, ram *ram.Ram, eb *eventbus.EventBus) *TCPService {
+func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerInterface, cache *cache.Cache, eb *eventbus.EventBus) *TCPService {
 	tcpSessionInfo := NewTCPSessionInfo()
 
 	noReplyCh := eb.Subscribe(customEvent.NewTopic(customEvent.TCPNoReplyType), customEvent.ChannelMore)
@@ -57,7 +57,7 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 	tcpService := &TCPService{
 		TCPSessionInfo: tcpSessionInfo,
 		Dao:            dao,
-		Ram:            ram,
+		Cache:          cache,
 		Eventbus:       eb,
 
 		ClientManager: clientManager,

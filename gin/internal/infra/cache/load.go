@@ -1,4 +1,4 @@
-package ram
+package cache
 
 /**
  * using mapper ( db layer )
@@ -6,7 +6,7 @@ package ram
  *
  */
 
-func (r *Ram) LoadSampleCache() error {
+func (r *Cache) LoadSampleCache() error {
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

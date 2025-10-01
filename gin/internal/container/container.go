@@ -6,7 +6,7 @@ import (
 	"pjt/internal/cron"
 	dbhandler "pjt/internal/db/db-handler"
 
-	"pjt/internal/infra/ram"
+	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
 	eventlog "pjt/internal/logger/event-logger"
 	"pjt/internal/service"
@@ -33,7 +33,7 @@ var container *Container
 type Container struct {
 	Config           *config.Configuration
 	Dao              dbhandler.DBHandlerInterface
-	Ram              *ram.Ram
+	Cache            *cache.Cache
 	ApiService       service.APIServcieInterface
 	SseManager       *sse.SessionManager[uint32, uint32]
 	TcpService       service.TCPServiceInterface
@@ -67,20 +67,20 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
-	ram, err := ram.NewRam(dao)
+	cache, err := cache.NewCacheMem(dao)
 	if err != nil {
 		return nil, err
 	}
 
 	eventbus := eventbus.NewEventBus(context.Background(), 30*time.Minute)
 
-	apiService := apiservice.NewAPIService(dao, ram, eventbus, config)
+	apiService := apiservice.NewAPIService(dao, cache, eventbus, config)
 	sseManager := sse.NewSessionManager[uint32, uint32]()
 	controller := controller.NewController(gin.New(), apiService, sseManager, eventbus, config)
 	rest := rest.NewRESTServer(*controller, config)
 
 	tcpClientManager := client.NewClientManager()
-	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, ram, eventbus)
+	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, cache, eventbus)
 	tcpController := tcpcontroller.NewTCPController(handler.New[string](), tcpService)
 	tcp, err := tcp.NewTCPServer(tcpController, tcpClientManager, config, 5*time.Second, 5)
 	if err != nil {
@@ -89,14 +89,14 @@ func NewContainer() (*Container, error) {
 
 	monitoring := monitoring.NewSystemMonitoring(dao, tcp, eventbus, 1*time.Second)
 
-	dbLogger, _ := eventlog.NewDBLogger(dao, ram, eventbus)
+	dbLogger, _ := eventlog.NewDBLogger(dao, cache, eventbus)
 	eventlog.SetEventLogger(dbLogger)
 	cron := cron.NewCron(config, dao, eventbus)
 
 	return &Container{
 		Config:           config,
 		Dao:              dao,
-		Ram:              ram,
+		Cache:            cache,
 		ApiService:       apiService,
 		SseManager:       sseManager,
 		TcpService:       tcpService,

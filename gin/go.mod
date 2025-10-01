@@ -6,6 +6,8 @@ toolchain go1.24.6
 
 require (
 	github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62
+	github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d
+	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250910005920-717abd87ef18
 	github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ini/ini v1.67.0
@@ -17,15 +19,11 @@ require (
 )
 
 require (
-	github.com/Jaeun-Choi98/modules v2.1.0+incompatible // indirect
-	github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d // indirect
-	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20250910005920-717abd87ef18 // indirect
 	github.com/VictoriaMetrics/easyproto v0.1.4 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
-	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect

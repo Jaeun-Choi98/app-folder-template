@@ -4,7 +4,7 @@ import (
 	"errors"
 	"pjt/internal/config"
 	dbhandler "pjt/internal/db/db-handler"
-	"pjt/internal/infra/ram"
+	"pjt/internal/infra/cache"
 	"pjt/internal/service"
 
 	"sync"
@@ -43,15 +43,15 @@ var (
 
 type APIService struct {
 	Dao      dbhandler.DBHandlerInterface
-	Ram      *ram.Ram
+	Cache    *cache.Cache
 	Config   *config.Configuration
 	EventBus *eventbus.EventBus
 }
 
-func NewAPIService(dao dbhandler.DBHandlerInterface, ram *ram.Ram, eventBus *eventbus.EventBus, config *config.Configuration) service.APIServcieInterface {
+func NewAPIService(dao dbhandler.DBHandlerInterface, cache *cache.Cache, eventBus *eventbus.EventBus, config *config.Configuration) service.APIServcieInterface {
 	return &APIService{
 		Dao:      dao,
-		Ram:      ram,
+		Cache:    cache,
 		Config:   config,
 		EventBus: eventBus,
 	}

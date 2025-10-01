@@ -5,7 +5,7 @@ import (
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/db/entity"
 
-	"pjt/internal/infra/ram"
+	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
 	"sync"
 	"time"
@@ -19,7 +19,7 @@ var sampleLogMu sync.RWMutex
 
 type EventLogger struct {
 	dao      dbhandler.DBHandlerInterface
-	ram      *ram.Ram
+	cache    *cache.Cache
 	eventBus *eventbus.EventBus
 
 	sampleLogQueue []*entity.SampleLog
@@ -31,11 +31,11 @@ type EventLogger struct {
 	wg sync.WaitGroup
 }
 
-func NewDBLogger(dao dbhandler.DBHandlerInterface, ram *ram.Ram, eventBus *eventbus.EventBus) (*EventLogger, error) {
+func NewDBLogger(dao dbhandler.DBHandlerInterface, cache *cache.Cache, eventBus *eventbus.EventBus) (*EventLogger, error) {
 	context, cancel := context.WithCancel(context.Background())
 	return &EventLogger{
 		dao:            dao,
-		ram:            ram,
+		cache:          cache,
 		eventBus:       eventBus,
 		sampleLogQueue: make([]*entity.SampleLog, 100),
 		ctx:            context,

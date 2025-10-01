@@ -81,7 +81,7 @@ func (a *Application) Start() {
 	 */
 	go eventlog.StartLogManager()
 
-	go a.container.Ram.StartSyncDB()
+	go a.container.Cache.StartSyncDB()
 
 	go a.container.Cron.StartCron()
 
@@ -131,7 +131,7 @@ func (a *Application) Shutdown() {
 	eventlog.Shutdown()
 
 	// shutdown sync db routine
-	a.container.Ram.ShutdownSyncDB()
+	a.container.Cache.ShutdownSyncDB()
 
 	// shutdown cron job routine
 	a.container.Cron.Shutdown()
