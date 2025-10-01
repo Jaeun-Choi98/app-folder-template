@@ -32,30 +32,65 @@ pjt/
 
 ## architecture
 ```mermaid
-flowchart RL
+flowchart LR
     subgraph backend
-        direction TB
+        direction RL
+        
         subgraph subprocess
-            direction LR
+            direction RL
             health@{ shape: lin-rect, label: "monitoring process" }
             log@{ shape: lin-rect, label: "log manager process" }
         end
-        tcp(tcp thread) --- cache
-        api(api thread) --- cache(cache mem)
-        worker(worker thread) -.-|eventbus| tcp
-        worker -.-|eventbus| api
-        cache cache@---> |state trace|cache
-        cache@{ animate: true }
+        
+        subgraph message_broker["Message Broker (EventBus)"]
+            direction TB
+            topics["Topics:<br/>- tcpclient.send<br/>- system.state<br/>- cache.data"]
+            topics@{ shape: hex }
+        end
+        
+        tcp(tcp thread)
+        api(api thread)
+        worker(tcp worker thread)
+        cache(cache mem)
+        dblayer(db layer)
+        dbmanager(db manager)
+        
+        %% API 흐름
+        api -->|subscribe: cache.data| message_broker
+        api -->|subscribe: system.state| message_broker
+        api -->|publish: tcpclient.send| message_broker
+        api --- cache
+        
+        %% TCP 흐름
+        tcp -->|publish: tcpclient.send| message_broker
+        tcp --- cache
+        worker --> tcp
+
+        %% Worker 흐름
+        message_broker -->|subscribe: tcpclient.send| worker
+        
+        %% Cache 흐름
+        cache -->|publish: cache.data| message_broker
+        cache -->|publish: system.state| message_broker
         cache --- dblayer
+        cache cache@--> |state trace|cache
+        cache@{ animate: true }
+        
+        %% DB 흐름
         dblayer ---> DB@{ shape: cyl, label: "Database" }
         dbmanager --->|log,tableManage| dblayer
     end
-    subgraph tcp client
+    
+    subgraph tcp_client["TCP Client"]
+        client[client]
         tcp <--->|protocol| client
     end
-    subgraph web client
-        chrome sse@<---|sse| api
-        api rest@<-->|rest| chrome
+    
+    subgraph web_client["Web Client"]
+        chrome[browser]
+        api sse@-->|SSE stream| chrome
+        api <-->|REST API| chrome
         sse@{ animate: true }
     end
+    health --> |publish: system.state| message_broker
 ```
