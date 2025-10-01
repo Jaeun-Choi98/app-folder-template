@@ -18,7 +18,6 @@ pjt/
 │   ├── service/      # 비즈니스 로직
 │   ├── eventbus/     # 이벤트 버스
 │   ├── healthcheck/  # 시스템 헬스 체크
-│   ├── model/        # 전역적으로 사용하는 모델
 │   ├── db/           # 데이터 접근 계층
 │   │   ├── entity/
 │   │   └── db-handler/
@@ -26,7 +25,37 @@ pjt/
 │   │   ├── http/
 │   │   └── tcp/
 │   └── infra/        # 메모리 관련 코드
-│       ├── ram/
+│       ├── cache/
 │       └── object/
 └── pkg/              # 외부 라이브러리 코드
+```
+
+## architecture
+```mermaid
+flowchart RL
+    subgraph backend
+        direction TB
+        subgraph subprocess
+            direction LR
+            health@{ shape: lin-rect, label: "monitoring process" }
+            log@{ shape: lin-rect, label: "log manager process" }
+        end
+        tcp(tcp thread) --- cache
+        api(api thread) --- cache(cache mem)
+        worker(worker thread) -.-|eventbus| tcp
+        worker -.-|eventbus| api
+        cache cache@---> |state trace|cache
+        cache@{ animate: true }
+        cache --- dblayer
+        dblayer ---> DB@{ shape: cyl, label: "Database" }
+        dbmanager --->|log,tableManage| dblayer
+    end
+    subgraph tcp client
+        tcp <--->|protocol| client
+    end
+    subgraph web client
+        chrome sse@<---|sse| api
+        api rest@<-->|rest| chrome
+        sse@{ animate: true }
+    end
 ```
