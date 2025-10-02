@@ -42,7 +42,7 @@ flowchart LR
             log@{ shape: lin-rect, label: "log manager process" }
         end
         
-        subgraph message_broker["Message Broker (EventBus)"]
+        subgraph EventBus["EventBus Instance"]
             direction TB
             topics["Topics:<br/>- tcpclient.send<br/>- system.state<br/>- cache.data"]
             topics@{ shape: hex }
@@ -56,22 +56,22 @@ flowchart LR
         dbmanager(db manager)
         
         %% API 흐름
-        api -->|subscribe: cache.data| message_broker
-        api -->|subscribe: system.state| message_broker
-        api -->|publish: tcpclient.send| message_broker
+        api -->|subscribe: cache.data| EventBus
+        api -->|subscribe: system.state| EventBus
+        api -->|publish: tcpclient.send| EventBus
         api --- cache
         
         %% TCP 흐름
-        tcp -->|publish: tcpclient.send| message_broker
+        tcp -->|publish: tcpclient.send| EventBus
         tcp --- cache
         worker --> tcp
 
         %% Worker 흐름
-        message_broker -->|subscribe: tcpclient.send| worker
+        EventBus -->|subscribe: tcpclient.send| worker
         
         %% Cache 흐름
-        cache -->|publish: cache.data| message_broker
-        cache -->|publish: system.state| message_broker
+        cache -->|publish: cache.data| EventBus
+        cache -->|publish: system.state| EventBus
         cache --- dblayer
         cache cache@--> |state trace|cache
         cache@{ animate: true }
@@ -92,5 +92,5 @@ flowchart LR
         api <-->|REST API| chrome
         sse@{ animate: true }
     end
-    health --> |publish: system.state| message_broker
+    health --> |publish: system.state| EventBus
 ```
