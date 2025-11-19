@@ -23,7 +23,7 @@ import (
 type TCPServer struct {
 	*server.ServerBase
 	clients *client.ClientManager
-	router  mhandler.HandlerManagerInterface
+	router  mhandler.ManagerInterface
 }
 
 func NewTCPServer(tcpcontroller *tcpcontroller.TCPController, cm *client.ClientManager, cfg *config.Configuration, heartbeat time.Duration, maxTimeOutCnt int) (*TCPServer, error) {

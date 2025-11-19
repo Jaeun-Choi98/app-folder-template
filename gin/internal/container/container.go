@@ -81,7 +81,7 @@ func NewContainer() (*Container, error) {
 
 	tcpClientManager := client.NewClientManager()
 	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, cache, eventbus)
-	tcpController := tcpcontroller.NewTCPController(handler.New[string](), tcpService)
+	tcpController := tcpcontroller.NewTCPController(handler.NewV1[string](), tcpService)
 	tcp, err := tcp.NewTCPServer(tcpController, tcpClientManager, config, 5*time.Second, 5)
 	if err != nil {
 		return nil, err

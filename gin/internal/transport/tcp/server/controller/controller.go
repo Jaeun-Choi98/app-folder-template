@@ -9,11 +9,11 @@ import (
 )
 
 type TCPController struct {
-	Router     *handler.HandlerManager[string]
+	Router     *handler.Manager[string]
 	TcpService service.TCPServiceInterface
 }
 
-func NewTCPController(router *handler.HandlerManager[string], tcpService service.TCPServiceInterface) *TCPController {
+func NewTCPController(router *handler.Manager[string], tcpService service.TCPServiceInterface) *TCPController {
 	controller := &TCPController{
 		Router:     router,
 		TcpService: tcpService,
@@ -23,12 +23,13 @@ func NewTCPController(router *handler.HandlerManager[string], tcpService service
 }
 
 func (c *TCPController) RoutePath() {
-	c.Router.RegisterHandle("text", func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
-		log.Printf("msgType: %s, clientID: %d, Data: %v ", msg.GetPacketId(), msg.GetClientId(), msg.GetPacket())
+	c.Router.RegisterHandle("text", func(c *tcpmd.ReqContext) error {
+		log.Printf("msgType: %s, clientID: %d, Data: %v ", c.GetParsedMsg().GetPacketId(),
+			c.GetParsedMsg().GetClientId(), c.GetParsedMsg().GetPacket())
 		return nil
 	})
 
-	c.Router.RegisterHandle("json", func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
+	c.Router.RegisterHandle("json", func(c *tcpmd.ReqContext) error {
 		return nil
 	})
 

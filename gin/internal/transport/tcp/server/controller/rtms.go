@@ -11,9 +11,10 @@ import (
 	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
 )
 
-func (c *TCPController) Handle0x001() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
-		rtmsMsg := msg.GetPacket().(*implparser.Packet)
+func (ctr *TCPController) Handle0x001() handler.HandlerFunc {
+	return func(c *tcpmd.ReqContext) error {
+
+		rtmsMsg := c.GetParsedMsg().GetPacket().(*implparser.Packet)
 		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
 
 		if lrcVerifiy != rtmsMsg.LRC {
@@ -25,35 +26,38 @@ func (c *TCPController) Handle0x001() handler.TypeHandlerFunc {
 }
 
 // reply test
-func (hm *TCPController) Handle0x002() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
-		rtmsMsg := msg.GetPacket().(*implparser.Packet)
+func (ctr *TCPController) Handle0x002() handler.HandlerFunc {
+	return func(c *tcpmd.ReqContext) error {
+		rtmsMsg := c.GetParsedMsg().GetPacket().(*implparser.Packet)
 
 		lrcVerifiy := serializer.CalculateRTMSLRC(binary.LittleEndian, rtmsMsg.Length, rtmsMsg.Sequence, rtmsMsg.UnitNo, rtmsMsg.OpCode, rtmsMsg.Data)
 
 		if lrcVerifiy != rtmsMsg.LRC {
 			return fmt.Errorf("invaild LRC")
 		}
-		replyCh[0x02] <- &tcpmd.GenericReply[string]{Err: nil, Payload: "success reply test"}
+		ch, ok := c.GetReplyChannel().Get(0x02)
+		if ok {
+			ch <- &tcpmd.GenericReply[string]{Err: nil, Payload: "success reply test"}
+		}
 		return nil
 	}
 }
 
-func (c *TCPController) Handle0x010() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
+func (ctr *TCPController) Handle0x010() handler.HandlerFunc {
+	return func(c *tcpmd.ReqContext) error {
 
 		/**
 		 * EventBus로 전파하거나  tcpService로 처리
 		 */
-		c.TcpService.Handle0x010(msg.GetClientId())
+		ctr.TcpService.Handle0x010(c.GetParsedMsg().GetClientId())
 		return nil
 	}
 }
 
 // 클라이언트 종료 시에 TCP 세션 정보를 삭제하기 위한 핸들러
-func (c *TCPController) Handle0xAA() handler.TypeHandlerFunc {
-	return func(msg tcpmd.ParseMsg, replyCh map[any]chan tcpmd.Reply) error {
-		c.TcpService.Handle0xAA(msg.GetClientId())
+func (ctr *TCPController) Handle0xAA() handler.HandlerFunc {
+	return func(c *tcpmd.ReqContext) error {
+		ctr.TcpService.Handle0xAA(c.GetParsedMsg().GetClientId())
 		return nil
 	}
 }

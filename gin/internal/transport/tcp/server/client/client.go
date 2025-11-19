@@ -29,9 +29,9 @@ type Client struct {
 	Conn     net.Conn
 	SeqNum   uint16
 
-	handler handler.HandlerManagerInterface
+	handler handler.ManagerInterface
 
-	ReplyCh map[any]chan tcpmd.Reply // OPCODE -> Reply Channel
+	//ReplyCh map[any]chan tcpmd.Reply // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
 	IsAuth bool
@@ -41,14 +41,14 @@ type Client struct {
 	// 아래 필드는 패키지를 사용한 예시
 	parser parser.Parser
 
-	Ctx    context.Context
-	Cancel context.CancelFunc
-
-	mu sync.Mutex
+	Ctx        context.Context
+	Cancel     context.CancelFunc
+	reqContext *tcpmd.ReqContext
+	mu         sync.Mutex
 }
 
 func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *implparser.RTMSParser,
-	hd handler.HandlerManagerInterface) *Client {
+	hd handler.ManagerInterface) *Client {
 	ctx, cancel := context.WithCancel(parentCtx)
 	return &Client{
 		ClientId: clinetId,
@@ -56,7 +56,8 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 		//parser:   ps,
 		parser:  ps,
 		handler: hd,
-		ReplyCh: make(map[any]chan tcpmd.Reply),
+		//ReplyCh: make(map[any]chan tcpmd.Reply),
+		reqContext: tcpmd.NewReqContext(ctx),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,
@@ -66,18 +67,20 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 func (c *Client) Close() {
 	if c.IsAuth {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
-		c.handler.HandleMessage(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId}, nil)
+		c.reqContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
+		c.handler.HandleMessage(c.reqContext)
 	}
 
 	if c.Conn != nil {
 		c.Conn.Close()
 	}
-	for _, v := range c.ReplyCh {
-		// 클라이언트가 패닉이 발생했을 때, 해당 replyCh를 갑자기 닫으면 해당 채널을 수신하고 있는 곳에서 close of closed channel panic 발생. -> 수신하는 곳에서 recover 처리 필요.
-		// client_manager.go_191
-		close(v)
-	}
+	// for _, v := range c.ReplyCh {
+	// 	// 클라이언트가 패닉이 발생했을 때, 해당 replyCh를 갑자기 닫으면 해당 채널을 수신하고 있는 곳에서 close of closed channel panic 발생. -> 수신하는 곳에서 recover 처리 필요.
+	// 	// client_manager.go_191
+	// 	close(v)
+	// }
 	//close(c.TimeoutChannel)
+	c.reqContext.GetReplyChannel().CloseAll()
 	c.Cancel()
 }
 
@@ -104,7 +107,9 @@ func (c *Client) MessageProcessingLoop() {
 
 			msg.SetClientId(c.ClientId)
 
-			if err := c.handler.HandleMessage(msg, c.ReplyCh); err != nil {
+			c.reqContext.SetParsedMsg(msg)
+
+			if err := c.handler.HandleMessage(c.reqContext); err != nil {
 				logger.Printf("[TCP] Handle error: %v", err)
 				// 클라이언트에게 처리 결과를 반환해야 한다면 아래 코드 실행.
 				// c.SendMessage([]byte(err.Error()), 0)
