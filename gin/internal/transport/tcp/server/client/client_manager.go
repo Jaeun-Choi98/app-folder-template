@@ -159,26 +159,33 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 		return
 	}
 
-	cm.mu.Lock()
-	if _, exists := client.reqContext.GetReplyChannel().Get(opCode); exists {
-		cm.mu.Unlock()
-		logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
-		response.Err = ErrNormal
-		return
+	// cm.mu.Lock()
+	// if _, exists := client.reqContext.GetReplyChannel().Get(opCode); exists {
+	// 	cm.mu.Unlock()
+	// 	logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
+	// 	response.Err = ErrNormal
+	// 	return
+	// }
+
+	// replyCh := make(chan tcpmd.Reply, 1)
+	// client.reqContext.GetReplyChannel().Set(opCode, replyCh)
+	// //client.ReplyCh[opCode] = replyCh
+	// cm.mu.Unlock()
+
+	// defer func() {
+	// 	if replyCh != nil {
+	// 		client.reqContext.GetReplyChannel().Close(opCode)
+	// 		// close(replyCh)
+	// 		// delete(client.ReplyCh, opCode)
+	// 	}
+	// }()
+
+	if _, exists := client.reqContext.GetReplyChannel().Get(opCode); !exists {
+		replyCh := make(chan tcpmd.Reply, 1)
+		client.reqContext.GetReplyChannel().Set(opCode, replyCh)
 	}
 
-	replyCh := make(chan tcpmd.Reply, 1)
-	client.reqContext.GetReplyChannel().Set(opCode, replyCh)
-	//client.ReplyCh[opCode] = replyCh
-	cm.mu.Unlock()
-
-	defer func() {
-		if replyCh != nil {
-			client.reqContext.GetReplyChannel().Close(opCode)
-			// close(replyCh)
-			// delete(client.ReplyCh, opCode)
-		}
-	}()
+	replyCh, _ := client.reqContext.GetReplyChannel().Get(opCode)
 
 	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
