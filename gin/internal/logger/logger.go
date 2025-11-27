@@ -15,15 +15,15 @@ var customLogger *CustomLogger
 var maxAgeDays = 0
 
 type CustomLogger struct {
-	prefix  string
-	curDay  int
-	wg      sync.WaitGroup
-	ctx     context.Context
-	cancel  context.CancelFunc
-	ticker  *time.Ticker
-	logger1 *log.Logger
-	logger2 *log.Logger
-	logFile *os.File
+	prefix     string
+	curDay     int
+	wg         sync.WaitGroup
+	ctx        context.Context
+	cancel     context.CancelFunc
+	ticker     *time.Ticker
+	logger     *log.Logger
+	stdoutFile *os.File
+	stderrFile *os.File
 }
 
 func NewCustomLogger(prefix string) (*CustomLogger, error) {
@@ -43,26 +43,33 @@ func NewCustomLogger(prefix string) (*CustomLogger, error) {
 
 func (l *CustomLogger) setLogfileAndLogger(prefix string) error {
 	now := time.Now()
-	filepath := getFilepath(now)
-	file, err := os.OpenFile(filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	outfilepath := getFilepath("stdout", now)
+	errfilepath := getFilepath("stderr", now)
+	stdoutfile, err := os.OpenFile(outfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	//logger := log.New(io.MultiWriter(os.Stderr, file), prefix, log.Ldate|log.Ltime)
-	logger1 := log.New(os.Stderr, prefix, log.Ldate|log.Ltime)
-	logger2 := log.New(file, prefix, log.Ldate|log.Ltime)
-	l.logFile = file
-	l.logger1 = logger1
-	l.logger2 = logger2
+	stderrfile, err := os.OpenFile(errfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	os.Stderr = stderrfile
+	logger := log.New(stdoutfile, prefix, log.Ldate|log.Ltime)
+
+	l.stdoutFile = stdoutfile
+	l.stderrFile = stderrfile
+	l.logger = logger
 	l.curDay = now.Day()
 	return nil
 }
 
-func getFilepath(now time.Time) string {
+func getFilepath(name string, now time.Time) string {
 	dir := filepath.Base("log")
-	fileName := fmt.Sprintf("%d_%02d_%02d", now.Year(), now.Month(), now.Day())
+	fileName := fmt.Sprintf("%s_%d_%02d_%02d", name, now.Year(), now.Month(), now.Day())
 	return filepath.Join(dir, fileName)
 }
 
@@ -73,22 +80,25 @@ func SetLogger(l *CustomLogger) {
 	customLogger = l
 }
 
-// func GetLogger() *CustomLogger {
-// 	return customLogger
-// }
-
 func Println(v ...any) {
-	customLogger.logger1.Println(v...)
-	customLogger.logger2.Println(v...)
+	log.Println(v...)
+	customLogger.logger.Println(v...)
 }
 
 func Printf(format string, v ...any) {
-	customLogger.logger1.Printf(format, v...)
-	customLogger.logger2.Printf(format, v...)
+	log.Printf(format, v...)
+	customLogger.logger.Printf(format, v...)
 }
 
 func Close() error {
-	return customLogger.logFile.Close()
+	var terr error
+	if err := customLogger.stdoutFile.Close(); err != nil {
+		terr = fmt.Errorf("stdoutfile close err: %v", err)
+	}
+	if err := customLogger.stderrFile.Close(); err != nil {
+		terr = fmt.Errorf("stderrfile close err: %v, %v", err, terr)
+	}
+	return terr
 }
 
 /**
