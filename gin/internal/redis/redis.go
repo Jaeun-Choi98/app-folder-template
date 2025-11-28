@@ -3,13 +3,14 @@ package redis
 import (
 	"fmt"
 	"pjt/internal/config"
+	redismodel "pjt/internal/redis/redis-model"
 	"sync"
 
 	"github.com/Jaeun-Choi98/modules/orm/redisorm"
 )
 
 var redisClient *redisorm.RedisClient
-var repositoies map[string]*redisorm.Repository[redisorm.Model]
+var repositoies map[redismodel.RedisKey]*redisorm.Repository[redisorm.Model]
 var redisMu sync.RWMutex
 
 func InitRedis(cfg *config.Configuration) error {
@@ -18,6 +19,8 @@ func InitRedis(cfg *config.Configuration) error {
 	if redisClient == nil {
 		return fmt.Errorf("[REDIS] failed to connect redis")
 	}
+	LoadDefaultRepo()
+
 	return nil
 }
 
@@ -25,7 +28,7 @@ func CloseRedisClient() error {
 	return redisClient.Close()
 }
 
-func AddRepository(key string, model redisorm.Model) error {
+func AddRepository(key redismodel.RedisKey, model redisorm.Model) error {
 	redisMu.Lock()
 	defer redisMu.Unlock()
 	if _, exists := repositoies[key]; !exists {
@@ -34,11 +37,21 @@ func AddRepository(key string, model redisorm.Model) error {
 	return nil
 }
 
-func DeleteRepository(key string) error {
+func DeleteRepository(key redismodel.RedisKey) error {
 	redisMu.Lock()
 	defer redisMu.Unlock()
 	if _, exists := repositoies[key]; exists {
 		delete(repositoies, key)
 	}
 	return nil
+}
+
+func GetRepository(key redismodel.RedisKey) *redisorm.Repository[redisorm.Model] {
+	redisMu.RLock()
+	defer redisMu.RUnlock()
+	return repositoies[key]
+}
+
+func LoadDefaultRepo() {
+	AddRepository(redismodel.RedisKeySample, &redismodel.Sample{})
 }
