@@ -6,6 +6,7 @@ toolchain go1.24.6
 
 require (
 	github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62
+	github.com/Jaeun-Choi98/modules/orm v0.0.0-20251127080943-0e3dedb95259
 	github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d
 	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20251118021557-bed91cf666d9
 	github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62
@@ -15,7 +16,7 @@ require (
 	github.com/godror/godror v0.48.3
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
@@ -23,8 +24,10 @@ require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -42,6 +45,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/redis/go-redis/v9 v9.16.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect

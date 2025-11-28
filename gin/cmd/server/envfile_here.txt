@@ -19,3 +19,11 @@ TNS=              # for oracle
 DRIVER=           # for odbc
 DSN=              # for odbc
 
+
+[REDIS]
+IP=
+PORT=
+PASSWD=
+DB=0
+PROTOCOL=2
+TIMEOUT=5

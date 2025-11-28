@@ -5,6 +5,7 @@ import (
 	"pjt/internal/config"
 	"pjt/internal/cron"
 	dbhandler "pjt/internal/db/db-handler"
+	"pjt/internal/redis"
 
 	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
@@ -92,6 +93,10 @@ func NewContainer() (*Container, error) {
 	dbLogger, _ := eventlog.NewDBLogger(dao, cache, eventbus)
 	eventlog.SetEventLogger(dbLogger)
 	cron := cron.NewCron(config, dao, eventbus)
+
+	if err := redis.InitRedis(config); err != nil {
+		return nil, err
+	}
 
 	return &Container{
 		Config:           config,

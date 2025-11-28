@@ -21,6 +21,13 @@ type Configuration struct {
 	TcpPort string
 
 	DatabaseConfig
+
+	RedisIp      string
+	RedisPort    string
+	RedisPwd     string
+	RedisDB      int
+	RedisProtocl int
+	RedisTimeout int
 }
 
 type DatabaseConfig struct {
@@ -92,6 +99,13 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.Driver = cfgFile.Section("DB").Key("DRIVER").MustString("")
 	config.DSN = cfgFile.Section("DB").Key("DSN").MustString("")
+
+	config.RedisIp = cfgFile.Section("REDIS").Key("IP").MustString("")
+	config.RedisPort = cfgFile.Section("REDIS").Key("PORT").MustString("")
+	config.RedisPwd = cfgFile.Section("REDIS").Key("PASSWD").MustString("")
+	config.RedisDB = cfgFile.Section("REDIS").Key("DB").MustInt(0)
+	config.RedisProtocl = cfgFile.Section("REDIS").Key("PROTOCOL").MustInt(2)
+	config.RedisTimeout = cfgFile.Section("REDIS").Key("TIMEOUT").MustInt(5)
 
 	return config
 }

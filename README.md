@@ -16,6 +16,7 @@ pjt/
 │   ├── container/    # 의존성 컨테이너
 │   ├── app/          # 애플리케이션 시작/종료 로직
 │   ├── service/      # 비즈니스 로직
+│   ├── reids/        # 레디스
 │   ├── eventbus/     # 이벤트 버스
 │   ├── healthcheck/  # 시스템 헬스 체크
 │   ├── db/           # 데이터 접근 계층

@@ -9,6 +9,7 @@ import (
 	"pjt/internal/container"
 	"pjt/internal/logger"
 	eventlog "pjt/internal/logger/event-logger"
+	"pjt/internal/redis"
 	rest "pjt/internal/transport/http-rest"
 	tcp "pjt/internal/transport/tcp/server"
 	"sync"
@@ -151,6 +152,10 @@ func (a *Application) Shutdown() {
 
 	// EventBus 채널 닫음
 	a.container.EventBus.Close()
+
+	if err := redis.CloseRedisClient(); err != nil {
+		logger.Printf("Failed to close reids client: %v", err)
+	}
 
 	a.wg.Wait()
 	logger.Println("Application terminated")
