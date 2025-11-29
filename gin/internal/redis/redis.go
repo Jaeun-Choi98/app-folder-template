@@ -10,7 +10,7 @@ import (
 )
 
 var redisClient *redisorm.RedisClient
-var repositoies map[redismodel.RedisKey]*redisorm.Repository[redisorm.Model]
+var repositories map[redismodel.RedisKey]any
 var redisMu sync.RWMutex
 
 func InitRedis(cfg *config.Configuration) error {
@@ -19,6 +19,7 @@ func InitRedis(cfg *config.Configuration) error {
 	if redisClient == nil {
 		return fmt.Errorf("[REDIS] failed to connect redis")
 	}
+	repositories = make(map[redismodel.RedisKey]any)
 	LoadDefaultRepo()
 
 	return nil
@@ -28,11 +29,11 @@ func CloseRedisClient() error {
 	return redisClient.Close()
 }
 
-func AddRepository(key redismodel.RedisKey, model redisorm.Model) error {
+func AddRepository[T redisorm.Model](key redismodel.RedisKey, model T) error {
 	redisMu.Lock()
 	defer redisMu.Unlock()
-	if _, exists := repositoies[key]; !exists {
-		repositoies[key] = redisorm.NewRepository[redisorm.Model](redisClient, model)
+	if _, exists := repositories[key]; !exists {
+		repositories[key] = redisorm.NewRepository(redisClient, model)
 	}
 	return nil
 }
@@ -40,16 +41,26 @@ func AddRepository(key redismodel.RedisKey, model redisorm.Model) error {
 func DeleteRepository(key redismodel.RedisKey) error {
 	redisMu.Lock()
 	defer redisMu.Unlock()
-	if _, exists := repositoies[key]; exists {
-		delete(repositoies, key)
-	}
+	delete(repositories, key)
 	return nil
 }
 
-func GetRepository(key redismodel.RedisKey) *redisorm.Repository[redisorm.Model] {
+func GetRepository[T redisorm.Model](key redismodel.RedisKey) *redisorm.Repository[T] {
 	redisMu.RLock()
 	defer redisMu.RUnlock()
-	return repositoies[key]
+
+	repo, exists := repositories[key]
+	if !exists {
+		return nil
+	}
+
+	// 타입 단언
+	typedRepo, ok := repo.(*redisorm.Repository[T])
+	if !ok {
+		return nil
+	}
+
+	return typedRepo
 }
 
 func LoadDefaultRepo() {
