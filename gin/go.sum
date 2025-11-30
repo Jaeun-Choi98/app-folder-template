@@ -2,6 +2,8 @@ github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62 h1:r
 github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62/go.mod h1:ATBPLafHqWfSiswmlUVW9ioSOG8Uc2wdp/GvPwTBeCQ=
 github.com/Jaeun-Choi98/modules/orm v0.0.0-20251127080943-0e3dedb95259 h1:CIdDHl2KkgtmilAK/ELoXu5N2HIxFI0yzi5FShNt31A=
 github.com/Jaeun-Choi98/modules/orm v0.0.0-20251127080943-0e3dedb95259/go.mod h1:V6EYleJk7mERNM7mzfGnxDYBQxL5JyCQ//vqlbJiAX0=
+github.com/Jaeun-Choi98/modules/orm v0.0.0-20251130080405-26f27d458b8b h1:/gsKZTf/laybJl2XXac52y4+fhcpEEEa08O4qZmtcSk=
+github.com/Jaeun-Choi98/modules/orm v0.0.0-20251130080405-26f27d458b8b/go.mod h1:V6EYleJk7mERNM7mzfGnxDYBQxL5JyCQ//vqlbJiAX0=
 github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d h1:m1uGewP3VVf1ikGgU6wph1nhYn3SL+yDbiepYBb06ys=
 github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d/go.mod h1:4iYxFE2n09x8w9GDrqYaAgnA76ftVk3yAPZJ/PpKCL4=
 github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20251118021557-bed91cf666d9 h1:PchaxOb+m2P2A+t3xOXnmuJKSSg7/lVaclDNdOIlPBg=

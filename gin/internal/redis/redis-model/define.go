@@ -1,7 +1,7 @@
 package redismodel
 
-type RedisKey int
+type RepoKey int
 
 const (
-	RedisKeySample RedisKey = 1
+	RedisKeySample RepoKey = 1
 )
