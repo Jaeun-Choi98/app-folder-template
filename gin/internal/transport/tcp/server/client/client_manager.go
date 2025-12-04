@@ -180,12 +180,12 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	// 	}
 	// }()
 
-	if _, exists := client.reqContext.GetReplyChannel().Get(opCode); !exists {
+	if _, exists := client.clientContext.GetReplyChannel().Get(opCode); !exists {
 		replyCh := make(chan tcpmd.Reply, 1)
-		client.reqContext.GetReplyChannel().Set(opCode, replyCh)
+		client.clientContext.GetReplyChannel().Set(opCode, replyCh)
 	}
 
-	replyCh, _ := client.reqContext.GetReplyChannel().Get(opCode)
+	replyCh, _ := client.clientContext.GetReplyChannel().Get(opCode)
 
 	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
