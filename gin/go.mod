@@ -8,7 +8,7 @@ require (
 	github.com/Jaeun-Choi98/modules/eventbus v0.0.0-20250902005914-f819e999fc62
 	github.com/Jaeun-Choi98/modules/orm v0.0.0-20251130080405-26f27d458b8b
 	github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d
-	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20251118021557-bed91cf666d9
+	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20251204124015-402a33fbaa1b
 	github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ini/ini v1.67.0

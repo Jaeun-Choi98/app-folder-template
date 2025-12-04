@@ -41,10 +41,10 @@ type Client struct {
 	// 아래 필드는 패키지를 사용한 예시
 	parser parser.Parser
 
-	Ctx        context.Context
-	Cancel     context.CancelFunc
-	reqContext *tcpmd.ReqContext
-	mu         sync.Mutex
+	Ctx           context.Context
+	Cancel        context.CancelFunc
+	clientContext *tcpmd.ClientContext
+	mu            sync.Mutex
 }
 
 func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *implparser.RTMSParser,
@@ -57,7 +57,7 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 		parser:  ps,
 		handler: hd,
 		//ReplyCh: make(map[any]chan tcpmd.Reply),
-		reqContext: tcpmd.NewReqContext(ctx),
+		clientContext: tcpmd.NewClientContext(ctx, 30),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,
@@ -67,8 +67,8 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 func (c *Client) Close() {
 	if c.IsAuth {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
-		c.reqContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
-		c.handler.HandleMessage(c.reqContext)
+		c.clientContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
+		c.handler.HandleMessage(c.clientContext)
 	}
 
 	if c.Conn != nil {
@@ -80,7 +80,7 @@ func (c *Client) Close() {
 	// 	close(v)
 	// }
 	//close(c.TimeoutChannel)
-	c.reqContext.GetReplyChannel().CloseAll()
+	c.clientContext.Close()
 	c.Cancel()
 }
 
@@ -107,9 +107,9 @@ func (c *Client) MessageProcessingLoop() {
 
 			msg.SetClientId(c.ClientId)
 
-			c.reqContext.SetParsedMsg(msg)
+			c.clientContext.SetParsedMsg(msg)
 
-			if err := c.handler.HandleMessage(c.reqContext); err != nil {
+			if err := c.handler.HandleMessage(c.clientContext); err != nil {
 				logger.Printf("[TCP] Handle error: %v", err)
 				// 클라이언트에게 처리 결과를 반환해야 한다면 아래 코드 실행.
 				// c.SendMessage([]byte(err.Error()), 0)
