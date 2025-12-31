@@ -1,8 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"os"
 	dbhandler "pjt/internal/db/db-handler"
 	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/infra/cache"
@@ -84,6 +87,11 @@ func (t *TCPService) Close() {
 	logger.Println("[TCP Service] TCP Service worker goroutine is terminated")
 }
 
+/**
+ * TCP Service의 Worker은 다른 서비스 계층에서 TCP/IP 통신이 필요한 경우 사용함.
+ *
+ * 같은 TCP Service 계층에서의 TCP통신이 필요한 경우에는 ClientManager을 사용해서 데이터를 전송해야함.
+ */
 func (t *TCPService) Worker() {
 	defer t.wg.Done()
 	for {
@@ -97,11 +105,11 @@ func (t *TCPService) Worker() {
 				continue
 			}
 			go func() {
-				res := t.ClientManager.SendToClientNoReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout)
-				if res.Err != nil {
-					logger.Printf("[TCP Service] Worker: failed to SendToClientNoReply: \n%v, station num: %d", res.Err, req.ClientId)
+				err := t.ClientManager.SendToClientNoReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout)
+				if err != nil {
+					logger.Printf("[TCP Service] Worker: failed to SendToClientNoReply: \n%v, station num: %d", err, req.ClientId)
 				}
-				req.Response <- res
+				req.Response <- customEvent.TCPResponse{Err: err}
 			}()
 		case msg := <-t.WithReplyCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.TCPSendPayload)
@@ -110,11 +118,11 @@ func (t *TCPService) Worker() {
 				continue
 			}
 			go func() {
-				res := t.ClientManager.SendToClientWithReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout, req.ReplyTimeout)
-				if res.Err != nil {
-					logger.Printf("[TCP Service] Worker: failed to sendToClientWithReply: \n%v, station num: %d", res.Err, req.ClientId)
+				reply, err := t.ClientManager.SendToClientWithReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout, req.ReplyTimeout)
+				if err != nil {
+					logger.Printf("[TCP Service] Worker: failed to sendToClientWithReply: \n%v, station num: %d", err, req.ClientId)
 				}
-				req.Response <- res
+				req.Response <- customEvent.TCPResponse{Data: reply, Err: err}
 			}()
 		case msg := <-t.UpdateCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.UpdateClientPayload)
@@ -140,6 +148,24 @@ func (t *TCPService) Handle0x010(clientId uint32) error {
 		customEvent.NewMessage("tcp").Add(&customEvent.UpdateClientPayload{OldClientId: clientId, NewClientId: 1}))
 	return nil
 }
+
 func (t *TCPService) Handle0xAA(clientId uint32) {
 	t.Eventbus.Publish(customEvent.NewTopic(customEvent.EventAType), customEvent.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
+}
+
+func (t *TCPService) readFileToBuffer(filePath string) (*bytes.Buffer, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var buffer bytes.Buffer
+
+	_, err = io.Copy(&buffer, file)
+	if err != nil {
+		return nil, err
+	}
+
+	return &buffer, nil
 }

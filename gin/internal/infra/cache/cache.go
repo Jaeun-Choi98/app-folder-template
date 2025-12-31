@@ -7,7 +7,6 @@ import (
 	"pjt/internal/infra/object"
 	"pjt/internal/logger"
 	"sync"
-	"time"
 )
 
 /**
@@ -27,11 +26,6 @@ type Cache struct {
 	mu          sync.RWMutex
 	dao         dbhandler.DBHandlerInterface
 	SampleCache map[int64]*object.Sample
-
-	// 정류장 상태 및 장비 상태 동기화를 위한 변수
-	ctx    context.Context
-	cancel context.CancelFunc
-	wg     sync.WaitGroup
 }
 
 func NewCacheMem(dao dbhandler.DBHandlerInterface) (*Cache, error) {
@@ -50,36 +44,8 @@ func NewCacheMem(dao dbhandler.DBHandlerInterface) (*Cache, error) {
 	return ram, nil
 }
 
-func (o *Cache) ShutdownSyncDB() {
+func (o *Cache) Close() {
 	o.cancel()
 	o.wg.Wait()
-	logger.Println("[RAM] SyncDB goroutine is terminated")
-}
-
-func (o *Cache) StartSyncDB() error {
-	o.wg.Add(1)
-	ticker := time.NewTicker(1 * time.Second)
-	defer func() {
-		ticker.Stop()
-		o.wg.Done()
-	}()
-	for {
-		select {
-		case <-o.ctx.Done():
-			return nil
-		case <-ticker.C:
-			models, _ := o.GetOprtModels(nil, true)
-			if len(models) == 0 {
-
-			}
-			// debug
-			// logger.Println("here sync DB")
-
-			go func() {
-				if err := o.dao.Ping(); err != nil {
-					logger.Println("[RAM] Failed to sync DB")
-				}
-			}()
-		}
-	}
+	logger.Println("[Cache] SyncDB goroutine is terminated")
 }

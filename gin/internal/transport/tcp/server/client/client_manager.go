@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
-	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/logger"
 
 	"pjt/internal/transport/tcp/server/serializer"
@@ -29,6 +28,9 @@ type ClientManager struct {
 	cancel  context.CancelFunc
 
 	count int
+
+	// for send logical packet
+	sendMu sync.RWMutex
 }
 
 func NewClientManager() *ClientManager {
@@ -107,14 +109,14 @@ func (cm *ClientManager) DisconnectClient(clientId uint32) {
 	}
 }
 
-func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) (response customEvent.TCPResponse) {
+func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) (retErr error) {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]
 	cm.mu.RUnlock()
 
 	if !exists {
 		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
-		response.Err = ErrNormal
+		retErr = ErrNormal
 		return
 	}
 
@@ -123,29 +125,34 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err != nil {
 		logger.Println("[TCP] failed to serialize message")
-		response.Err = ErrNormal
+		retErr = ErrNormal
 		return
 	}
 
+	cm.sendMu.Lock()
 	if err := client.SendMessage(message, sendTimeout); err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			response.Err = ErrTimeoutSend
+			retErr = ErrTimeoutSend
 		} else {
-			response.Err = err
+			retErr = err
 		}
 		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
+	cm.sendMu.Unlock()
+	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+		clientId, 0x00, opCode, seqNum, len(data), data)
+
 	client.SetSequenceNum(seqNum)
 	return
 }
 
 func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, data []byte,
-	sendTimeout time.Duration, replyTimeout time.Duration) (response customEvent.TCPResponse) {
+	sendTimeout time.Duration, replyTimeout time.Duration) (replyData any, retErr error) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			response.Err = fmt.Errorf("[TCP] client wsarecv( panic ), client id: %d, panic: %v", clientId, r)
+			retErr = fmt.Errorf("[TCP] client wsarecv( panic ), client id: %d, panic: %v", clientId, r)
 		}
 	}()
 
@@ -155,30 +162,9 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 
 	if !exists {
 		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
-		response.Err = ErrNormal
+		retErr = ErrNormal
 		return
 	}
-
-	// cm.mu.Lock()
-	// if _, exists := client.reqContext.GetReplyChannel().Get(opCode); exists {
-	// 	cm.mu.Unlock()
-	// 	logger.Printf("[TCP] already exists processing message: pending %+v reply, clinet id: %+v", opCode, clientId)
-	// 	response.Err = ErrNormal
-	// 	return
-	// }
-
-	// replyCh := make(chan tcpmd.Reply, 1)
-	// client.reqContext.GetReplyChannel().Set(opCode, replyCh)
-	// //client.ReplyCh[opCode] = replyCh
-	// cm.mu.Unlock()
-
-	// defer func() {
-	// 	if replyCh != nil {
-	// 		client.reqContext.GetReplyChannel().Close(opCode)
-	// 		// close(replyCh)
-	// 		// delete(client.ReplyCh, opCode)
-	// 	}
-	// }()
 
 	if _, exists := client.clientContext.GetReplyChannel().Get(opCode); !exists {
 		replyCh := make(chan tcpmd.Reply, 1)
@@ -190,15 +176,20 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 
+	cm.sendMu.Lock()
 	if err := client.SendMessage(message, sendTimeout); err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			response.Err = ErrTimeoutSend
+			retErr = ErrTimeoutSend
 		} else {
-			response.Err = err
+			retErr = err
 		}
 		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
+	cm.sendMu.Unlock()
+
+	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+		clientId, 0x00, opCode, seqNum, len(data), data)
 
 	client.SetSequenceNum(seqNum)
 
@@ -209,18 +200,96 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	select {
 	case <-time.After(replyTimeout):
 		logger.Printf("[TCP] %+v reply timeout, client id: %+v", opCode, clientId)
-		response.Err = ErrTimeoutReply
+		retErr = ErrTimeoutReply
 		return
 	case reply, ok := <-replyCh:
 		if !ok {
 			logger.Printf("[TCP] %+v reply channel closed, client id: %+v", opCode, clientId)
-			response.Err = ErrNormal
+			retErr = ErrNormal
 			return
 		}
-		response.Data = reply.GetPayload()
-		response.Err = reply.GetErr()
+		replyData = reply.GetPayload()
+		retErr = reply.GetErr()
 		return
 	}
+}
+
+func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []byte, sendTimeout time.Duration) (retErr error) {
+	cm.mu.RLock()
+	client, exists := cm.clients[clientId]
+	cm.mu.RUnlock()
+
+	if !exists {
+		logger.Printf("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
+		retErr = ErrNormal
+		return
+	}
+
+	offset := 0
+	maxChunk := 1 * 1024 * 1024
+	totalSize := len(buf)
+	var chunkCnt, chunkIdx int
+	a, b := totalSize/maxChunk, totalSize%maxChunk
+	if b > 0 {
+		chunkCnt = a + 1
+	} else {
+		chunkCnt = a
+	}
+
+	// 청크 인덱스는 1부터
+	chunkIdx = 1
+
+	var seqNums []uint16
+	for offset < len(buf) {
+		data := make([]byte, 4)
+		binary.BigEndian.PutUint32(data, clientId)
+		data = append(data, byte(chunkCnt), byte(chunkIdx))
+		if offset+maxChunk > len(buf) {
+			chunkSise := make([]byte, 4)
+			binary.BigEndian.PutUint32(chunkSise, uint32(totalSize-offset))
+			data = append(data, chunkSise...)
+			data = append(data, buf[offset:]...)
+			offset += len(buf)
+		} else {
+			chunkSise := make([]byte, 4)
+			binary.BigEndian.PutUint32(chunkSise, uint32(maxChunk))
+			data = append(data, chunkSise...)
+			data = append(data, buf[offset:offset+maxChunk]...)
+			offset += maxChunk
+		}
+		chunkIdx += 1
+
+		seqNum := (client.GetSequenceNum() + 1) % SequenceMode
+
+		message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
+		if err != nil {
+			logger.Println("[TCP] failed to serialize message")
+			retErr = ErrNormal
+			return
+		}
+
+		cm.sendMu.Lock()
+		if err := client.SendMessage(message, sendTimeout); err != nil {
+			var sendErr error
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				sendErr = ErrTimeoutSend
+			} else {
+				sendErr = err
+			}
+			logger.Printf("[TCP] failed to send message, err: %+v", err)
+			retErr = sendErr
+			return
+		}
+		cm.sendMu.Unlock()
+
+		client.SetSequenceNum(seqNum)
+		seqNums = append(seqNums, seqNum)
+	}
+
+	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Chunk count: %v, ",
+		clientId, 0x00, opCode, seqNums, len(buf), chunkCnt)
+
+	return
 }
 
 /**
@@ -228,6 +297,10 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
  * 1. don't use gorutine without time.Sleep. ( use sync or time.Sleep )
  * 2. minimize scope of Rlock or Lock
  */
-func (cm *ClientManager) Broadcast(msg []byte) {
-
+func (cm *ClientManager) Broadcast(msg []byte, opCode any) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Printf("[TCP] Failed to broadcast( panic ), OPCODE: %+v, panic: %v", opCode, r)
+		}
+	}()
 }
