@@ -82,9 +82,12 @@ func (a *Application) Start() {
 	 */
 	go eventlog.StartLogManager()
 
-	go a.container.Cache.StartSyncDB()
-
-	go a.container.Cron.StartCron()
+	/**
+	 * Worker들 실행
+	 */
+	go a.container.CronWorker.Start()
+	go a.container.CacheWorker.Start()
+	go a.container.TCPWorker.Start()
 
 	go startTCPServer()
 
@@ -131,11 +134,10 @@ func (a *Application) Shutdown() {
 	// shutdown db log manager
 	eventlog.Shutdown()
 
-	// shutdown sync db routine
-	a.container.Cache.ShutdownSyncDB()
-
-	// shutdown cron job routine
-	a.container.Cron.Shutdown()
+	// stop workers job routine
+	a.container.CronWorker.Shutdown()
+	a.container.CacheWorker.Shutdown()
+	a.container.TCPWorker.Shutdown()
 
 	// shutdown tcp routine and tcp heartbeat routine
 	a.tcpServer.Shutdown()
@@ -146,9 +148,6 @@ func (a *Application) Shutdown() {
 		logger.Printf("Failed to close APIService instance:\n\t%v", err)
 	}
 	a.container.SseManager.Close()
-
-	// shutdown worker routine
-	a.container.TcpService.Close()
 
 	// EventBus 채널 닫음
 	a.container.EventBus.Close()

@@ -68,5 +68,5 @@ func (s *TCPServer) Start() error {
 
 func (s *TCPServer) Shutdown() {
 	s.ServerBase.Shutdown()
-	logger.Println("[TCP] TCP goroutine terminated")
+	logger.Println("[TCP] TCP goroutine is terminated")
 }

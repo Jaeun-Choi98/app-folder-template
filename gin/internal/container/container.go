@@ -3,9 +3,10 @@ package container
 import (
 	"context"
 	"pjt/internal/config"
-	"pjt/internal/cron"
+
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/redis"
+	"pjt/internal/worker"
 
 	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
@@ -42,8 +43,11 @@ type Container struct {
 	RESTServer       *rest.RESTServer
 	TCPServer        *tcp.TCPServer
 	EventBus         *eventbus.EventBus
-	Cron             *cron.Cron
 	SystemMonitoring *monitoring.SystemMonitoring
+
+	CacheWorker *worker.CacheWorker
+	TCPWorker   *worker.TCPWorker
+	CronWorker  *worker.CronWorker
 }
 
 func NewContainer() (*Container, error) {
@@ -88,11 +92,14 @@ func NewContainer() (*Container, error) {
 		return nil, err
 	}
 
+	cacheWorker := worker.NewCacheWorker(dao, cache)
+	tcpWorker := worker.NewTCPWorker(dao, cache, eventbus, tcpClientManager)
+	cronWorker := worker.NewCronWorker(config, dao, eventbus)
+
 	monitoring := monitoring.NewSystemMonitoring(dao, tcp, eventbus, 1*time.Second)
 
 	dbLogger, _ := eventlog.NewDBLogger(dao, cache, eventbus)
 	eventlog.SetEventLogger(dbLogger)
-	cron := cron.NewCron(config, dao, eventbus)
 
 	if err := redis.InitRedis(config); err != nil {
 		return nil, err
@@ -109,7 +116,9 @@ func NewContainer() (*Container, error) {
 		RESTServer:       rest,
 		TCPServer:        tcp,
 		EventBus:         eventbus,
-		Cron:             cron,
+		CacheWorker:      cacheWorker,
+		TCPWorker:        tcpWorker,
+		CronWorker:       cronWorker,
 		SystemMonitoring: monitoring,
 	}, nil
 }

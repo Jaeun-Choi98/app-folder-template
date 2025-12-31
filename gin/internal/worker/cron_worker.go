@@ -1,4 +1,4 @@
-package cron
+package worker
 
 import (
 	"context"
@@ -25,7 +25,7 @@ var DynamicDeviceLogTableName string
 var CreateDeviceLog time.Time
 var cronMu sync.Mutex
 
-type Cron struct {
+type CronWorker struct {
 	config   *config.Configuration
 	dao      dbhandler.DBHandlerInterface
 	eventBus *eventbus.EventBus
@@ -36,9 +36,9 @@ type Cron struct {
 	cancel context.CancelFunc
 }
 
-func NewCron(config *config.Configuration, dao dbhandler.DBHandlerInterface, eventbus *eventbus.EventBus) *Cron {
+func NewCronWorker(config *config.Configuration, dao dbhandler.DBHandlerInterface, eventbus *eventbus.EventBus) *CronWorker {
 	ctx, cancel := context.WithCancel(context.Background())
-	c := &Cron{
+	c := &CronWorker{
 		config:   config,
 		dao:      dao,
 		eventBus: eventbus,
@@ -52,7 +52,7 @@ func NewCron(config *config.Configuration, dao dbhandler.DBHandlerInterface, eve
 	return c
 }
 
-func (c *Cron) LoadLogTableInfo() error {
+func (c *CronWorker) LoadLogTableInfo() error {
 
 	if DynamicDeviceLogTableName == "" {
 		c.renewTableName()
@@ -61,13 +61,13 @@ func (c *Cron) LoadLogTableInfo() error {
 	return nil
 }
 
-func (c *Cron) Shutdown() {
+func (c *CronWorker) Shutdown() {
 	c.cancel()
 	c.wg.Wait()
-	logger.Println("[Cron] Cron routine is terminated")
+	logger.Println("[Cron Worker] Cron Worker goroutine is terminated")
 }
 
-func (c *Cron) StartCron() error {
+func (c *CronWorker) Start() error {
 	tickerCheck := time.NewTicker(1 * time.Minute)
 	c.wg.Add(1)
 	defer func() {
@@ -90,7 +90,7 @@ func (c *Cron) StartCron() error {
 	}
 }
 
-func (c *Cron) renewTableName() {
+func (c *CronWorker) renewTableName() {
 	t := time.Now().In(utils.LocalKorea)
 	year, month, day := t.Date()
 	t = time.Date(year, month, day, 0, 0, 0, 0, utils.LocalKorea)
@@ -107,7 +107,7 @@ func GetDeviceLogTableName() string {
 	return DynamicDeviceLogTableName
 }
 
-func (c *Cron) DynamicDBLogTableJob(updateDevice bool) {
+func (c *CronWorker) DynamicDBLogTableJob(updateDevice bool) {
 	switch c.config.DBType {
 	case "oracle":
 		if updateDevice {
@@ -117,7 +117,7 @@ func (c *Cron) DynamicDBLogTableJob(updateDevice bool) {
 		}
 	case "maria":
 	default:
-		logger.Println("[Cron] Failed to create log table, invalid config.DBType")
+		logger.Println("[Cron Worker] Failed to create log table, invalid config.DBType")
 	}
 }
 
@@ -129,7 +129,7 @@ func GetOraQuery() []string {
 	return queries
 }
 
-func (c *Cron) CleanDBLogTableJob() {
+func (c *CronWorker) CleanDBLogTableJob() {
 
 	cutOff := time.Now().In(utils.LocalKorea).AddDate(0, 0, maxAgeDays)
 	start := cutOff.AddDate(-1, 0, 0).Add(-1 * time.Second)
@@ -143,7 +143,7 @@ func (c *Cron) CleanDBLogTableJob() {
 		case "maria":
 			tableName = strings.ToLower(tbName)
 		default:
-			logger.Println("[Cron] Failed to clean db log_table, invalid config.DBType")
+			logger.Println("[Cron Worker] Failed to clean db log_table, invalid config.DBType")
 			return
 		}
 		logger.Println(tableName)

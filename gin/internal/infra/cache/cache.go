@@ -1,11 +1,9 @@
 package cache
 
 import (
-	"context"
 	"errors"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/object"
-	"pjt/internal/logger"
 	"sync"
 )
 
@@ -30,22 +28,12 @@ type Cache struct {
 
 func NewCacheMem(dao dbhandler.DBHandlerInterface) (*Cache, error) {
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	ram := &Cache{
-		dao:    dao,
-		ctx:    ctx,
-		cancel: cancel,
+		dao: dao,
 	}
 
 	if err := ram.LoadSampleCache(); err != nil {
 		return nil, err
 	}
 	return ram, nil
-}
-
-func (o *Cache) Close() {
-	o.cancel()
-	o.wg.Wait()
-	logger.Println("[Cache] SyncDB goroutine is terminated")
 }
