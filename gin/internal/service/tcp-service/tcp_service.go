@@ -8,6 +8,7 @@ import (
 	dbhandler "pjt/internal/db/db-handler"
 	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/infra/cache"
+	"sync"
 
 	"pjt/internal/transport/tcp/server/client"
 
@@ -15,37 +16,25 @@ import (
 )
 
 type TCPService struct {
-	Eventbus       *eventbus.EventBus
-	Dao            dbhandler.DBHandlerInterface
-	Cache          *cache.Cache
-	TCPSessionInfo *TCPSessionInfo
+	Eventbus *eventbus.EventBus
+	Dao      dbhandler.DBHandlerInterface
+	Cache    *cache.Cache
 
 	ClientManager *client.ClientManager
-}
 
-/**
- * TCP 통신을 통해 받은 데이터를 저장
- */
-type TCPSessionInfo struct {
-	StationSession map[uint16]struct{} // 정류장 번호를 키값으로
-
-}
-
-func NewTCPSessionInfo() *TCPSessionInfo {
-	return &TCPSessionInfo{
-		StationSession: make(map[uint16]struct{}),
-	}
+	FileTransferJobs map[uint32]map[string]*FileTransferJob // (clientId, filepath) -> file transfer session'
+	muFileTransfer   sync.RWMutex
 }
 
 func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerInterface, cache *cache.Cache, eb *eventbus.EventBus) *TCPService {
-	tcpSessionInfo := NewTCPSessionInfo()
 	tcpService := &TCPService{
-		TCPSessionInfo: tcpSessionInfo,
-		Dao:            dao,
-		Cache:          cache,
-		Eventbus:       eb,
+		Dao:      dao,
+		Cache:    cache,
+		Eventbus: eb,
 
 		ClientManager: clientManager,
+		// 파일 전송 프로토콜 1안 사용 시
+		FileTransferJobs: make(map[uint32]map[string]*FileTransferJob),
 	}
 	return tcpService
 }
@@ -59,6 +48,14 @@ func (t *TCPService) Handle0x010(clientId uint32) error {
 
 func (t *TCPService) Handle0xAA(clientId uint32) {
 	t.Eventbus.Publish(customEvent.NewTopic(customEvent.EventAType), customEvent.NewMessage("EVENTA").Add(map[string]interface{}{"test": fmt.Sprintf("disconnected client:%d", clientId)}))
+
+	// 파일 전송 프로토콜 1안 사용시 필요
+	t.muFileTransfer.Lock()
+	if fileTransferSessions, exists := t.FileTransferJobs[clientId]; exists {
+		for _, fileTransferSession := range fileTransferSessions {
+			fileTransferSession.Close()
+		}
+	}
 }
 
 func (t *TCPService) readFileToBuffer(filePath string) (*bytes.Buffer, error) {

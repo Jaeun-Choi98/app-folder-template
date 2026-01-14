@@ -214,6 +214,58 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	}
 }
 
+func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) error {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Printf("[TCP] Failed to SendDataToClientSync( panic ), OPCODE: %+v, panic: %v", opCode, r)
+		}
+	}()
+
+	cm.mu.RLock()
+	client, exists := cm.clients[clientId]
+	cm.mu.RUnlock()
+
+	if !exists {
+		logger.Printf("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
+		return ErrNormal
+	}
+
+	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
+
+	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
+	if err != nil {
+		logger.Println("[TCP] failed to serialize message")
+		return ErrNormal
+	}
+
+	cm.sendMu.Lock()
+	if err := client.SendMessage(message, sendTimeout); err != nil {
+		var sendErr error
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			sendErr = ErrTimeoutSend
+		} else {
+			sendErr = err
+		}
+		logger.Printf("[TCP] failed to send message, err: %+v", err)
+		return sendErr
+	}
+	cm.sendMu.Unlock()
+
+	client.SetSequenceNum(seqNum)
+
+	// 0x1B: 파일 전송
+	if opCode == 0x1B {
+		logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X,  Data Length: %+v",
+			clientId, 0x00, opCode, len(data))
+	} else {
+		logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+			clientId, 0x00, opCode, seqNum, len(data), data)
+	}
+
+	return nil
+}
+
+// 파일 전송 프로토콜 2안
 func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []byte, sendTimeout time.Duration) (retErr error) {
 	cm.mu.RLock()
 	client, exists := cm.clients[clientId]

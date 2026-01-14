@@ -34,3 +34,25 @@ func (r *Cache) GetOprtModels(ids []int64, all bool) (map[int64]*object.Sample, 
 
 	return new, checkUnique
 }
+
+func CheckAccToken(id int, accToken string) bool {
+	token, exists := badCodeForCheckTokenMiddleware[id]
+	if !exists {
+		return false
+	}
+	if *token != accToken {
+		return false
+	}
+	return true
+}
+
+func (c *Cache) GetLoginSession(id int) *object.LoginSeesion {
+	c.muLoginSessions.RLock()
+	defer c.muLoginSessions.RUnlock()
+	if _, exists := c.LoginSessions[id]; exists {
+		n := &object.LoginSeesion{}
+		utils.DeepCopy(c.LoginSessions[id], n)
+		return n
+	}
+	return nil
+}

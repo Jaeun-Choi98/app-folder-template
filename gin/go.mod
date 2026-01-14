@@ -9,7 +9,7 @@ require (
 	github.com/Jaeun-Choi98/modules/orm v0.0.0-20251130080405-26f27d458b8b
 	github.com/Jaeun-Choi98/modules/sse v0.0.0-20250915015943-6e4b2206595d
 	github.com/Jaeun-Choi98/modules/tcpnet v0.0.0-20251204124015-402a33fbaa1b
-	github.com/Jaeun-Choi98/modules/utils v0.0.0-20250902005914-f819e999fc62
+	github.com/Jaeun-Choi98/modules/utils v0.0.0-20260108065007-e9a024d19159
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ini/ini v1.67.0
 	github.com/go-sql-driver/mysql v1.7.1
@@ -51,7 +51,7 @@ require (
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	golang.org/x/arch v0.21.0 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
-	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b // indirect
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
