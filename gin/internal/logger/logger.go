@@ -15,15 +15,14 @@ var customLogger *CustomLogger
 var maxAgeDays = 0
 
 type CustomLogger struct {
-	prefix     string
-	curDay     int
-	wg         sync.WaitGroup
-	ctx        context.Context
-	cancel     context.CancelFunc
-	ticker     *time.Ticker
-	logger     *log.Logger
-	stdoutFile *os.File
-	stderrFile *os.File
+	prefix  string
+	curDay  int
+	wg      sync.WaitGroup
+	ctx     context.Context
+	cancel  context.CancelFunc
+	ticker  *time.Ticker
+	logger  *log.Logger
+	logFile *os.File
 }
 
 func NewCustomLogger(prefix string) (*CustomLogger, error) {
@@ -43,25 +42,16 @@ func NewCustomLogger(prefix string) (*CustomLogger, error) {
 
 func (l *CustomLogger) setLogfileAndLogger(prefix string) error {
 	now := time.Now()
-	outfilepath := getFilepath("stdout", now)
-	errfilepath := getFilepath("stderr", now)
-	stdoutfile, err := os.OpenFile(outfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logfilepath := getFilepath("logfile", now)
+	logfile, err := os.OpenFile(logfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	stderrfile, err := os.OpenFile(errfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+	logger := log.New(logfile, prefix, log.Ldate|log.Ltime)
 
-	os.Stderr = stderrfile
-	logger := log.New(stdoutfile, prefix, log.Ldate|log.Ltime)
-
-	l.stdoutFile = stdoutfile
-	l.stderrFile = stderrfile
+	l.logFile = logfile
 	l.logger = logger
 	l.curDay = now.Day()
 	return nil
@@ -92,11 +82,8 @@ func Printf(format string, v ...any) {
 
 func Close() error {
 	var terr error
-	if err := customLogger.stdoutFile.Close(); err != nil {
+	if err := customLogger.logFile.Close(); err != nil {
 		terr = fmt.Errorf("stdoutfile close err: %v", err)
-	}
-	if err := customLogger.stderrFile.Close(); err != nil {
-		terr = fmt.Errorf("stderrfile close err: %v, %v", err, terr)
 	}
 	return terr
 }
