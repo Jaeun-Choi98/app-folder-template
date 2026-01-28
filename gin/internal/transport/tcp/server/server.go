@@ -6,13 +6,13 @@ import (
 	"net"
 	"pjt/internal/config"
 	"pjt/internal/logger"
+	"pjt/internal/service"
 	"pjt/internal/transport/tcp/server/client"
 	tcpcontroller "pjt/internal/transport/tcp/server/controller"
 
 	implparser "pjt/internal/transport/tcp/server/parser"
 	"time"
 
-	mhandler "github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
 	"github.com/Jaeun-Choi98/modules/tcpnet/server/server"
 )
 
@@ -23,10 +23,10 @@ import (
 type TCPServer struct {
 	*server.ServerBase
 	clients *client.ClientManager
-	router  mhandler.ManagerInterface
 }
 
-func NewTCPServer(tcpcontroller *tcpcontroller.TCPController, cm *client.ClientManager, cfg *config.Configuration, heartbeat time.Duration, maxTimeOutCnt int) (*TCPServer, error) {
+func NewTCPServer(cm *client.ClientManager, cfg *config.Configuration,
+	svc service.TCPServiceInterface, heartbeat time.Duration, maxTimeOutCnt int) (*TCPServer, error) {
 	s, err := server.NewServerBase(context.Background(), heartbeat, maxTimeOutCnt)
 	if err != nil {
 		return nil, err
@@ -35,18 +35,18 @@ func NewTCPServer(tcpcontroller *tcpcontroller.TCPController, cm *client.ClientM
 	customServer := &TCPServer{
 		ServerBase: s,
 		clients:    cm,
-		router:     tcpcontroller.Router,
 	}
-	customServer.ImplClientHandleConnection()
+	customServer.ImplClientHandleConnection(svc)
 	return customServer, nil
 }
 
-func (s *TCPServer) ImplClientHandleConnection() {
+func (s *TCPServer) ImplClientHandleConnection(svc service.TCPServiceInterface) {
 	s.ServerBase.SetHandleConnectFunc(func(conn net.Conn) {
 		//c := client.NewClient(t.ctx, uuid.New().ID(), conn, parser.NewRTMSParser(binary.LittleEndian, 4096), t.handler)
 
 		// sendWork Test
-		c := client.NewClient(context.Background(), 1, conn, implparser.NewRTMSParser(binary.LittleEndian, 4096), s.router)
+		c := client.NewClient(context.Background(), 1, conn, implparser.NewRTMSParser(binary.LittleEndian, 4096),
+			tcpcontroller.NewController(svc))
 
 		defer func() {
 			//logger.Println(c.ClientId)
