@@ -41,8 +41,6 @@ type Client struct {
 	// 아래 필드는 패키지를 사용한 예시
 	parser parser.Parser
 
-	wg sync.WaitGroup
-
 	Ctx           context.Context
 	Cancel        context.CancelFunc
 	clientContext *tcpmd.ClientContext
@@ -68,7 +66,6 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 
 func (c *Client) Close() {
 	c.Cancel()
-	c.wg.Wait()
 	if c.IsAuth {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
 		c.clientContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
@@ -83,8 +80,6 @@ func (c *Client) Close() {
 }
 
 func (c *Client) MessageProcessingLoop() {
-	c.wg.Add(1)
-	defer c.wg.Done()
 	for {
 		select {
 		case <-c.Ctx.Done():
