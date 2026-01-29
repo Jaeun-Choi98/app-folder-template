@@ -41,6 +41,8 @@ type Client struct {
 	// 아래 필드는 패키지를 사용한 예시
 	parser parser.Parser
 
+	wg sync.WaitGroup
+
 	Ctx           context.Context
 	Cancel        context.CancelFunc
 	clientContext *tcpmd.ClientContext
@@ -57,7 +59,7 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 		parser:  ps,
 		handler: hd,
 		//ReplyCh: make(map[any]chan tcpmd.Reply),
-		clientContext: tcpmd.NewClientContext(ctx, 30),
+		clientContext: tcpmd.NewClientContext(context.Background(), 30),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,
@@ -65,26 +67,24 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 }
 
 func (c *Client) Close() {
+	c.Cancel()
+	c.wg.Wait()
 	if c.IsAuth {
 		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
 		c.clientContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
-		c.handler.HandleMessage(c.clientContext)
+		c.handler.HandleMessageSync(c.clientContext)
 	}
 
 	if c.Conn != nil {
 		c.Conn.Close()
 	}
-	// for _, v := range c.ReplyCh {
-	// 	// 클라이언트가 패닉이 발생했을 때, 해당 replyCh를 갑자기 닫으면 해당 채널을 수신하고 있는 곳에서 close of closed channel panic 발생. -> 수신하는 곳에서 recover 처리 필요.
-	// 	// client_manager.go_191
-	// 	close(v)
-	// }
-	//close(c.TimeoutChannel)
+
 	c.clientContext.Close()
-	c.Cancel()
 }
 
 func (c *Client) MessageProcessingLoop() {
+	c.wg.Add(1)
+	defer c.wg.Done()
 	for {
 		select {
 		case <-c.Ctx.Done():
