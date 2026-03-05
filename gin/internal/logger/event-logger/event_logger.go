@@ -46,7 +46,7 @@ func NewDBLogger(dao dbhandler.DBHandlerInterface, cache *cache.Cache, eventBus 
 func Shutdown() {
 	evetLogger.cancel()
 	evetLogger.wg.Wait()
-	logger.Println("[DB] DB Log Manager goroutine terminated")
+	logger.Infoln("[DB] DB Log Manager goroutine terminated")
 }
 
 func StartLogManager() {

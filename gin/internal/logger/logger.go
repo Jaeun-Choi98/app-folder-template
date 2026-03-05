@@ -10,19 +10,21 @@ import (
 	"time"
 )
 
-// global variable (package-level variable x)
 var customLogger *CustomLogger
-var maxAgeDays = 0
+var maxAgeDays = -3
+var rootDir = `log`
 
 type CustomLogger struct {
-	prefix  string
-	curDay  int
-	wg      sync.WaitGroup
-	ctx     context.Context
-	cancel  context.CancelFunc
-	ticker  *time.Ticker
-	logger  *log.Logger
-	logFile *os.File
+	prefix    string
+	curDay    int
+	wg        sync.WaitGroup
+	ctx       context.Context
+	cancel    context.CancelFunc
+	ticker    *time.Ticker
+	info      *log.Logger
+	debug     *log.Logger
+	infoFile  *os.File
+	debugFile *os.File
 }
 
 func NewCustomLogger(prefix string) (*CustomLogger, error) {
@@ -42,25 +44,44 @@ func NewCustomLogger(prefix string) (*CustomLogger, error) {
 
 func (l *CustomLogger) setLogfileAndLogger(prefix string) error {
 	now := time.Now()
-	logfilepath := getFilepath("logfile", now)
-	logfile, err := os.OpenFile(logfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	outfilepath := getFilepath("info", now)
+	os.MkdirAll(filepath.Dir(outfilepath), 0755)
+	infofile, err := os.OpenFile(outfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	logger := log.New(logfile, prefix, log.Ldate|log.Ltime)
+	info := log.New(infofile, prefix, log.Ldate|log.Ltime)
 
-	l.logFile = logfile
-	l.logger = logger
+	l.infoFile = infofile
+	l.info = info
+
+	outfilepath = getFilepath("debug", now)
+	os.MkdirAll(filepath.Dir(outfilepath), 0755)
+	debugFile, err := os.OpenFile(outfilepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	debug := log.New(debugFile, prefix, log.Ldate|log.Ltime)
+
+	l.debugFile = debugFile
+	l.debug = debug
+
 	l.curDay = now.Day()
 	return nil
 }
 
 func getFilepath(name string, now time.Time) string {
-	dir := filepath.Base("log")
-	fileName := fmt.Sprintf("%s_%d_%02d_%02d", name, now.Year(), now.Month(), now.Day())
-	return filepath.Join(dir, fileName)
+	dir := filepath.Join(rootDir,
+		fmt.Sprintf("%v", now.Year()),
+		fmt.Sprintf("%02d", now.Month()),
+		fmt.Sprintf("%v", now.Day()),
+	)
+
+	return filepath.Join(dir, name)
 }
 
 func SetLogger(l *CustomLogger) {
@@ -70,28 +91,42 @@ func SetLogger(l *CustomLogger) {
 	customLogger = l
 }
 
-func Println(v ...any) {
+// func GetLogger() *CustomLogger {
+// 	return customLogger
+// }
+
+func Infoln(v ...any) {
 	log.Println(v...)
-	customLogger.logger.Println(v...)
+	customLogger.info.Println(v...)
 }
 
-func Printf(format string, v ...any) {
+func Infof(format string, v ...any) {
 	log.Printf(format, v...)
-	customLogger.logger.Printf(format, v...)
+	customLogger.info.Printf(format, v...)
+}
+
+func Debugln(v ...any) {
+	log.Println(v...)
+	customLogger.debug.Println(v...)
+}
+
+func Debugf(format string, v ...any) {
+	log.Printf(format, v...)
+	customLogger.debug.Printf(format, v...)
 }
 
 func Close() error {
 	var terr error
-	if err := customLogger.logFile.Close(); err != nil {
-		terr = fmt.Errorf("stdoutfile close err: %v", err)
+	if err := customLogger.infoFile.Close(); err != nil {
+		terr = fmt.Errorf("info file close err: %v", err)
 	}
+	if err := customLogger.debugFile.Close(); err != nil {
+		terr = fmt.Errorf("debug file close err: %v", err)
+	}
+
 	return terr
 }
 
-/**
- * 일정 시간이 지난 로그 파일은 삭제하기 위한 고루틴 함수
- * Log prefix: [Log Cleanup]
- */
 func StartCleaning() {
 	customLogger.wg.Add(1)
 	defer customLogger.wg.Done()
@@ -100,7 +135,7 @@ func StartCleaning() {
 	for {
 		select {
 		case <-customLogger.ctx.Done():
-			Println("[Log Cleanup] Log cleanup goroutine terminated")
+			Infoln("[Log Cleanup] log cleanup goroutine terminated")
 			return
 		case <-customLogger.ticker.C:
 			now := time.Now()
@@ -116,44 +151,54 @@ func StartCleaning() {
 }
 
 func cleanOldLogs() {
-	cutoffTime := time.Now().AddDate(0, 0, maxAgeDays)
 
-	dir := filepath.Base("log")
+	root := filepath.Base(rootDir)
 
-	files, err := os.ReadDir(dir)
+	deletedCount := searchLogFileAndDelete(root, time.Now().AddDate(0, 0, maxAgeDays))
+
+	Infof("[Log Cleanup] log cleanup completed: %d files deleted in total", deletedCount)
+}
+
+func searchLogFileAndDelete(parent string, cutoffTime time.Time) int {
+
+	// debug
+	// log.Println(parent)
+
+	files, err := os.ReadDir(parent)
+	delCnt := 0
+
 	if err != nil {
-		Printf("[Log Cleanup] Failed to read log directory:\n\t %v", err)
-		return
+		Infof("[Log Cleanup] failed to searchLogFileAndDelete:\n\t %v", err)
+		return 0
 	}
 
-	var deletedCount int
-
 	for _, file := range files {
+
 		if file.IsDir() {
+			delCnt += searchLogFileAndDelete(filepath.Join(parent, file.Name()), cutoffTime)
 			continue
 		}
 
 		info, err := file.Info()
 		if err != nil {
-			Printf("[Log Cleanup] Failed to get file information:\n\t %v", err)
+			Infof("[Log Cleanup] failed to get file information:\n\t %v", err)
 			continue
 		}
 
 		if info.ModTime().Before(cutoffTime) {
 
-			filePath := filepath.Join(dir, file.Name())
-			Printf("[Log Cleanup] Old log files deleted: %s (Deleted date: %s)",
+			filePath := filepath.Join(parent, file.Name())
+			Infof("[Log Cleanup] old log files deleted: %s (Deleted date: %s)",
 				filePath, info.ModTime().Format("2006-01-02"))
 
 			if err := os.Remove(filePath); err != nil {
-				Printf("[Log Cleanup] Failed to delete file:\n\t %v", err)
+				Infof("[Log Cleanup] failed to delete file:\n\t %v", err)
 			} else {
-				deletedCount++
+				delCnt += 1
 			}
 		}
 	}
-
-	Printf("[Log Cleanup] Log cleanup completed: %d files deleted in total", deletedCount)
+	return delCnt
 }
 
 func Shutdown() {

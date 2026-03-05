@@ -45,7 +45,7 @@ func (a *Application) Start() {
 	startRestServer := func() error {
 		defer a.wg.Done()
 		if err := a.restServer.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Printf("Failed to start application:\n\t%v", err)
+			logger.Infof("Failed to start application:\n\t%v", err)
 			return err
 		}
 		return nil
@@ -55,7 +55,7 @@ func (a *Application) Start() {
 	startTCPServer := func() error {
 		defer a.wg.Done()
 		if err := a.tcpServer.Start(); err != nil {
-			logger.Printf("Failed to start TCP routine:\n\t%v", err)
+			logger.Infof("Failed to start TCP routine:\n\t%v", err)
 			return err
 		}
 		return nil
@@ -65,7 +65,7 @@ func (a *Application) Start() {
 	// startSystemMonitoring := func() error {
 	// 	defer a.wg.Done()
 	// 	if err := a.container.SystemMonitoring.Start(); err != nil {
-	// 		logger.Printf("Failed to start SystemMonitoring routine:\n\t%v", err)
+	// 		logger.Infof("Failed to start SystemMonitoring routine:\n\t%v", err)
 	// 		return err
 	// 	}
 	// 	return nil
@@ -111,7 +111,7 @@ func (a *Application) handleShutdown() {
 
 	go func() {
 		<-signalChan
-		logger.Println("Shutting down...")
+		logger.Infoln("Shutting down...")
 		a.Shutdown()
 		close(signalChan)
 	}()
@@ -128,7 +128,7 @@ func (a *Application) Shutdown() {
 	defer cancel()
 
 	if err := a.restServer.Shutdown(ctx); err != nil {
-		logger.Printf("Error during shutdown: %v", err)
+		logger.Infof("Error during shutdown: %v", err)
 	}
 
 	// shutdown db log manager
@@ -145,7 +145,7 @@ func (a *Application) Shutdown() {
 	// close servcie object, close: api -> close: dao -> db ctx cancel -> shutdown: DBHeartbeat
 	err := a.container.ApiService.Close()
 	if err != nil {
-		logger.Printf("Failed to close APIService instance:\n\t%v", err)
+		logger.Infof("Failed to close APIService instance:\n\t%v", err)
 	}
 	a.container.SseManager.Close()
 
@@ -153,11 +153,11 @@ func (a *Application) Shutdown() {
 	a.container.EventBus.Close()
 
 	if err := redis.CloseRedisClient(); err != nil {
-		logger.Printf("Failed to close reids client: %v", err)
+		logger.Infof("Failed to close reids client: %v", err)
 	}
 
 	a.wg.Wait()
-	logger.Println("Application terminated")
+	logger.Infoln("Application terminated")
 
 	// shutdown log routine
 	logger.Shutdown()

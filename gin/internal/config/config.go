@@ -60,7 +60,7 @@ type DatabaseConfig struct {
 func NewConfiguration() (*Configuration, error) {
 	cfgFile, err := ini.Load("env.ini")
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return nil, err
 	}
 	return initConfig(cfgFile), nil

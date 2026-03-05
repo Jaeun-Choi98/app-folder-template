@@ -49,23 +49,23 @@ func (s *SystemMonitoring) Start() error {
 	var dbComm, tcpListener int8
 
 	recoverProcessTCP := func() {
-		logger.Println("[System Monitoring] Listening is closed, attempting to listen...")
+		logger.Infoln("[System Monitoring] Listening is closed, attempting to listen...")
 		go func() {
 			if s.isRecoveringTCP {
 				return
 			}
 			s.isRecoveringTCP = true
 			if err := s.Tcp.Listening(); err != nil {
-				logger.Printf("[System Monitoring] Failed to listen:\n\t%v", err)
+				logger.Infof("[System Monitoring] Failed to listen:\n\t%v", err)
 			} else {
-				logger.Println("[System Monitoring] TCP listening successful")
+				logger.Infoln("[System Monitoring] TCP listening successful")
 			}
 			s.isRecoveringTCP = false
 		}()
 	}
 
 	recoverProcessDB := func() {
-		logger.Println("[System Monitoring] DB Connection is closed, attempting to reconnect...")
+		logger.Infoln("[System Monitoring] DB Connection is closed, attempting to reconnect...")
 
 		go func() {
 			if s.isRecoveringDB {
@@ -73,7 +73,7 @@ func (s *SystemMonitoring) Start() error {
 			}
 			s.isRecoveringDB = true
 			if err := s.Dao.Connect(); err == nil {
-				logger.Println("[System Monitoring] DB reconnection successful")
+				logger.Infoln("[System Monitoring] DB reconnection successful")
 			}
 			s.isRecoveringDB = false
 		}()
@@ -88,7 +88,7 @@ func (s *SystemMonitoring) Start() error {
 	for {
 		select {
 		case <-s.ctx.Done():
-			logger.Println("[System Monitoring] System Monitoring goroutine terminated")
+			logger.Infoln("[System Monitoring] System Monitoring goroutine terminated")
 			return nil
 		case <-heartbeat.C:
 			if !s.Tcp.CheckConnection() {

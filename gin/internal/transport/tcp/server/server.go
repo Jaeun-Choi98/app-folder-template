@@ -49,7 +49,7 @@ func (s *TCPServer) ImplClientHandleConnection(svc service.TCPServiceInterface) 
 			tcpcontroller.NewController(svc))
 
 		defer func() {
-			//logger.Println(c.ClientId)
+			//logger.Infoln(c.ClientId)
 			s.clients.Unregister(c.ClientId)
 			c.Close()
 			//logger.Printf("[TCP] Disconnected client: %s", c.Conn.RemoteAddr().String())
@@ -68,5 +68,5 @@ func (s *TCPServer) Start() error {
 
 func (s *TCPServer) Shutdown() {
 	s.ServerBase.Shutdown()
-	logger.Println("[TCP] TCP goroutine is terminated")
+	logger.Infoln("[TCP] TCP goroutine is terminated")
 }

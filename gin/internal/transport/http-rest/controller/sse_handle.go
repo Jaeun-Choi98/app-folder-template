@@ -94,7 +94,7 @@ func (ctl *Controller) HandleSSEConnect(ctx *gin.Context) {
 		payloadByte, err := json.Marshal(event.Payload)
 		var msg *CustomSSEMsg
 		if err != nil {
-			logger.Println("[SSE] failed to serialize event payload to json")
+			logger.Infoln("[SSE] failed to serialize event payload to json")
 			msg = &CustomSSEMsg{
 				Type:    event.Type,
 				Payload: event.Payload,

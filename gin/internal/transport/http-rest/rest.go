@@ -33,6 +33,6 @@ func (r *RESTServer) Start() error {
 
 func (r *RESTServer) Shutdown(ctx context.Context) (err error) {
 	err = r.server.Shutdown(ctx)
-	logger.Println("[REST] REST goroutine terminated")
+	logger.Infoln("[REST] REST goroutine terminated")
 	return err
 }

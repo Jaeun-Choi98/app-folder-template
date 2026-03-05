@@ -42,12 +42,12 @@ func NewOralce(dsn string, heartbeat time.Duration) (*Oracle, error) {
 func (o *Oracle) Connect() error {
 	db, err := sql.Open("godror", o.dsn)
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
 	if err := db.Ping(); err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		db.Close()
 		return err
 	}
@@ -99,14 +99,14 @@ func (o *Oracle) StartDBHeartbeat() {
 		for {
 			select {
 			case <-o.ctx.Done():
-				logger.Println("[DB Heartbeat] DB heartbeat goroutine terminated")
+				logger.Infoln("[DB Heartbeat] DB heartbeat goroutine terminated")
 				return
 			case <-heartbeat.C:
 				if err := o.Ping(); err != nil {
 					// 재연결 시도
-					logger.Println("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
+					logger.Infoln("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
 					if err := o.Connect(); err == nil {
-						logger.Println("[DB Heartbeat] DB reconnection successful")
+						logger.Infoln("[DB Heartbeat] DB reconnection successful")
 					}
 				}
 			}

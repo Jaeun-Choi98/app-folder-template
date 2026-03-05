@@ -25,7 +25,7 @@ func (i *Maria) InsertEventLog(tableName string, params [][]any) error {
 	}
 
 	if _, err := i.db.ExecContext(timeout, query.String()); err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
@@ -167,7 +167,7 @@ func (i *Maria) SelectEvtLogPaged(tableName string, startDT, endDT time.Time, ev
 // 중복된 레코드 삽입 시 활용할 수 있는 Native Query
 func (i *Maria) InsertTempData(tbName string, objs []any) error {
 	// if len(objs) == 0 {
-	// 	logger.Println("[DB] No temp data to insert")
+	// 	logger.Infoln("[DB] No temp data to insert")
 	// 	return nil
 	// }
 
@@ -218,7 +218,7 @@ func (i *Maria) InsertTempData(tbName string, objs []any) error {
 	// `)
 
 	// if _, err := i.db.ExecContext(timeout, query.String(), args...); err != nil {
-	// 	logger.Println(err)
+	// 	logger.Infoln(err)
 	// 	return err
 	// }
 
@@ -265,7 +265,7 @@ func (i *Maria) AggregateTempSelect(tableName string, startDt, endDt time.Time, 
 
 	rows, err := i.db.QueryContext(timeout, query.String(), startDt, endDt)
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return nil, err
 	}
 	defer rows.Close()

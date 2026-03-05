@@ -32,37 +32,37 @@ func (o *Cache) LoadFile(fpath, vpath string) error {
 
 	stat, err := os.Stat(fpath)
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v", fpath, err)
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v", fpath, err)
 		return err
 	}
 
 	maxSize := int64(5 * 1024 * 1024 * 1024)
 	if stat.Size() > maxSize {
-		logger.Printf("[Cache] file too large: %d > %d", stat.Size(), maxSize)
+		logger.Infof("[Cache] file too large: %d > %d", stat.Size(), maxSize)
 		return fmt.Errorf("file too large: %d > %d", stat.Size(), maxSize)
 	}
 
 	data, err := os.ReadFile(fpath)
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v", fpath, err)
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v", fpath, err)
 		return err
 	}
 
 	verBytes, err := os.ReadFile(vpath)
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 		return err
 	}
 
 	version := strings.Split(string(verBytes), ".")
 	major, err := strconv.Atoi(version[0])
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 		return fmt.Errorf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 	}
 	minor, err := strconv.Atoi(version[1])
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 		return fmt.Errorf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 	}
 	tmp, err := hex.DecodeString(version[2])
@@ -74,18 +74,18 @@ func (o *Cache) LoadFile(fpath, vpath string) error {
 	// 파일 무결성 검증
 	vf, err := os.Open(fpath)
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v")
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v")
 		return fmt.Errorf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 	}
 
 	calcCheckSum, err := utils.CalculateChecksumFromFile(vf)
 	if err != nil {
-		logger.Printf("[Cache] Failed to LoadFile: %v, error: %v")
+		logger.Infof("[Cache] Failed to LoadFile: %v, error: %v")
 		return fmt.Errorf("[Cache] Failed to LoadFile: %v, error: %v", vpath, err)
 	}
 
 	if expectedCheckSum != calcCheckSum {
-		logger.Printf("[Cache] Fialed to LoadFile: %v, diff checksum value: %v(expected) - %v(calc)",
+		logger.Infof("[Cache] Fialed to LoadFile: %v, diff checksum value: %v(expected) - %v(calc)",
 			vpath, expectedCheckSum, calcCheckSum)
 		return fmt.Errorf("[Cache] Fialed to LoadFile: %v, diff checksum value: %v(expected) - %v(calc)",
 			vpath, expectedCheckSum, calcCheckSum)

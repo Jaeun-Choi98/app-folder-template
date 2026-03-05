@@ -94,9 +94,9 @@ func (cm *ClientManager) UpdateClient(old, new uint32) {
 		client.IsAuth = true
 		cm.clients[new] = client
 		delete(cm.clients, old)
-		logger.Printf("[TCP] Success ClientManager.UpdateClient, cilentId: %d -> %d", old, new)
+		logger.Infof("[TCP] Success ClientManager.UpdateClient, cilentId: %d -> %d", old, new)
 	} else {
-		logger.Println("[TCP] Failed to ClientManager.UpdateClient")
+		logger.Infoln("[TCP] Failed to ClientManager.UpdateClient")
 	}
 }
 
@@ -115,7 +115,7 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 	cm.mu.RUnlock()
 
 	if !exists {
-		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
+		logger.Infof("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
 		retErr = ErrNormal
 		return
 	}
@@ -124,7 +124,7 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 
 	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err != nil {
-		logger.Println("[TCP] failed to serialize message")
+		logger.Infoln("[TCP] failed to serialize message")
 		retErr = ErrNormal
 		return
 	}
@@ -136,11 +136,11 @@ func (cm *ClientManager) SendToClientNoReply(clientId uint32, opCode byte, data 
 		} else {
 			retErr = err
 		}
-		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
+		logger.Infof("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
 	cm.sendMu.Unlock()
-	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+	logger.Infof("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
 		clientId, 0x00, opCode, seqNum, len(data), data)
 
 	client.SetSequenceNum(seqNum)
@@ -161,7 +161,7 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 	cm.mu.RUnlock()
 
 	if !exists {
-		logger.Printf("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
+		logger.Infof("[TCP] client not found: %d, in processing op_code: %+v", clientId, opCode)
 		retErr = ErrNormal
 		return
 	}
@@ -183,12 +183,12 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 		} else {
 			retErr = err
 		}
-		logger.Printf("[TCP] failed to sendmessage, err: %+v", err)
+		logger.Infof("[TCP] failed to sendmessage, err: %+v", err)
 		return
 	}
 	cm.sendMu.Unlock()
 
-	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+	logger.Infof("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
 		clientId, 0x00, opCode, seqNum, len(data), data)
 
 	client.SetSequenceNum(seqNum)
@@ -199,12 +199,12 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 
 	select {
 	case <-time.After(replyTimeout):
-		logger.Printf("[TCP] %+v reply timeout, client id: %+v", opCode, clientId)
+		logger.Infof("[TCP] %+v reply timeout, client id: %+v", opCode, clientId)
 		retErr = ErrTimeoutReply
 		return
 	case reply, ok := <-replyCh:
 		if !ok {
-			logger.Printf("[TCP] %+v reply channel closed, client id: %+v", opCode, clientId)
+			logger.Infof("[TCP] %+v reply channel closed, client id: %+v", opCode, clientId)
 			retErr = ErrNormal
 			return
 		}
@@ -217,7 +217,7 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data []byte, sendTimeout time.Duration) error {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Printf("[TCP] Failed to SendDataToClientSync( panic ), OPCODE: %+v, panic: %v", opCode, r)
+			logger.Infof("[TCP] Failed to SendDataToClientSync( panic ), OPCODE: %+v, panic: %v", opCode, r)
 		}
 	}()
 
@@ -226,7 +226,7 @@ func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data
 	cm.mu.RUnlock()
 
 	if !exists {
-		logger.Printf("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
+		logger.Infof("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
 		return ErrNormal
 	}
 
@@ -234,7 +234,7 @@ func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data
 
 	message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 	if err != nil {
-		logger.Println("[TCP] failed to serialize message")
+		logger.Infoln("[TCP] failed to serialize message")
 		return ErrNormal
 	}
 
@@ -246,7 +246,7 @@ func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data
 		} else {
 			sendErr = err
 		}
-		logger.Printf("[TCP] failed to send message, err: %+v", err)
+		logger.Infof("[TCP] failed to send message, err: %+v", err)
 		return sendErr
 	}
 	cm.sendMu.Unlock()
@@ -255,10 +255,10 @@ func (cm *ClientManager) SendDataToClientSync(clientId uint32, opCode byte, data
 
 	// 0x1B: 파일 전송
 	if opCode == 0x1B {
-		logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X,  Data Length: %+v",
+		logger.Infof("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X,  Data Length: %+v",
 			clientId, 0x00, opCode, len(data))
 	} else {
-		logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
+		logger.Infof("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Data: [%x]",
 			clientId, 0x00, opCode, seqNum, len(data), data)
 	}
 
@@ -272,7 +272,7 @@ func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []by
 	cm.mu.RUnlock()
 
 	if !exists {
-		logger.Printf("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
+		logger.Infof("[TCP] client not found: %d, in processing op_code: 0x%02X", clientId, opCode)
 		retErr = ErrNormal
 		return
 	}
@@ -315,7 +315,7 @@ func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []by
 
 		message, err := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)
 		if err != nil {
-			logger.Println("[TCP] failed to serialize message")
+			logger.Infoln("[TCP] failed to serialize message")
 			retErr = ErrNormal
 			return
 		}
@@ -328,7 +328,7 @@ func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []by
 			} else {
 				sendErr = err
 			}
-			logger.Printf("[TCP] failed to send message, err: %+v", err)
+			logger.Infof("[TCP] failed to send message, err: %+v", err)
 			retErr = sendErr
 			return
 		}
@@ -338,7 +338,7 @@ func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []by
 		seqNums = append(seqNums, seqNum)
 	}
 
-	logger.Printf("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Chunk count: %v, ",
+	logger.Infof("[TCP] Transmitted packet, client id: %+v, Flow Control: %+v, OP Code: 0x%02X, SeqNum: %+v, Data Length: %+v, Chunk count: %v, ",
 		clientId, 0x00, opCode, seqNums, len(buf), chunkCnt)
 
 	return
@@ -352,7 +352,7 @@ func (cm *ClientManager) SendFileToClient(clientId uint32, opCode byte, buf []by
 func (cm *ClientManager) Broadcast(msg []byte, opCode any) {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Printf("[TCP] Failed to broadcast( panic ), OPCODE: %+v, panic: %v", opCode, r)
+			logger.Infof("[TCP] Failed to broadcast( panic ), OPCODE: %+v, panic: %v", opCode, r)
 		}
 	}()
 }

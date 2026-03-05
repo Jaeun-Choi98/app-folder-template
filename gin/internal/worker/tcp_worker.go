@@ -63,40 +63,40 @@ func (t *TCPWorker) Start() {
 		case msg := <-t.NoReplyCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Worker] Failed to assert struct( *customEvent.TCPSendNoReplyPayload )")
+				logger.Infoln("[TCP Worker] Failed to assert struct( *customEvent.TCPSendNoReplyPayload )")
 				continue
 			}
 			go func() {
 				err := t.ClientManager.SendToClientNoReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout)
 				if err != nil {
-					logger.Printf("[TCP Worker] Failed to SendToClientNoReply: \n%v, station num: %d", err, req.ClientId)
+					logger.Infof("[TCP Worker] Failed to SendToClientNoReply: \n%v, station num: %d", err, req.ClientId)
 				}
 				req.Response <- customEvent.TCPResponse{Err: err}
 			}()
 		case msg := <-t.WithReplyCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.TCPSendPayload)
 			if !ok {
-				logger.Println("[TCP Worker] Failed to assert struct( *customEvent.TCPSendWithReplyPayload )")
+				logger.Infoln("[TCP Worker] Failed to assert struct( *customEvent.TCPSendWithReplyPayload )")
 				continue
 			}
 			go func() {
 				reply, err := t.ClientManager.SendToClientWithReply(req.ClientId, req.OpCode, req.Data, req.SendTimeout, req.ReplyTimeout)
 				if err != nil {
-					logger.Printf("[TCP Worker] Failed to sendToClientWithReply: \n%v, station num: %d", err, req.ClientId)
+					logger.Infof("[TCP Worker] Failed to sendToClientWithReply: \n%v, station num: %d", err, req.ClientId)
 				}
 				req.Response <- customEvent.TCPResponse{Data: reply, Err: err}
 			}()
 		case msg := <-t.UpdateCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.UpdateClientPayload)
 			if !ok {
-				logger.Println("[TCP Worker] Failed to assert struct")
+				logger.Infoln("[TCP Worker] Failed to assert struct")
 				continue
 			}
 			t.ClientManager.UpdateClient(req.OldClientId, req.NewClientId)
 		case msg := <-t.DisconnectCh:
 			req, ok := msg.(*customEvent.Message).Payload.(*customEvent.DisconnectClientPayload)
 			if !ok {
-				logger.Println("[TCP Worker] Failed to assert struct")
+				logger.Infoln("[TCP Worker] Failed to assert struct")
 				continue
 			}
 			t.ClientManager.DisconnectClient(req.ClientId)
@@ -111,5 +111,5 @@ func (t *TCPWorker) Shutdown() {
 	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.UpdateClientType), t.UpdateCh)
 	t.Eventbus.Unsubscribe(customEvent.NewTopic(customEvent.DisconnectClientType), t.DisconnectCh)
 	t.wg.Wait()
-	logger.Println("[TCP Worker] TCP Worker goroutine is terminated")
+	logger.Infoln("[TCP Worker] TCP Worker goroutine is terminated")
 }

@@ -17,6 +17,6 @@ func TestLogger(t *testing.T) {
 	time.Sleep(time.Second * 3)
 
 	assert.NoError(t, err)
-	logger.Printf("test%s", " test")
+	logger.Infof("test%s", " test")
 
 }

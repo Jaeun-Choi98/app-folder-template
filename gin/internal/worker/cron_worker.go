@@ -64,7 +64,7 @@ func (c *CronWorker) LoadLogTableInfo() error {
 func (c *CronWorker) Shutdown() {
 	c.cancel()
 	c.wg.Wait()
-	logger.Println("[Cron Worker] Cron Worker goroutine is terminated")
+	logger.Infoln("[Cron Worker] Cron Worker goroutine is terminated")
 }
 
 func (c *CronWorker) Start() error {
@@ -112,12 +112,12 @@ func (c *CronWorker) DynamicDBLogTableJob(updateDevice bool) {
 	case "oracle":
 		if updateDevice {
 			// if err := c.dao.CreateTable(strings.ToUpper(DynamicDeviceLogTableName), GetOraQuery()); err != nil {
-			// 	logger.Println("[Cron] Failed to create log table")
+			// 	logger.Infoln("[Cron] Failed to create log table")
 			// }
 		}
 	case "maria":
 	default:
-		logger.Println("[Cron Worker] Failed to create log table, invalid config.DBType")
+		logger.Infoln("[Cron Worker] Failed to create log table, invalid config.DBType")
 	}
 }
 
@@ -143,10 +143,10 @@ func (c *CronWorker) CleanDBLogTableJob() {
 		case "maria":
 			tableName = strings.ToLower(tbName)
 		default:
-			logger.Println("[Cron Worker] Failed to clean db log_table, invalid config.DBType")
+			logger.Infoln("[Cron Worker] Failed to clean db log_table, invalid config.DBType")
 			return
 		}
-		logger.Println(tableName)
+		logger.Infoln(tableName)
 		// if exsits, err := c.dao.DeleteTableLog(tableName); err != nil {
 		// 	logger.Printf("[Cron] Failed to clean db log_table, DeleteTableLog: %s", tableName)
 		// } else if exsits == 1 {

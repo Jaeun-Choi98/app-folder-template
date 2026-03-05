@@ -39,12 +39,12 @@ func NewMaria(dsn string, heartbeat time.Duration) (*Maria, error) {
 func (m *Maria) Connect() error {
 	db, err := sql.Open("mysql", m.dsn)
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
 	// if err := db.Ping(); err != nil {
-	// 	logger.Println(err)
+	// 	logger.Infoln(err)
 	// 	db.Close()
 	// 	return err
 	// }
@@ -96,14 +96,14 @@ func (m *Maria) StartDBHeartbeat() {
 		for {
 			select {
 			case <-m.ctx.Done():
-				logger.Println("[DB Heartbeat] DB heartbeat goroutine terminated")
+				logger.Infoln("[DB Heartbeat] DB heartbeat goroutine terminated")
 				return
 			case <-heartbeat.C:
 				if err := m.Ping(); err != nil {
 					// 재연결 시도
-					logger.Println("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
+					logger.Infoln("[DB Heartbeat] DB Connection is closed, attempting to reconnect...")
 					if err := m.Connect(); err == nil {
-						logger.Println("[DB Heartbeat] DB reconnection successful")
+						logger.Infoln("[DB Heartbeat] DB reconnection successful")
 					}
 				}
 			}

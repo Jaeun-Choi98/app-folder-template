@@ -13,13 +13,13 @@ func ErrorMiddleware() gin.HandlerFunc {
 		for _, ctxErr := range ctx.Errors {
 			if err, ok := ctxErr.Err.(*httperr.HttpError); ok {
 				// if err.Code == http.StatusInternalServerError {
-				// 	logger.Println(err.ErrMsg)
+				// 	logger.Infoln(err.ErrMsg)
 				// }
 				if err.ErrMsg != "" {
-					logger.Printf("[REST] error message: %s", err.ErrMsg)
+					logger.Infof("[REST] error message: %s", err.ErrMsg)
 				}
 				if err.BaseResponse != nil {
-					logger.Printf("[REST] result code: %d", err.BaseResponse.Result)
+					logger.Infof("[REST] result code: %d", err.BaseResponse.Result)
 				}
 				ctx.JSON(err.Code, err.BaseResponse)
 			}

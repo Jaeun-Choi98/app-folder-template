@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/binary"
 	"fmt"
-	"log"
 	"math"
 	"pjt/internal/infra/cache"
 	"pjt/internal/logger"
@@ -129,7 +128,7 @@ func (s *FileTransferJob) GetState() TransferState {
 func (s *FileTransferJob) SetState(state TransferState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	log.Printf(
+	logger.Infof(
 		"[debug, File Transfer] file transfer state: %v(0: idle, 1:wait start ack, 2: sending, 3: check ack, 4: end ack, 5: completed, 6: timeout, 7: cancelled, 8: failed), terminalid: %v",
 		state, s.terminalId)
 	s.state = state
@@ -220,7 +219,7 @@ func (s *FileTransferJob) Run(sendFunc func(clientId uint32, opCode byte, buf []
 
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Printf("[File Transfer] panic in running file transfer session, terminal: %v, panic: %v", s.terminalId, r)
+			logger.Infof("[File Transfer] panic in running file transfer session, terminal: %v, panic: %v", s.terminalId, r)
 			retErr = fmt.Errorf("[File Transfer] panic in running file transfer session, panic: %v", r)
 			s.SetState(StateFailed)
 		}
@@ -232,7 +231,7 @@ func (s *FileTransferJob) Run(sendFunc func(clientId uint32, opCode byte, buf []
 	// 0x2B 대기 (5초)
 	select {
 	case <-s.startChan:
-		// log.Printf("[debug, File Transfer] start ack, terminalid: %v", s.terminalId)
+		// log.Infof("[debug, File Transfer] start ack, terminalid: %v", s.terminalId)
 		// 정상
 	case <-time.After(s.ackTimeout):
 
@@ -247,7 +246,7 @@ func (s *FileTransferJob) Run(sendFunc func(clientId uint32, opCode byte, buf []
 		binary.BigEndian.PutUint32(data[0:4], s.terminalId)
 		data[4] = 1
 		if err := sendFunc(s.terminalId, 0x1D, data, 0); err != nil {
-			//logger.Printf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
+			//logger.Infof("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 			retErr = fmt.Errorf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 			s.SetState(StateFailed)
 			return
@@ -294,7 +293,7 @@ func (s *FileTransferJob) Run(sendFunc func(clientId uint32, opCode byte, buf []
 				binary.BigEndian.PutUint32(data[0:4], s.terminalId)
 				data[4] = 1
 				if err := sendFunc(s.terminalId, 0x1D, data, 0); err != nil {
-					//	logger.Printf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
+					//	logger.Infof("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 					retErr = fmt.Errorf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 					s.SetState(StateFailed)
 					return
@@ -330,7 +329,7 @@ func (s *FileTransferJob) Run(sendFunc func(clientId uint32, opCode byte, buf []
 			binary.BigEndian.PutUint32(data[0:4], s.terminalId)
 			data[4] = 1
 			if err := sendFunc(s.terminalId, 0x1D, data, 0); err != nil {
-				//logger.Printf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
+				//logger.Infof("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 				retErr = fmt.Errorf("[File Transfer] Failed to send 0x1D to terminal: %v", s.terminalId)
 				s.SetState(StateFailed)
 				return
@@ -350,7 +349,7 @@ func (s *FileTransferJob) sendWindow(sendFunc func(clientId uint32, opCode byte,
 	}
 	s.mu.Unlock()
 
-	log.Printf("[debug, File Transfer] sending window [%d-%d] to terminal: %v", startIdx, endIdx-1, s.terminalId)
+	logger.Infof("[debug, File Transfer] sending window [%d-%d] to terminal: %v", startIdx, endIdx-1, s.terminalId)
 
 	for chunkIdx := startIdx; chunkIdx < endIdx; chunkIdx++ {
 		chunk, err := s.cache.ReadChunk(s.filepath, chunkIdx, s.chunkSize)
@@ -364,7 +363,7 @@ func (s *FileTransferJob) sendWindow(sendFunc func(clientId uint32, opCode byte,
 		binary.BigEndian.PutUint32(data[8:12], uint32(len(chunk)))
 		data = append(data, chunk...)
 		if err := sendFunc(s.terminalId, 0x1B, data, 0); err != nil {
-			//logger.Printf("[File Transfer] Failed to send 0x1B to terminal: %v", s.terminalId)
+			//logger.Infof("[File Transfer] Failed to send 0x1B to terminal: %v", s.terminalId)
 			return fmt.Errorf("[File Transfer] Failed to send 0x1B to terminal: %v", s.terminalId)
 		}
 	}
@@ -376,7 +375,7 @@ func (s *FileTransferJob) handleAckIndex(ackIdx int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	log.Printf("[debug, File Transfer] received ACK for chunk %d from terminal %v", ackIdx, s.terminalId)
+	logger.Infof("[debug, File Transfer] received ACK for chunk %d from terminal %v", ackIdx, s.terminalId)
 
 	s.lastAckedChunk = ackIdx
 }

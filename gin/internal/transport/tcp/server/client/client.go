@@ -67,7 +67,7 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 func (c *Client) Close() {
 	c.Cancel()
 	if c.IsAuth {
-		logger.Printf("[TCP] Disconnected client: %d", c.ClientId)
+		logger.Infof("[TCP] Disconnected client: %d", c.ClientId)
 		c.clientContext.SetParsedMsg(&implparser.ParseMessage{Type: "rtms_0x0AA", ClientId: c.ClientId})
 		c.handler.HandleMessageSync(c.clientContext)
 	}
@@ -95,7 +95,7 @@ func (c *Client) MessageProcessingLoop() {
 				if err == io.EOF || c.parsingErrCnt > 4 {
 					return
 				}
-				logger.Printf("[TCP] Parse error for client %d: %v", c.ClientId, err)
+				logger.Infof("[TCP] Parse error for client %d: %v", c.ClientId, err)
 				c.parsingErrCnt++
 				continue
 			}
@@ -105,7 +105,7 @@ func (c *Client) MessageProcessingLoop() {
 			c.clientContext.SetParsedMsg(msg)
 
 			if err := c.handler.HandleMessage(c.clientContext); err != nil {
-				logger.Printf("[TCP] Handle error: %v", err)
+				logger.Infof("[TCP] Handle error: %v", err)
 				// 클라이언트에게 처리 결과를 반환해야 한다면 아래 코드 실행.
 				// c.SendMessage([]byte(err.Error()), 0)
 			}

@@ -12,7 +12,7 @@ func main() {
 
 	container, err := container.NewContainer()
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())

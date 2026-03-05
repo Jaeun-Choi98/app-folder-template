@@ -25,6 +25,6 @@ func LogMiddleware() gin.HandlerFunc {
 			time.Since(t).Seconds(),
 			c.Request.UserAgent(),
 		)
-		logger.Println(logText)
+		logger.Infoln(logText)
 	}
 }

@@ -23,7 +23,7 @@ func (i *Oracle) InsertEventLog(tableName string, params [][]any) error {
 	query.WriteString("SELECT * FROM dual")
 
 	if _, err := i.db.ExecContext(timeout, query.String()); err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return err
 	}
 
@@ -177,7 +177,7 @@ func (i *Oracle) InsertTempData(tbName string, objs []any) error {
 	// 		temp.DayMonthYear.Int16)
 
 	// 	if _, err := i.db.ExecContext(timeout, query); err != nil {
-	// 		logger.Println(err)
+	// 		logger.Infoln(err)
 	// 		return err
 	// 	}
 	// }
@@ -225,7 +225,7 @@ func (i *Oracle) AggregateTempSelect(tableName string, startDt, endDt time.Time,
 
 	rows, err := i.db.QueryContext(timeout, query.String(), startDt, endDt)
 	if err != nil {
-		logger.Println(err)
+		logger.Infoln(err)
 		return nil, err
 	}
 	defer rows.Close()

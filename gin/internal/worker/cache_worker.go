@@ -55,11 +55,11 @@ func (w *CacheWorker) Start() error {
 
 			}
 			// debug
-			// logger.Println("here sync DB")
+			// logger.Infoln("here sync DB")
 
 			go func() {
 				if err := w.dao.Ping(); err != nil {
-					logger.Println("[Cache] Failed to sync DB")
+					logger.Infoln("[Cache] Failed to sync DB")
 				}
 			}()
 		}
@@ -69,6 +69,6 @@ func (w *CacheWorker) Start() error {
 func (w *CacheWorker) Shutdown() error {
 	w.cancel()
 	w.wg.Wait()
-	logger.Printf("[Cache Worker] Cache Worker goroutine is terminated")
+	logger.Infof("[Cache Worker] Cache Worker goroutine is terminated")
 	return nil
 }

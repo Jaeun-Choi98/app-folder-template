@@ -82,14 +82,14 @@ func StartCleanupWorker(interval time.Duration) {
 		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
 
-		logger.Printf("[Redis] Cleanup worker started (interval: %v)", interval)
+		logger.Infof("[Redis] Cleanup worker started (interval: %v)", interval)
 
 		for {
 			select {
 			case <-ticker.C:
 				cleanupAllRepositories()
 			case <-cleanupCtx.Done():
-				logger.Println("[Redis] Cleanup worker routine is terminated")
+				logger.Infoln("[Redis] Cleanup worker routine is terminated")
 				return
 			}
 		}
@@ -98,15 +98,15 @@ func StartCleanupWorker(interval time.Duration) {
 
 // 만료된 키의 인덱스 정리가 필요한 경우, 따로 코드를 아래처럼 작성해주어야 함.
 func cleanupAllRepositories() {
-	logger.Println("[Redis] Starting cleanup...")
+	logger.Infoln("[Redis] Starting cleanup...")
 
 	dockerRepo := GetRepository[*redismodel.Sample](redismodel.RedisKeySample)
 	if dockerRepo != nil {
 		count, err := dockerRepo.CleanupExpired()
 		if err != nil {
-			logger.Printf("[Redis] Error: %v", err)
+			logger.Infof("[Redis] Error: %v", err)
 		} else if count > 0 {
-			logger.Printf("[Redis] Cleaned %d records", count)
+			logger.Infof("[Redis] Cleaned %d records", count)
 		}
 	}
 }
