@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"path/filepath"
 	"pjt/internal/config"
 	customEvent "pjt/internal/eventbus/event-define"
 	"pjt/internal/service"
@@ -127,7 +128,8 @@ func (c *Controller) RoutePath() {
 		ctx.String(http.StatusOK, res.Data.(string))
 
 	})
-
+	// 웹서버
+	c.Router.GET("/", func(c *gin.Context) { c.File(filepath.Join("build", "index.html")) })
 	c.Router.Use(middleware.SpaHandlerOther("/spatest", "spa-test"))
 	c.Router.Use(middleware.SpaHandlerRoot("build", "index.html"))
 }

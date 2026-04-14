@@ -36,6 +36,21 @@ func SpaHandlerRoot(staticPath, indexPath string) gin.HandlerFunc {
 
 		// 2. 경로 정리 및 탐색 방지
 		cleanPath := filepath.Clean(url)
+
+		// 리다이렉트 경로 추가
+		redirectPath := map[string]bool{
+			filepath.FromSlash("/page1"): true,
+			filepath.FromSlash("/page2"): true,
+			filepath.FromSlash("/page3"): true,
+			filepath.FromSlash("/page4"): true,
+		}
+
+		// /로 리다이렉트
+		if redirectPath[cleanPath] {
+			c.Redirect(http.StatusFound, "/")
+			return
+		}
+
 		absPath := filepath.Join(staticPath, cleanPath)
 		_, err := os.Stat(absPath)
 		/**
@@ -50,9 +65,12 @@ func SpaHandlerRoot(staticPath, indexPath string) gin.HandlerFunc {
 		if err != nil {
 			// 1. 파일이 존재하지x
 			if errors.Is(err, fs.ErrNotExist) {
-				// fallback
-				http.ServeFile(c.Writer, c.Request, filepath.Join(staticPath, indexPath))
+
+				c.AbortWithStatus(http.StatusNotFound)
 				return
+				// 아래는 fallback
+				// http.ServeFile(c.Writer, c.Request, filepath.Join(staticPath, indexPath))
+				// return
 			} else {
 				http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
 				return
