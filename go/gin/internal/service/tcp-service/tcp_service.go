@@ -37,7 +37,7 @@ func NewTCPService(clientManager *client.ClientManager, dao dbhandler.DBHandlerI
 }
 
 func (t *TCPService) Handle0x010(clientId uint32) error {
-	eventbus.Publish(event.GetEventBus(), "sse.event", event.SseEvent{Event: "tcp service", Data: "hello world"})
+	eventbus.Publish(event.GetEventBus(), "sse.event", &event.SseEvent{Event: "tcp service", Data: "hello world"})
 	t.ClientManager.UpdateClient(clientId, 1)
 	return nil
 }

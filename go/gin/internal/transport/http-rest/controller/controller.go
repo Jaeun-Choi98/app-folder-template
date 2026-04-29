@@ -91,7 +91,7 @@ func (c *Controller) RoutePath() {
 
 	// TCP 송신 테스트, 테스트 하려면 tcp/server.go 에서 클라이언트 ID를 임의로 설정해야함.
 	c.Router.GET("/send-work", func(ctx *gin.Context) {
-		if err := eventbus.PublishSync(event.GetEventBus(), "tcp.event", event.TcpEvent{
+		if err := eventbus.PublishSync(event.GetEventBus(), "tcp.event", &event.TcpEvent{
 			TcpEventOpcode: 0x01,
 			ClientId:       1,
 			PacketOpcode:   0x02,
@@ -106,7 +106,7 @@ func (c *Controller) RoutePath() {
 	})
 
 	c.Router.GET("/send-work-reply", func(ctx *gin.Context) {
-		results, errs := eventbus.Request(event.GetEventBus(), "tcp.event", event.TcpEvent{
+		results, errs := eventbus.Request(event.GetEventBus(), "tcp.event", &event.TcpEvent{
 			TcpEventOpcode: 0x01,
 			ClientId:       1,
 			PacketOpcode:   0x02,
