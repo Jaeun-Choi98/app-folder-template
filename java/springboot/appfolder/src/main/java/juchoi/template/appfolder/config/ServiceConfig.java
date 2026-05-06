@@ -1,6 +1,7 @@
 package juchoi.template.appfolder.config;
 
 import juchoi.template.appfolder.db.handler.DbHandler;
+import juchoi.template.appfolder.eventbus.EventBus;
 import juchoi.template.appfolder.infra.cache.Cache;
 import juchoi.template.appfolder.service.ApiService;
 import juchoi.template.appfolder.service.TcpService;
@@ -19,7 +20,7 @@ public class ServiceConfig {
     }
 
     @Bean
-    public TcpService tcpService(DbHandler dbHandler, Cache cache) {
-        return new TcpServiceImpl(dbHandler, cache);
+    public TcpService tcpService(DbHandler dbHandler, Cache cache, EventBus eventBus) {
+        return new TcpServiceImpl(dbHandler, cache, eventBus);
     }
 }

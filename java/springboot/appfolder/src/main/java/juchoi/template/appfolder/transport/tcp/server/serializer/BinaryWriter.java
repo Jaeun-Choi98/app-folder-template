@@ -1,24 +1,19 @@
 package juchoi.template.appfolder.transport.tcp.server.serializer;
 
+import juchoi.template.appfolder.utils.ByteUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
-/**
- * Serializes outbound binary frames.
- * Frame format: [1 byte opcode][4 bytes big-endian body length][N bytes body]
- * Mirrors Go's server/serializer/binary_writer.go.
- */
+// Packet format: [opcode 1B][length 2B big-endian][data length-B]
 public class BinaryWriter {
 
-    public static byte[] build(byte opcode, byte[] body) throws IOException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream(5 + body.length);
+    public static byte[] build(byte opcode, byte[] data) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream(3 + data.length);
         buf.write(opcode);
-        int len = body.length;
-        buf.write((len >> 24) & 0xFF);
-        buf.write((len >> 16) & 0xFF);
-        buf.write((len >>  8) & 0xFF);
-        buf.write(len & 0xFF);
-        buf.write(body);
+        buf.write(ByteUtils.fromShort((short) data.length, ByteOrder.BIG_ENDIAN));
+        buf.write(data);
         return buf.toByteArray();
     }
 }

@@ -1,5 +1,6 @@
 package juchoi.template.appfolder.app;
 
+import juchoi.template.appfolder.eventbus.EventBus;
 import juchoi.template.appfolder.transport.tcp.server.TcpServer;
 import juchoi.template.appfolder.worker.CacheWorker;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class AppLifecycle implements SmartLifecycle {
 
     private final TcpServer tcpServer;
     private final CacheWorker cacheWorker;
+    private final EventBus eventBus;
 
     @Override
     public void start() {
@@ -32,6 +34,7 @@ public class AppLifecycle implements SmartLifecycle {
         log.info("[App] Shutting down...");
         tcpServer.shutdown();
         cacheWorker.shutdown();
+        eventBus.close();
         running = false;
         log.info("[App] Terminated");
     }

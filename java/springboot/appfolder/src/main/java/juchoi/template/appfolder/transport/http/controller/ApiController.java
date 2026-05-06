@@ -48,14 +48,14 @@ public class ApiController {
 
     @GetMapping("/send-work")
     public ResponseEntity<String> sendWork() {
-        TcpSendEvent event = TcpSendEvent.noReply(1, (byte) 0x01, "work".getBytes());
+        TcpSendEvent event = TcpSendEvent.noReply(1, (byte) 0x11, "hello world, no reply".getBytes());
         eventBus.publish("tcpclient.send", event);
         return ResponseEntity.ok("sent");
     }
 
     @GetMapping("/send-work-reply")
     public ResponseEntity<String> sendWorkReply() throws Exception {
-        TcpSendEvent event = new TcpSendEvent(1, (byte) 0x02, new byte[]{0x02});
+        TcpSendEvent event = TcpSendEvent.withReply(1, (byte) 0x12, "hello world, with reply".getBytes(), (byte) 0x22);
         eventBus.publish("tcpclient.send", event);
         byte[] reply = event.future().get(10, TimeUnit.SECONDS);
         return ResponseEntity.ok(new String(reply));

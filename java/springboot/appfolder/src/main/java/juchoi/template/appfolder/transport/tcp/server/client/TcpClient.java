@@ -1,15 +1,17 @@
 package juchoi.template.appfolder.transport.tcp.server.client;
 
 import juchoi.template.appfolder.service.TcpService;
-import juchoi.template.appfolder.transport.tcp.server.parser.RtmsParser;
+import juchoi.template.appfolder.transport.tcp.server.dispatcher.PacketDispatcher;
+import juchoi.template.appfolder.transport.tcp.server.parser.PacketParser;
+import juchoi.template.appfolder.transport.tcp.server.parser.PacketParser.Packet;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.CompletableFuture;
 
-// Represents a single connected TCP client. Mirrors Go's server/client/client.go.
 @Slf4j
 public class TcpClient {
 
@@ -17,9 +19,9 @@ public class TcpClient {
     private final Socket socket;
     private final OutputStream out;
     private final InputStream in;
-    private final TcpService tcpService;
     private final ClientManager clientManager;
-    private final RtmsParser parser = new RtmsParser();
+    private final PacketParser parser = new PacketParser();
+    private final PacketDispatcher dispatcher;
 
     public TcpClient(int id, Socket socket, TcpService tcpService, ClientManager clientManager)
             throws IOException {
@@ -27,32 +29,29 @@ public class TcpClient {
         this.socket = socket;
         this.out = socket.getOutputStream();
         this.in = socket.getInputStream();
-        this.tcpService = tcpService;
         this.clientManager = clientManager;
+        this.dispatcher = new PacketDispatcher(id, tcpService);
     }
 
     // Blocking read loop — runs on its own thread (submitted by TcpServer).
     public void readLoop() {
         try {
             while (!socket.isClosed()) {
-                RtmsParser.Frame frame = parser.parse(in);
-                if (frame == null) break;
-                dispatch(frame);
+                Packet packet = parser.parse(in);
+                if (packet == null) break;
+                dispatcher.dispatch(packet);
             }
         } catch (IOException e) {
             log.info("[TCP] Client {} disconnected: {}", id, e.getMessage());
         } finally {
+            dispatcher.failAll(new IOException("client disconnected"));
             clientManager.unregister(id);
             close();
         }
     }
 
-    private void dispatch(RtmsParser.Frame frame) {
-        switch (frame.opcode()) {
-            case 0x01       -> tcpService.handle0x01(id);
-            case (byte)0xAA -> tcpService.handle0xAA(id);
-            default -> log.warn("[TCP] Unknown opcode 0x{} from client {}", Integer.toHexString(frame.opcode()), id);
-        }
+    public void registerPending(byte replyOpcode, CompletableFuture<byte[]> future) {
+        dispatcher.registerPending(replyOpcode, future);
     }
 
     // Thread-safe write — multiple workers may call this concurrently.

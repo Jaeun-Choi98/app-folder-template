@@ -40,8 +40,13 @@ public class TcpServer {
             }
             try {
                 byte[] frame = BinaryWriter.build(event.getOpcode(), event.getData());
+                if (event.expectsReply()) {
+                    client.registerPending(event.getReplyOpcode(), event.future());
+                }
                 client.send(frame);
-                event.complete(null);
+                if (!event.expectsReply()) {
+                    event.complete(null);
+                }
             } catch (IOException e) {
                 log.error("[TCP] send failed to client {}", event.getClientId(), e);
                 event.fail(e);

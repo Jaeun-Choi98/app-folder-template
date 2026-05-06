@@ -16,8 +16,8 @@ import juchoi.template.appfolder.worker.CacheWorker;
 @EnableScheduling
 public class AppConfig {
     @Bean
-    public AppLifecycle appLifecycle(TcpServer tcpServer, CacheWorker cacheWorker) {
-        return new AppLifecycle(tcpServer, cacheWorker);
+    public AppLifecycle appLifecycle(TcpServer tcpServer, CacheWorker cacheWorker, EventBus eventBus) {
+        return new AppLifecycle(tcpServer, cacheWorker, eventBus);
     }
 
     @Bean
