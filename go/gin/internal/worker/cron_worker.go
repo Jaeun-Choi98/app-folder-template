@@ -142,7 +142,7 @@ func (c *CronWorker) CleanDBLogTableJob() {
 			logger.Infoln("[Cron Worker] Failed to clean db log_table, invalid config.DBType")
 			return
 		}
-		logger.Infoln(tableName)
+		logger.Infof("[CronWorker] check and delete tableName:%s", tableName)
 		// if exsits, err := c.dao.DeleteTableLog(tableName); err != nil {
 		// 	logger.Printf("[Cron] Failed to clean db log_table, DeleteTableLog: %s", tableName)
 		// } else if exsits == 1 {
