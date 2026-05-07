@@ -6,6 +6,7 @@ import juchoi.template.appfolder.transport.http.controller.ApiController;
 import juchoi.template.appfolder.transport.http.controller.SseController;
 import juchoi.template.appfolder.transport.http.filter.JwtFilter;
 import juchoi.template.appfolder.transport.http.filter.LogFilter;
+import juchoi.template.appfolder.transport.http.filter.SpaFilter;
 import juchoi.template.appfolder.transport.http.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
+import java.util.Set;
 
 // HTTP 전송 계층 빈 등록 — 컨트롤러, 필터, JWT 유틸
 @Configuration
@@ -58,6 +60,30 @@ public class WebConfig {
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(0);
+        return bean;
+    }
+
+    // prefix SPA: /spatest/* → spa-test/ 디렉터리 서빙
+    @Bean
+    public FilterRegistrationBean<SpaFilter> spaOtherFilter(
+            @Value("${spa.other.url-prefix:/spatest}") String urlPrefix,
+            @Value("${spa.other.static-path:spa-test}") String staticPath) {
+        FilterRegistrationBean<SpaFilter> bean = new FilterRegistrationBean<>(
+                new SpaFilter(urlPrefix, staticPath, Set.of()));
+        bean.addUrlPatterns(urlPrefix + "/*");
+        bean.setOrder(2);
+        return bean;
+    }
+
+    // root SPA: /* → build/ 디렉터리 서빙, 파일 없으면 API 라우터로 통과
+    @Bean
+    public FilterRegistrationBean<SpaFilter> spaRootFilter(
+            @Value("${spa.root.static-path:build}") String staticPath,
+            @Value("${spa.root.redirects:/page1,/page2,/page3,/page4}") List<String> redirects) {
+        FilterRegistrationBean<SpaFilter> bean = new FilterRegistrationBean<>(
+                new SpaFilter("", staticPath, Set.copyOf(redirects)));
+        bean.addUrlPatterns("/*");
+        bean.setOrder(3);
         return bean;
     }
 
