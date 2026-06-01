@@ -124,7 +124,7 @@ func (c *Controller) RoutePath() {
 	})
 
 	// 웹서버
-	c.Router.GET("/", func(c *gin.Context) { c.File(filepath.Join("build", "index.html")) })
+	// c.Router.GET("/", func(c *gin.Context) { c.File(filepath.Join("build", "index.html")) })
 	c.Router.Use(middleware.SpaHandlerOther("/spatest", "spa-test"))
 	c.Router.Use(middleware.SpaHandlerRoot("build", "index.html"))
 }
