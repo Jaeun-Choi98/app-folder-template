@@ -128,15 +128,3 @@ internal/
   worker/                  CacheWorker, CronWorker
   utils/                   유틸리티
 ```
-
-## C++ vs Go vs Java 핵심 비교
-
-|                     | C++ (이 템플릿)                      | Go                              | Java                                  |
-| ------------------- | ------------------------------------ | ------------------------------- | ------------------------------------- |
-| HTTP 프레임워크     | Drogon                               | Gin                             | Spring Boot                           |
-| TCP 비동기          | standalone Asio                      | 고루틴 (net 패키지)             | ExecutorService / 가상 스레드 (21+)   |
-| DB 접근             | SOCI (직접 쿼리)                     | database/sql + 드라이버         | JDBC (직접 쿼리)                      |
-| DI                  | 수동 조립 (Container struct)         | 수동 조립 (container.go)        | Spring IoC (@Configuration)           |
-| 동시성 모델         | std::thread + Asio io_context        | 고루틴 + 채널                   | 스레드 풀 + CompletableFuture         |
-| 메모리 관리         | std::shared_ptr / std::unique_ptr    | GC                              | GC                                    |
-| 빌드                | CMake                                | go build                        | Gradle                                |
