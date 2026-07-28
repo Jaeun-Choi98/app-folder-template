@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"path/filepath"
 	"pjt/internal/config"
 	"pjt/internal/event"
 	"pjt/internal/service"
