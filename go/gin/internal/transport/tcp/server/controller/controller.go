@@ -8,12 +8,12 @@ import (
 	implparser "pjt/internal/transport/tcp/server/parser"
 	"pjt/internal/transport/tcp/server/serializer"
 
-	"github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
-	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
+	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/handler"
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/advanced/model"
 )
 
 func NewController(svc service.TCPServiceInterface) handler.ManagerInterface {
-	h := handler.NewV1[string]()
+	h := handler.New[string]()
 
 	h.RegisterHandle("text", func(c *tcpmd.HandleContext) error {
 		log.Printf("msgType: %s, clientID: %d, Data: %v ", c.GetParseMsg().GetPacketId(),

@@ -3,12 +3,13 @@ package tcp
 import (
 	"bufio"
 	"context"
+	"io"
 	"log"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/Jaeun-Choi98/modules/tcpnet/client"
+	"github.com/Jaeun-Choi98/modules/tcpnet/basic/client"
 )
 
 /**
@@ -17,33 +18,80 @@ import (
 type CustomClient struct {
 	BaseClient   *client.ClientBase
 	firstRequest bool
+
+	parsingErrCnt int
+
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
 }
 
 func NewCustomClient(parentCtx context.Context, timeout, reconnect time.Duration) *CustomClient {
 	c, _ := client.NewClientBase(parentCtx, timeout, reconnect)
+	ctx, cancel := context.WithCancel(parentCtx)
 	c.SetIpAndPort("localhost", "5000")
-	c.SetRxAndParsingFunc(func(conn net.Conn) (any, error) {
-		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-		defer conn.SetReadDeadline(time.Time{})
-		return bufio.NewReader(conn).ReadString('\n')
-	})
-	c.SetHandlePacket(func(a any) error {
-		log.Print(a.(string))
-		return nil
-	})
-	return &CustomClient{
+	customClient := &CustomClient{
 		BaseClient:   c,
 		firstRequest: true,
+		ctx:          ctx,
+		cancel:       cancel,
 	}
+	customClient.implHandleConnection()
+	return customClient
+}
+
+func (c *CustomClient) implHandleConnection() {
+	c.BaseClient.SetHandleConnectFunc(func(conn net.Conn) {
+		defer c.wg.Done()
+		for {
+
+			select {
+			case <-c.ctx.Done():
+				return
+			default:
+			}
+
+			if !c.BaseClient.IsConnected() {
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+
+			// =============== parser space =============== //
+			parsedPacket, err := bufio.NewReader(conn).ReadString('\n')
+			// =============== parser space =============== //
+
+			if err != nil {
+				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+					continue
+				}
+				// if EOF, normally exit
+				if err == io.EOF || c.parsingErrCnt > 4 {
+					c.BaseClient.SetConnectionState(false)
+					return
+				}
+				c.parsingErrCnt++
+				continue
+			}
+
+			// =============== handler space =============== //
+			log.Print(parsedPacket)
+			// =============== handler space =============== //
+		}
+	})
 }
 
 func (c *CustomClient) Start() error {
+	c.wg.Add(1)
 	go c.BaseClient.Start()
 	return nil
 }
 
 func (c *CustomClient) Shutdown() {
+	c.cancel()
 	c.BaseClient.Shutdown()
+	c.wg.Wait()
 }
 
 func (c *CustomClient) StartTCPClientHeartbeat() {

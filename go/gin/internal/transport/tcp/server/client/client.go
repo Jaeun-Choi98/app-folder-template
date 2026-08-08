@@ -9,9 +9,9 @@ import (
 
 	implparser "pjt/internal/transport/tcp/server/parser"
 
-	"github.com/Jaeun-Choi98/modules/tcpnet/server/handler"
-	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
-	"github.com/Jaeun-Choi98/modules/tcpnet/server/parser"
+	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/handler"
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/advanced/model"
+	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/parser"
 
 	"time"
 )
@@ -43,7 +43,7 @@ type Client struct {
 
 	Ctx           context.Context
 	Cancel        context.CancelFunc
-	clientContext *tcpmd.ClientContext
+	clientContext *tcpmd.ConnContext
 	mu            sync.Mutex
 }
 
@@ -57,7 +57,7 @@ func NewClient(parentCtx context.Context, clinetId uint32, conn net.Conn, ps *im
 		parser:  ps,
 		handler: hd,
 		//ReplyCh: make(map[any]chan tcpmd.Reply),
-		clientContext: tcpmd.NewClientContext(context.Background(), 30),
+		clientContext: tcpmd.NewConnContext(context.Background(), 30),
 		//TimeoutChannel: make(chan bool, 1),
 		Ctx:    ctx,
 		Cancel: cancel,

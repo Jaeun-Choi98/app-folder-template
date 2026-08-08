@@ -13,7 +13,7 @@ import (
 	implparser "pjt/internal/transport/tcp/server/parser"
 	"time"
 
-	"github.com/Jaeun-Choi98/modules/tcpnet/server/server"
+	"github.com/Jaeun-Choi98/modules/tcpnet/basic/server"
 )
 
 /**

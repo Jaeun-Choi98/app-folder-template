@@ -8,7 +8,7 @@ import (
 	"net"
 	"strings"
 
-	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/server/model"
+	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/advanced/model"
 )
 
 /**

@@ -3,7 +3,7 @@ package serializer
 import (
 	"encoding/binary"
 
-	"github.com/Jaeun-Choi98/modules/tcpnet/server/serializer"
+	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/serializer"
 )
 
 // 이때, data 슬라이스는 크기는 프로토콜에 맞는 고정된 크기여야 함.
