@@ -138,4 +138,7 @@ DNS.1 = domain.go.kr
 openssl x509 -req -in domain.go.kr.csr -CA rtca.pem -CAkey rtca.key -CAcreateserial -out domain.go.kr.crt -days 18250 -sha256 -extfile domain.go.kr.ext
 Enter pass phrase for uwsigca.key: 123456
 
+우분투 인증서 등록
+$ sudo cp *.crt /usr/local/share/ca-certificates/
+$ sudo update-ca-certificates
 */
