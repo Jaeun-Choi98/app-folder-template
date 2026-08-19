@@ -16,6 +16,10 @@ type Configuration struct {
 	RestIp   string
 	RestPort string
 	Cors     string
+	TLS      int
+	SSLCERT  string
+	SSLKEY   string
+	CACERT   string
 
 	// tcp
 	TcpIp   string
@@ -75,6 +79,10 @@ func initConfig(cfgFile *ini.File) *Configuration {
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
 	config.Cors = cfgFile.Section("REST").Key("CORS").MustString("*")
+	config.TLS = cfgFile.Section("REST").Key("TLS").MustInt(0)
+	config.SSLCERT = cfgFile.Section("REST").Key("SSLCERT").MustString("")
+	config.SSLKEY = cfgFile.Section("REST").Key("SSLKEY").MustString("")
+	config.CACERT = cfgFile.Section("REST").Key("CACERT").MustString("")
 
 	config.TcpIp = cfgFile.Section("TCP").Key("IP").MustString("")
 	config.TcpPort = cfgFile.Section("TCP").Key("PORT").MustString("")

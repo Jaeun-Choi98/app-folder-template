@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,7 +17,7 @@ import (
 func SpaHandlerRoot(staticPath, indexPath string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		log.Println("root")
+
 		url := c.Request.URL.Path
 		ext := filepath.Ext(url)
 
@@ -84,7 +83,6 @@ func SpaHandlerRoot(staticPath, indexPath string) gin.HandlerFunc {
 func SpaHandlerOther(urlPrefix, staticPath string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		log.Println("other")
 		url := c.Request.URL.Path
 		ext := filepath.Ext(url)
 

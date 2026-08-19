@@ -2,6 +2,10 @@
 IP=
 PORT=8080
 CORS=http://localhost:3000,https://localhost:3000
+TLS=1
+SSLCERT=./crt/test.crt
+SSLKEY=./crt/test.key
+CACERT=./ca/testca.crt
 
 [DB]
 TYPE=oracle       # maria/mysql, postgres, odbc

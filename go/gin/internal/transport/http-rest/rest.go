@@ -16,26 +16,40 @@ import (
 
 type RESTServer struct {
 	server *http.Server
+	useTLS int
+	cert   string
+	key    string
 }
 
 func NewRESTServer(controller controller.Controller, config *config.Configuration) *RESTServer {
+	var tlsCfg *tls.Config
+	if config.TLS == 1 {
+		tlsCfg = initHttpTLSconfig(config.CACERT)
+	}
+
 	server := &http.Server{
 		Addr: config.RestIp + ":" + config.RestPort,
 		// if using sse, comment below
 		// WriteTimeout: time.Second * 5,
 		ReadTimeout: time.Second * 5,
 		Handler:     controller.Router,
-		//TLSConfig:   initHttpTLSconfig(),
+		TLSConfig:   tlsCfg,
 	}
 
 	return &RESTServer{
 		server: server,
+		useTLS: config.TLS,
+		cert:   config.SSLCERT,
+		key:    config.SSLKEY,
 	}
 }
 
 func (r *RESTServer) Start() error {
-	// return r.server.ListenAndServeTLS("filpath.crt", "filepath.key")
-	return r.server.ListenAndServe()
+	if r.useTLS == 1 {
+		return r.server.ListenAndServeTLS(r.cert, r.key)
+	} else {
+		return r.server.ListenAndServe()
+	}
 }
 
 func (r *RESTServer) Shutdown(ctx context.Context) (err error) {
@@ -44,7 +58,7 @@ func (r *RESTServer) Shutdown(ctx context.Context) (err error) {
 	return err
 }
 
-func initHttpTLSconfig() *tls.Config {
+func initHttpTLSconfig(cacertFilepath string) *tls.Config {
 	insecure := flag.Bool("[REST] insecure-ssl", false, "Accept/Ignore all server SSL certificates")
 	flag.Parse()
 
@@ -56,7 +70,7 @@ func initHttpTLSconfig() *tls.Config {
 
 	// Read in the cert file
 	//certs, err := ioutil.ReadFile(localCertFile)
-	certs, err := ioutil.ReadFile("rootca.pem")
+	certs, err := ioutil.ReadFile(cacertFilepath)
 	if err != nil {
 		log.Fatalf("[REST] Failed to read RootCAs: %v", err)
 	}
@@ -77,11 +91,11 @@ func initHttpTLSconfig() *tls.Config {
 
 // make self signed crt example
 /**
- $ openssl genrsa -des3 -out shevpca.key 2048
+ $ openssl genrsa -des3 -out rtca.key 2048
 password : 123456
 
 $ openssl req -x509 -new -nodes -key rtca.key -sha256 -days 18250 -out rtca.pem
-Enter pass phrase for shevpca.key: 123456
+Enter pass phrase for rtca.key: 123456
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
