@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,7 @@ func NewCORSMiddleware(allowedOrigins []string, allowCredentials bool) gin.Handl
 
 		wildcard, matched := false, false
 		for _, o := range allowedOrigins {
+			o = strings.TrimSpace(o)
 			if o == "*" {
 				wildcard = true
 			} else if o == origin {
