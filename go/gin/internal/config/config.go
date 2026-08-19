@@ -15,6 +15,7 @@ type Configuration struct {
 	// http-rest
 	RestIp   string
 	RestPort string
+	Cors     string
 
 	// tcp
 	TcpIp   string
@@ -73,6 +74,7 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
+	config.Cors = cfgFile.Section("REST").Key("CORS").MustString("*")
 
 	config.TcpIp = cfgFile.Section("TCP").Key("IP").MustString("")
 	config.TcpPort = cfgFile.Section("TCP").Key("PORT").MustString("")
