@@ -1,7 +1,7 @@
 [REST]
 IP=
 PORT=8080
-CORS=http://localhost:3000,https://localhost:3000
+CORS=localhost:3000,localhost:3000
 TLS=1
 SSLCERT=./crt/test.crt
 SSLKEY=./crt/test.key

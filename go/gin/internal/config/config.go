@@ -2,6 +2,7 @@ package config
 
 import (
 	"pjt/internal/logger"
+	"strings"
 	"sync"
 
 	"github.com/go-ini/ini"
@@ -15,7 +16,7 @@ type Configuration struct {
 	// http-rest
 	RestIp   string
 	RestPort string
-	Cors     string
+	Cors     []string
 	TLS      int
 	SSLCERT  string
 	SSLKEY   string
@@ -78,7 +79,12 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.RestIp = cfgFile.Section("REST").Key("IP").MustString("")
 	config.RestPort = cfgFile.Section("REST").Key("PORT").MustString("")
-	config.Cors = cfgFile.Section("REST").Key("CORS").MustString("*")
+	corsStr := cfgFile.Section("REST").Key("CORS").MustString("*")
+	var cors []string
+	for _, orgin := range strings.Split(corsStr, ",") {
+		cors = append(cors, strings.TrimSpace(orgin))
+	}
+	config.Cors = cors
 	config.TLS = cfgFile.Section("REST").Key("TLS").MustInt(0)
 	config.SSLCERT = cfgFile.Section("REST").Key("SSLCERT").MustString("")
 	config.SSLKEY = cfgFile.Section("REST").Key("SSLKEY").MustString("")
