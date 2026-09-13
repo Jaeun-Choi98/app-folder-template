@@ -31,7 +31,7 @@ func NewApplication(c *container.Container, cancel context.CancelFunc) *Applicat
 func (a *Application) Start() {
 	a.handleShutdown()
 
-	go logger.StartCleaning()
+	logger.StartCleaning()
 	go eventlog.StartLogManager()
 	go a.container.CronWorker.Start()
 	go a.container.CacheWorker.Start()

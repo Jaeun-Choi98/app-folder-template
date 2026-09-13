@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"pjt/internal/config"
 	"pjt/internal/event"
+	"pjt/internal/logger"
 	"pjt/internal/service"
+	"strconv"
 
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/http-utils/jwt"
@@ -42,6 +45,10 @@ func (c *Controller) RoutePath() {
 	c.Router.Use(middleware.LogMiddleware())
 	c.Router.Use(middleware.ErrorMiddleware())
 	c.Router.Use(middleware.NewCORSMiddleware(c.Config.Cors, true))
+
+	// 로그 레벨 / 덤프 여부 조회 및 실행 중 변경 ( 재기동 시 env.ini 값으로 복귀 )
+	// ex) curl 'host/log-config?level=debug&dump=false'
+	c.Router.GET("/log-config", c.HandleGetLogConfig)
 
 	// 쿠키를 사용해서 jwt 토큰을 전달
 	c.Router.GET("/test", func(ctx *gin.Context) {
@@ -130,4 +137,46 @@ func (c *Controller) RoutePath() {
 
 func (ctr *Controller) Close() error {
 	return ctr.ApiService.Close()
+}
+
+// HandleGetLogConfig 는 현재 로그 레벨/덤프 여부를 돌려준다.
+// 쿼리를 주면 그 값만 바꾼 뒤 돌려준다 (curl 로 쓰기 쉽게 GET 으로 둔다).
+//
+//	GET /log-config                      조회
+//	GET /log-config?level=debug          레벨 변경 (debug/info/warn/error)
+//	GET /log-config?dump=false           덤프 끄기
+//
+// 잘못된 값이 하나라도 있으면 아무것도 바꾸지 않는다.
+func (t *Controller) HandleGetLogConfig(c *gin.Context) {
+	levelStr, hasLevel := c.GetQuery("level")
+	dumpStr, hasDump := c.GetQuery("dump")
+
+	var level logger.Level
+	var dump bool
+	var err error
+	if hasLevel {
+		if level, err = logger.ParseLevel(levelStr); err != nil {
+			c.Error(httperr.BADREQUEST.Add(err, response.INVAILD_DATA))
+			return
+		}
+	}
+	if hasDump {
+		if dump, err = strconv.ParseBool(dumpStr); err != nil {
+			c.Error(httperr.BADREQUEST.Add(errors.New("invalid dump value: "+dumpStr), response.INVAILD_DATA))
+			return
+		}
+	}
+
+	if hasLevel {
+		logger.SetLevel(level)
+	}
+	if hasDump {
+		logger.SetDump(dump)
+	}
+
+	cur := gin.H{"level": logger.GetLevel().String(), "dump": logger.IsDumpEnabled()}
+	if hasLevel || hasDump {
+		logger.Warnf("[REST] log config changed: level=%v, dump=%v, remote: %s", cur["level"], cur["dump"], c.ClientIP())
+	}
+	c.JSON(http.StatusOK, response.SUCCESS.Add(cur))
 }

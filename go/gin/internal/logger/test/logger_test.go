@@ -9,7 +9,7 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	customLogger, err := logger.NewCustomLogger("")
+	customLogger, err := logger.NewCustomLogger("", logger.INFO, true)
 	logger.SetLogger(customLogger)
 
 	logger.StartCleaning()

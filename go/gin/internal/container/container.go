@@ -54,17 +54,23 @@ func NewContainer() (*Container, error) {
 	if container != nil {
 		return container, nil
 	}
-	customLogger, err := logger.NewCustomLogger("")
+	// 로거 레벨/덤프가 env.ini 값을 따르도록 config 를 먼저 읽는다.
+	config, err := config.NewConfiguration()
+	if err != nil {
+		return nil, err
+	}
+
+	level, levelErr := logger.ParseLevel(config.LogLevel)
+	customLogger, err := logger.NewCustomLogger("", level, config.LogDump)
 	if err != nil {
 		return nil, err
 	}
 	// 전역 로거 객체 주입
 	logger.SetLogger(customLogger)
-
-	config, err := config.NewConfiguration()
-	if err != nil {
-		return nil, err
+	if levelErr != nil {
+		logger.Warnf("[Container] %v, fallback to %s", levelErr, level)
 	}
+	logger.Infof("[Container] log level: %s, dump: %v", level, config.LogDump)
 
 	dao, err := dbhandler.NewDBHandler(config)
 	if err != nil {

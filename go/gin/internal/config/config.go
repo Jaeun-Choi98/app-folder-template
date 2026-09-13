@@ -26,6 +26,10 @@ type Configuration struct {
 	TcpIp   string
 	TcpPort string
 
+	// log - 기동 시 초기값. 실행 중 변경은 logger.SetLevel/SetDump 가 담당한다.
+	LogLevel string
+	LogDump  bool
+
 	DatabaseConfig
 
 	RedisIp      string
@@ -122,6 +126,9 @@ func initConfig(cfgFile *ini.File) *Configuration {
 	config.RedisDB = cfgFile.Section("REDIS").Key("DB").MustInt(0)
 	config.RedisProtocl = cfgFile.Section("REDIS").Key("PROTOCOL").MustInt(2)
 	config.RedisTimeout = cfgFile.Section("REDIS").Key("TIMEOUT").MustInt(5)
+
+	config.LogLevel = cfgFile.Section("LOG").Key("LEVEL").MustString("INFO")
+	config.LogDump = cfgFile.Section("LOG").Key("DUMP").MustBool(true)
 
 	return config
 }
