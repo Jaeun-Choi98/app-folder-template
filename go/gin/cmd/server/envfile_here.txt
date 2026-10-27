@@ -7,6 +7,10 @@ SSLCERT=./crt/test.crt
 SSLKEY=./crt/test.key
 CACERT=./ca/testca.crt
 
+[DEPLOY_STAGE]
+// 0: 테스트, 1: 제품
+MODE=0
+
 [DB]
 TYPE=oracle       # maria/mysql, postgres, odbc
 HOST=

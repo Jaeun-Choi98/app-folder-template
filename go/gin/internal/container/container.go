@@ -49,21 +49,16 @@ type Container struct {
 	CronWorker  *worker.CronWorker
 }
 
-func NewContainer() (*Container, error) {
+func NewContainer(config *config.Configuration) error {
 
 	if container != nil {
-		return container, nil
-	}
-	// 로거 레벨/덤프가 env.ini 값을 따르도록 config 를 먼저 읽는다.
-	config, err := config.NewConfiguration()
-	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	level, levelErr := logger.ParseLevel(config.LogLevel)
 	customLogger, err := logger.NewCustomLogger("", level, config.LogDump)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// 전역 로거 객체 주입
 	logger.SetLogger(customLogger)
@@ -74,12 +69,12 @@ func NewContainer() (*Container, error) {
 
 	dao, err := dbhandler.NewDBHandler(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	cache, err := cache.NewCacheMem(dao)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	eb := eventbus.NewEventBus(context.Background())
@@ -94,7 +89,7 @@ func NewContainer() (*Container, error) {
 	tcpService := tcpservice.NewTCPService(tcpClientManager, dao, cache)
 	tcp, err := tcp.NewTCPServer(tcpClientManager, config, tcpService, 5*time.Second, 5)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	cacheWorker := worker.NewCacheWorker(dao, cache)
@@ -106,10 +101,10 @@ func NewContainer() (*Container, error) {
 	eventlog.SetEventLogger(dbLogger)
 
 	if err := redis.InitRedis(config); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Container{
+	container = &Container{
 		Config:           config,
 		Dao:              dao,
 		Cache:            cache,
@@ -125,5 +120,54 @@ func NewContainer() (*Container, error) {
 		CacheWorker:      cacheWorker,
 		CronWorker:       cronWorker,
 		SystemMonitoring: monitoring,
-	}, nil
+	}
+
+	return nil
+}
+
+func GetApiService() service.APIServcieInterface {
+	return container.ApiService
+}
+
+func GetTcpService() service.TCPServiceInterface {
+	return container.TcpService
+}
+
+func GetSseManager() *sse.SessionManager[uint32, uint32] {
+	return container.SseManager
+}
+
+func GetConfig() *config.Configuration {
+	return container.Config
+}
+
+func GetDao() dbhandler.DBHandlerInterface {
+	return container.Dao
+}
+
+func GetTCPServer() *tcp.TCPServer {
+	return container.TCPServer
+}
+
+func GetRESTServer() *rest.RESTServer {
+	return container.RESTServer
+}
+
+func GetSystemMonitoring() *monitoring.SystemMonitoring {
+	return container.SystemMonitoring
+}
+
+func GetCacheWorker() *worker.CacheWorker {
+	return container.CacheWorker
+}
+
+func GetCronWorker() *worker.CronWorker {
+	return container.CronWorker
+}
+
+func GetTcpClientManager() *client.ClientManager {
+	return container.TCPClientManager
+}
+func DelContainer() {
+	container = nil
 }

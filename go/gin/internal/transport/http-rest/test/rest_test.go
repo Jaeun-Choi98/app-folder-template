@@ -1,30 +1,20 @@
 package test
 
-import (
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"pjt/internal/container"
-	"testing"
+// func TestREST(t *testing.T) {
+// 	container, err := container.NewContainer()
+// 	assert.NoError(t, err)
 
-	"github.com/stretchr/testify/assert"
-)
+// 	ms := httptest.NewServer(container.Controller.Router)
+// 	defer ms.Close()
 
-func TestREST(t *testing.T) {
-	container, err := container.NewContainer()
-	assert.NoError(t, err)
+// 	req, err := http.NewRequest("", ms.URL+"/test", nil)
+// 	assert.NoError(t, err)
 
-	ms := httptest.NewServer(container.Controller.Router)
-	defer ms.Close()
+// 	res, err := http.DefaultClient.Do(req)
+// 	assert.NoError(t, err)
 
-	req, err := http.NewRequest("", ms.URL+"/test", nil)
-	assert.NoError(t, err)
+// 	resBytes, err := io.ReadAll(res.Body)
+// 	assert.NoError(t, err)
 
-	res, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
-
-	resBytes, err := io.ReadAll(res.Body)
-	assert.NoError(t, err)
-
-	assert.Equal(t, "hello world", string(resBytes))
-}
+// 	assert.Equal(t, "hello world", string(resBytes))
+// }

@@ -9,6 +9,11 @@ import (
 	"github.com/go-ini/ini"
 )
 
+const (
+	TEST    = 0
+	PRODUCT = 1
+)
+
 type Configuration struct {
 	// for saving to .ini file
 	mu      sync.RWMutex
@@ -30,6 +35,9 @@ type Configuration struct {
 	// log - 기동 시 초기값. 실행 중 변경은 logger.SetLevel/SetDump 가 담당한다.
 	LogLevel string
 	LogDump  bool
+
+	// deploy env
+	DeployMode int
 
 	DatabaseConfig
 
@@ -100,6 +108,8 @@ func initConfig(cfgFile *ini.File) *Configuration {
 
 	config.TcpIp = cfgFile.Section("TCP").Key("IP").MustString("")
 	config.TcpPort = cfgFile.Section("TCP").Key("PORT").MustString("")
+
+	config.DeployMode = cfgFile.Section("DEPLOY_SATE").Key("MODE").MustInt(TEST)
 
 	config.DBType = cfgFile.Section("DB").Key("TYPE").MustString("")
 	config.DBHost = cfgFile.Section("DB").Key("HOST").MustString("")
