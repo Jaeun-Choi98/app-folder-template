@@ -69,11 +69,23 @@ func (a *Application) Start() {
 
 func (a *Application) handleShutdown() {
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
 	go func() {
-		<-signalChan
+		sig := <-signalChan
 		signal.Stop(signalChan)
+
+		switch sig {
+		case syscall.SIGHUP:
+			logger.Infof("[App] closed session(siganl: %+v)", syscall.SIGHUP)
+		case syscall.SIGINT:
+			logger.Infof("[App] user use ctrl+c(siganl: %+v)", syscall.SIGINT)
+		case syscall.SIGKILL:
+			logger.Infof("[App] received force exit(siganl: %+v)", syscall.SIGKILL)
+		case syscall.SIGTERM:
+			logger.Infof("[App] received exit(siganl: %+v)", syscall.SIGTERM)
+		}
+
 		logger.Infoln("[App] Shutting down...")
 		a.Shutdown()
 		close(signalChan)
