@@ -26,7 +26,7 @@ func main() {
 	}
 
 	level, levelErr := logger.ParseLevel(cfg.LogLevel)
-	// 패키지 기본 로거로 등록 ( log/YYYY/MM/D/app.log, dump.log, 오늘 + 지난 3일 보존 )
+
 	if _, err := logger.Init(logger.Options{
 		Dir:        logger.DefaultDir,
 		Level:      level,
@@ -37,6 +37,8 @@ func main() {
 		log.Printf("[Main] failed to init logger, err: %v", err)
 		os.Exit(1)
 	}
+	defer logger.Close()
+
 	if levelErr != nil {
 		logger.Warnf("[Main] %v, fallback to %s", levelErr, level)
 	}
