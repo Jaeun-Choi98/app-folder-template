@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -153,7 +152,4 @@ func (a *Application) shutdown() {
 	a.wg.Wait()
 	logger.Infoln("[App] Application terminated")
 
-	if err := logger.Close(); err != nil {
-		log.Printf("[App] Failed to close logger: %v", err)
-	}
 }
