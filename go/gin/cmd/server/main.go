@@ -37,22 +37,28 @@ func main() {
 		log.Printf("[Main] failed to init logger, err: %v", err)
 		os.Exit(1)
 	}
-	defer logger.Close()
 
 	if levelErr != nil {
 		logger.Warnf("[Main] %v, fallback to %s", levelErr, level)
 	}
 	logger.Infof("[Main] log level: %s, dump: %v", level, cfg.LogDump)
 
+	var code int
 	switch cfg.DeployMode {
 	case config.TEST:
-		os.Exit(Test(cfg))
+		code = Test(cfg)
 	case config.PRODUCT:
-		os.Exit(Product(cfg))
+		code = Product(cfg)
 	default:
 		log.Printf("[Main] undefined deploy stage, deploy mode: %v", cfg.DeployMode)
-		os.Exit(1)
+		code = 1
 	}
+
+	if err := logger.Close(); err != nil {
+		log.Printf("[Main] failed to close logger: %v", err)
+	}
+
+	os.Exit(code)
 }
 
 func run(cfg *config.Configuration) (cause error, err error) {
