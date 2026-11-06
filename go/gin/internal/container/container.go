@@ -10,7 +10,6 @@ import (
 	"pjt/internal/worker"
 
 	"pjt/internal/infra/cache"
-	"pjt/internal/logger"
 	eventlog "pjt/internal/logger/event-logger"
 	"pjt/internal/service"
 	apiservice "pjt/internal/service/api-service"
@@ -54,18 +53,6 @@ func NewContainer(config *config.Configuration) error {
 	if container != nil {
 		return nil
 	}
-
-	level, levelErr := logger.ParseLevel(config.LogLevel)
-	customLogger, err := logger.NewCustomLogger("", level, config.LogDump)
-	if err != nil {
-		return err
-	}
-	// 전역 로거 객체 주입
-	logger.SetLogger(customLogger)
-	if levelErr != nil {
-		logger.Warnf("[Container] %v, fallback to %s", levelErr, level)
-	}
-	logger.Infof("[Container] log level: %s, dump: %v", level, config.LogDump)
 
 	dao, err := dbhandler.NewDBHandler(config)
 	if err != nil {

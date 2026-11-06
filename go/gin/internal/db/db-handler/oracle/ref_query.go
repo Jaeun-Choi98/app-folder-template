@@ -3,9 +3,10 @@ package oracle
 import (
 	"context"
 	"fmt"
-	"pjt/internal/logger"
 	"strings"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 // 확장 INSERT문 사용

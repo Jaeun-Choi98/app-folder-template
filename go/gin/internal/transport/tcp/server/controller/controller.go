@@ -60,10 +60,9 @@ func handle0x002() handler.HandlerFunc {
 		if lrcVerifiy != rtmsMsg.LRC {
 			return fmt.Errorf("invaild LRC")
 		}
-		ch, ok := c.GetReplyChannel().Get(0x02)
-		if ok {
-			ch <- &tcpmd.GenericReply[string]{Err: nil, Payload: "success reply test"}
-		}
+		// 대기 key 는 ClientManager.SendToClientWithReply 가 등록한 opCode(byte) 와 타입까지 같아야 한다.
+		// 기다리는 요청이 없으면(ErrNoPendingRequest) 무시한다.
+		_ = c.GetPending().Resolve(byte(0x02), &tcpmd.GenericResponse[string]{Err: nil, Payload: "success reply test"})
 		return nil
 	}
 }

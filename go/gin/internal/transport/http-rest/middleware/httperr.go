@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"pjt/internal/logger"
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/gin-gonic/gin"
 )
 

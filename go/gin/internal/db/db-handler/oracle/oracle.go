@@ -3,10 +3,10 @@ package oracle
 import (
 	"context"
 	"database/sql"
-	"pjt/internal/logger"
 	"sync"
 	"time"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	_ "github.com/godror/godror"
 )
 

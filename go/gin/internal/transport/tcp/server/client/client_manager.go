@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"net"
 	"pjt/internal/event"
-	"pjt/internal/logger"
 
 	"pjt/internal/transport/tcp/server/serializer"
 	"sync"
 	"time"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
+	"github.com/Jaeun-Choi98/modules/logger"
 	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/advanced/model"
 )
 
@@ -201,12 +201,12 @@ func (cm *ClientManager) SendToClientWithReply(clientId uint32, opCode byte, dat
 		return
 	}
 
-	if _, exists := client.clientContext.GetReplyChannel().Get(opCode); !exists {
-		replyCh := make(chan tcpmd.Reply, 1)
-		client.clientContext.GetReplyChannel().Set(opCode, replyCh)
+	if _, exists := client.clientContext.GetPending().Get(opCode); !exists {
+		replyCh := make(chan tcpmd.Response, 1)
+		client.clientContext.GetPending().Register(opCode, replyCh)
 	}
 
-	replyCh, _ := client.clientContext.GetReplyChannel().Get(opCode)
+	replyCh, _ := client.clientContext.GetPending().Get(opCode)
 
 	seqNum := (client.GetSequenceNum() + 1) % SequenceMode
 	message, _ := serializer.SerializeResponse(binary.BigEndian, 0x00, opCode, seqNum, data)

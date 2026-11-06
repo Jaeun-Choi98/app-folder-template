@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"pjt/internal/config"
 	dbhandler "pjt/internal/db/db-handler"
-	"pjt/internal/logger"
 
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/utils"
 )
 

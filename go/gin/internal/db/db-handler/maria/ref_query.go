@@ -3,9 +3,10 @@ package maria
 import (
 	"context"
 	"fmt"
-	"pjt/internal/logger"
 	"strings"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 // 확장 INSERT 문

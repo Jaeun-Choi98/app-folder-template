@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"pjt/internal/config"
-	"pjt/internal/logger"
 	redismodel "pjt/internal/redis/redis-model"
 	"sync"
 	"time"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/orm/redisorm"
 )
 

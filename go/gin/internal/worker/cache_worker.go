@@ -4,9 +4,10 @@ import (
 	"context"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/infra/cache"
-	"pjt/internal/logger"
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 /**

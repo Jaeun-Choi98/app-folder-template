@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"math"
 	"pjt/internal/infra/cache"
-	"pjt/internal/logger"
 
 	"sync"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 /**

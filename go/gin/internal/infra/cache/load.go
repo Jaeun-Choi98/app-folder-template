@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"pjt/internal/infra/object"
-	"pjt/internal/logger"
 	"strconv"
 	"strings"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/utils"
 )
 

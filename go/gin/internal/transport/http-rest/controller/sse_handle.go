@@ -7,12 +7,12 @@ import (
 	"strconv"
 
 	"pjt/internal/event"
-	"pjt/internal/logger"
 
 	"pjt/internal/transport/http-rest/http-utils/httperr"
 	"pjt/internal/transport/http-rest/response"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

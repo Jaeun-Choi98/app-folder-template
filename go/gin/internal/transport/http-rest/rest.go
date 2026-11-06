@@ -9,9 +9,10 @@ import (
 	"log"
 	"net/http"
 	"pjt/internal/config"
-	"pjt/internal/logger"
 	"pjt/internal/transport/http-rest/controller"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 type RESTServer struct {

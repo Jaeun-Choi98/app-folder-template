@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"pjt/internal/config"
 	"pjt/internal/event"
-	"pjt/internal/logger"
 	"pjt/internal/service"
 	"strconv"
 
@@ -19,6 +18,7 @@ import (
 	"github.com/Jaeun-Choi98/modules/sse"
 	"github.com/Jaeun-Choi98/modules/utils"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/gin-gonic/gin"
 )
 

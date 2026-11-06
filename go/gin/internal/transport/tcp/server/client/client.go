@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 	"net"
-	"pjt/internal/logger"
 	"sync"
 
 	implparser "pjt/internal/transport/tcp/server/parser"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/handler"
 	tcpmd "github.com/Jaeun-Choi98/modules/tcpnet/advanced/model"
 	"github.com/Jaeun-Choi98/modules/tcpnet/advanced/parser"
@@ -31,7 +31,7 @@ type Client struct {
 
 	handler handler.ManagerInterface
 
-	//ReplyCh map[any]chan tcpmd.Reply // OPCODE -> Reply Channel
+	//ReplyCh map[any]chan tcpmd.Response // OPCODE -> Reply Channel
 	//TimeoutChannel chan bool
 
 	IsAuth bool

@@ -4,13 +4,13 @@ import (
 	"context"
 	dbhandler "pjt/internal/db/db-handler"
 	"pjt/internal/event"
-	"pjt/internal/logger"
 
 	tcp "pjt/internal/transport/tcp/server"
 	"sync"
 	"time"
 
 	"github.com/Jaeun-Choi98/modules/eventbus"
+	"github.com/Jaeun-Choi98/modules/logger"
 )
 
 type SystemMonitoring struct {

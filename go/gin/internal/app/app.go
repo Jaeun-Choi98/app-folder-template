@@ -3,28 +3,42 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"pjt/internal/container"
 	"pjt/internal/event"
-	"pjt/internal/logger"
 	eventlog "pjt/internal/logger/event-logger"
 	"pjt/internal/redis"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/Jaeun-Choi98/modules/logger"
+)
+
+var (
+	ErrSignal = errors.New("terminated by signal")
+	ErrPanic  = errors.New("terminated by panic")
 )
 
 type Application struct {
 	wg            sync.WaitGroup
-	mainCtxCancel context.CancelFunc
+	mainCtxCancel context.CancelCauseFunc
+
+	stopOnce  sync.Once
+	signalErr atomic.Pointer[error]
+	done      chan struct{}
 }
 
-func NewApplication(cancel context.CancelFunc) *Application {
+func NewApplication(cancel context.CancelCauseFunc) *Application {
 	return &Application{
 		mainCtxCancel: cancel,
+		done:          make(chan struct{}),
 	}
 }
 
@@ -32,8 +46,8 @@ func (a *Application) safeGo(name string, fn func()) {
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Infof("[App][%s] panic: %v\n%s", name, r, debug.Stack())
-				a.mainCtxCancel() // main의 <-ctx.Done() 깨움 → 재시작 경로
+				logger.Errorf("[App][%s] panic: %v\n%s", name, r, debug.Stack())
+				a.stop(fmt.Errorf("%w: [%s] %v", ErrPanic, name, r))
 			}
 		}()
 		fn()
@@ -41,12 +55,11 @@ func (a *Application) safeGo(name string, fn func()) {
 }
 
 func (a *Application) Start() {
-	a.handleShutdown()
+	a.handleSignal()
 
-	logger.StartCleaning()
 	a.safeGo("log-manager", func() { eventlog.StartLogManager() })
 	a.safeGo("cron-worker", func() { container.GetCronWorker().Start() })
-	a.safeGo("cron-worker", func() { container.GetCacheWorker().Start() })
+	a.safeGo("cache-worker", func() { container.GetCacheWorker().Start() })
 
 	a.wg.Add(1)
 	go func() {
@@ -64,37 +77,52 @@ func (a *Application) Start() {
 		}
 	}()
 
-	a.safeGo("cron-worker", func() { container.GetSystemMonitoring().Start() })
+	a.safeGo("system-monitoring", func() { container.GetSystemMonitoring().Start() })
 }
 
-func (a *Application) handleShutdown() {
+func (a *Application) handleSignal() {
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		sig := <-signalChan
-		signal.Stop(signalChan)
+		defer signal.Stop(signalChan)
 
-		switch sig {
-		case syscall.SIGHUP:
-			logger.Infof("[App] closed session(siganl: %+v)", syscall.SIGHUP)
-		case syscall.SIGINT:
-			logger.Infof("[App] user use ctrl+c(siganl: %+v)", syscall.SIGINT)
-		case syscall.SIGKILL:
-			logger.Infof("[App] received force exit(siganl: %+v)", syscall.SIGKILL)
-		case syscall.SIGTERM:
-			logger.Infof("[App] received exit(siganl: %+v)", syscall.SIGTERM)
+		select {
+		case sig := <-signalChan:
+			switch sig {
+			case syscall.SIGINT:
+				logger.Infof("[App] user use ctrl+c(signal: %v)", sig)
+			case syscall.SIGTERM:
+				logger.Infof("[App] received exit(signal: %v)", sig)
+			}
+			a.stop(fmt.Errorf("%w: %v", ErrSignal, sig))
+		case <-a.done:
 		}
-
-		logger.Infoln("[App] Shutting down...")
-		a.Shutdown()
-		close(signalChan)
 	}()
+}
+
+// stop 은 시그널/panic 어느 쪽에서 불려도 정리를 한 번만 수행하고, 끝나면 원인을 main 에 넘긴다.
+// panic 정리 도중 시그널이 들어오면 그 호출은 정리가 끝날 때까지 기다리고, 원인은 시그널로 바뀐다.
+func (a *Application) stop(cause error) {
+	if errors.Is(cause, ErrSignal) {
+		a.signalErr.CompareAndSwap(nil, &cause)
+	}
+
+	a.stopOnce.Do(func() {
+		logger.Infof("[App] Shutting down... (cause: %v)", cause)
+		a.shutdown()
+
+		if sigErr := a.signalErr.Load(); sigErr != nil {
+			cause = *sigErr
+		}
+		close(a.done)
+		a.mainCtxCancel(cause)
+	})
 }
 
 // Shutdown order: SystemMonitoring → REST → DB log manager → Workers → TCP → services → EventBus → Redis → logger.
 // Reversing this order risks panics.
-func (a *Application) Shutdown() {
+func (a *Application) shutdown() {
 	container.GetSystemMonitoring().Shutdown()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -125,6 +153,7 @@ func (a *Application) Shutdown() {
 	a.wg.Wait()
 	logger.Infoln("[App] Application terminated")
 
-	logger.Shutdown()
-	a.mainCtxCancel()
+	if err := logger.Close(); err != nil {
+		log.Printf("[App] Failed to close logger: %v", err)
+	}
 }

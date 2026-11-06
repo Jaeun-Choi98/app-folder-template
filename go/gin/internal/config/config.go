@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
-	"pjt/internal/logger"
 	"strings"
 	"sync"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/go-ini/ini"
 )
 

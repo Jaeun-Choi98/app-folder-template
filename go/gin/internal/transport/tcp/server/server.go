@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"net"
 	"pjt/internal/config"
-	"pjt/internal/logger"
 	"pjt/internal/service"
 	"pjt/internal/transport/tcp/server/client"
 	tcpcontroller "pjt/internal/transport/tcp/server/controller"
@@ -13,6 +12,7 @@ import (
 	implparser "pjt/internal/transport/tcp/server/parser"
 	"time"
 
+	"github.com/Jaeun-Choi98/modules/logger"
 	"github.com/Jaeun-Choi98/modules/tcpnet/basic/server"
 )
 
